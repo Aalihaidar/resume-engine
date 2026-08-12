@@ -1,5 +1,5 @@
 name: "Ali Haidar"
-headline: "Headline or tagline goes here, e.g. 'AI/ML Engineer | Robotics Engineer'"
+headline: "AI/ML & Robotics Engineer | Computer Vision · Deep Learning · Applied ML in Automation"
 
 # Master on/off switch per top-level section.
 sections:
@@ -12,62 +12,102 @@ sections:
   photo: true
 
 contact:
-  location: "Berlin, Germany"
-  phone: "+49 151 23456789"
-  email: "jane.doe@example.com"
-  linkedin_display: "linkedin.com/in/janedoe"
-  linkedin_url: "https://www.linkedin.com/in/janedoe/"
-  github_display: "github.com/janedoe"
-  github_url: "https://github.com/janedoe"
+  location: "Saint Petersburg, Russia"
+  phone: "+7 (931) 585-08-58"
+  email: "Aalihaidar.1995@gmail.com"
+  linkedin_display: "linkedin.com/in/alihaidar1995"
+  linkedin_url: "https://www.linkedin.com/in/alihaidar1995/"
+  github_display: "github.com/Aalihaidar"
+  github_url: "https://github.com/Aalihaidar"
 
-# Filename inside src/resume_builder/static/, or null to omit. Also gated by
-# sections.photo above — both must be true/non-null for the photo to show.
 photo: headshot.jpg
 
 summary: >
-  One-paragraph, 3-5 sentence overview: your role, years of experience,
-  domain focus, and one or two standout achievements. Written in third
-  person, no "I".
+  AI/ML Engineer with an MSc (Honors) in Robotics & AI from ITMO University and hands-on delivery across research,
+  industry, and freelance work — spanning applied generative AI, deep learning-based computer vision, and production ML.
+  Built an agentic RAG chatbot backend (FastAPI, LangGraph, Weaviate) for bilingual restaurant and gym clients,
+  and applied regression modeling and similarity-based matching for cost estimation at IROS-System.
+  Extends this AI/ML foundation into physical systems through robotics work (motion control, kinematics, ROS), bringing research-grade models into real-world automation.
 
-# -----------------------------------------------------------------------
-# EXPERIENCE — most recent first. Keep bullets to ~2 lines, start with a
-# strong verb, quantify wherever a real number exists. Do not invent numbers.
-# Set include: false on an entry to hide it (e.g. an older/less relevant
-# role) without deleting it.
-# -----------------------------------------------------------------------
 experience:
   - include: true
-    title: "Job Title"
-    company: "Company Name"
-    location: "City, Country"
-    start: "Mon YYYY"
+    title: "Freelance AI/ML Engineer"
+    company: "Self-employed"
+    location: "Remote"
+    start: "Aug 2025"
     end: "Present"
     bullets:
-      - "Achievement-focused bullet starting with a strong past/present-tense verb."
-      - "Another bullet, ideally with a quantified outcome (%, $, time saved)."
+      - "Designed and shipped an AI agent for a restaurant chain's RAG chatbot backend (bilingual RU/EN menu + FAQ), using FastAPI, LangGraph, and Weaviate Cloud for retrieval."
+      - "Implemented logging, monitoring, and observability with Arize Phoenix to track and debug agent behavior in production."
+      - "Delivered an AI agent-based chatbot engagement for a gym client."
 
   - include: true
-    title: "Previous Job Title"
-    company: "Previous Company"
-    location: "City, Country"
-    start: "Mon YYYY"
-    end: "Mon YYYY"
+    title: "AI/ML & CAD Engineer — Industrial Automation"
+    company: "IROS-System"
+    location: "Saint Petersburg, Russia"
+    start: "Jul 2023"
+    end: "Present"
     bullets:
-      - "Bullet describing scope and impact."
-      - "Bullet describing a specific technical contribution."
+      - "Built a cost-prediction regression model and a cosine-similarity-based part-matching system (Python, pandas, scikit-learn) from BOM and assembly data, enabling earlier cost estimates and reducing part duplication."
+      - "Designed 3D part models, assemblies, and technical drawings, and built rule-based automation scripts (iLogic, Inventor API) to auto-generate design variants and drawings, cutting modeling time and reducing manual errors."
+      - "Performed stress calculations and FEA validation across all design outputs, maintaining 100% compliance with regulatory standards."
+
+  - include: true
+    title: "Research Assistant & Robotics Engineer"
+    company: "Higher Institute for Applied Sciences and Technology (HIAST)"
+    location: "Damascus, Syria"
+    start: "Oct 2018"
+    end: "Oct 2022"
+    bullets:
+      - "Supervised 4th- and 5th-year capstone projects in robotics and mechatronics, including a Knee CPM machine, a propulsive bionic foot, and a laser engraving machine."
+      - "Taught Industrial Drawing and CAD to 100+ students; led advanced modules in Robotics, Industrial Automation, and CAM."
+      - "Delivered practical training in Ansys simulation and PLC coding, preparing students for industrial manufacturing roles."
+
+  - include: true
+    title: "Mechatronics Engineer, Automated Systems (Part-time)"
+    company: "Syriatel Mobile Telecom and Milkman"
+    location: "Damascus, Syria"
+    start: "Jun 2018"
+    end: "Jun 2020"
+    bullets:
+      - "Designed and implemented a custom 500×500×500mm Cartesian 3D printer, managing the full lifecycle from mechanical design to firmware integration."
+      - "Developed a high-precision volumetric filling machine, a cup feeder machine, and an end-line picker machine for high-viscosity, food-grade production lines."
+      - "Managed development of a Building Management System (BMS), improving facility automation and energy efficiency."
 
 # -----------------------------------------------------------------------
 # EDUCATION
 # -----------------------------------------------------------------------
 education:
   - include: true
-    degree: "Degree, Field of Study"
-    institution: "Institution Name"
-    location: "City, Country"
-    start: "Mon YYYY"
-    end: "Mon YYYY"
+    degree: "MSc (Honors), Robotics and Artificial Intelligence"
+    institution: "ITMO University"
+    location: "Saint Petersburg, Russia"
+    start: "Oct 2023"
+    end: "Jul 2025"
     details:
-      - "Honors, thesis title, or notable coursework (optional)."
+      - "Graduated with Honors (Red Diploma)."
+      - 'Thesis: "Real-Time Visual Object Tracking Methods with Deep Learning Techniques."'
+      - "Coursework: Machine Learning in Robotics, Computer Vision, ROS, Motion Control, Path Planning, Cyber-Physical Systems, Big Data Processing."
+      - "Research focus: implementing deep learning algorithms for visual perception in dynamic environments."
+
+  - include: true
+    degree: "Russian Language Preparatory Program"
+    institution: "ITMO University"
+    location: "Saint Petersburg, Russia"
+    start: "Oct 2022"
+    end: "Sep 2023"
+    details: []
+
+  - include: true
+    degree: "BEng, Mechatronics Engineering"
+    institution: "Higher Institute for Applied Sciences and Technology (HIAST)"
+    location: "Damascus, Syria"
+    start: "Oct 2013"
+    end: "Oct 2018"
+    details:
+      - "Graduated Top Performer (Ranked 'A' for distinguished academic performance); final grade 82.55%."
+      - "Graduation project: designed and manufactured a Delta Linear Robot with 20µm positioning accuracy for laser drawing and 3D printing applications."
+      - "4th-year project: designed an open-wheel electric vehicle (Go-Kart)."
 
 # -----------------------------------------------------------------------
 # SKILLS — grouped for ATS category matching. include: false hides an
@@ -75,29 +115,113 @@ education:
 # where it's not relevant).
 # -----------------------------------------------------------------------
 skills:
-  - include: true
-    category: "Category Name"
+  - category: "AI/ML & Data Science"
     items:
-      - "Skill 1"
-      - "Skill 2"
-      - "Skill 3"
+      - "Machine Learning"
+      - "Deep Learning"
+      - "Computer Vision"
+      - "Artificial Neural Networks"
+      - "Image Processing"
+      - "Reinforcement Learning"
+      - "TensorFlow"
+      - "Python (pandas, scikit-learn)"
+
+  - category: "Generative AI & LLMs (applied)"
+    items:
+      - "Retrieval-Augmented Generation (RAG)"
+      - "AI Agents / LangGraph"
+      - "Large Language Models (LLMs)"
+      - "Generative AI"
+
+  - category: "Robotics"
+    items:
+      - "Robot Operating System (ROS)"
+      - "Motion Control & Kinematics"
+      - "Path Planning"
+      - "Mechatronic System Design"
+
+  - category: "Engineering & CAD"
+    items:
+      - "Autodesk Inventor"
+      - "Autodesk Vault"
+      - "AutoCAD"
+      - "SOLIDWORKS"
+      - "Computer-Aided Design (CAD)"
+      - "Finite Element Analysis (FEA)"
+      - "CAD Standards & Bill of Materials"
+      - "Technical Drawing"
+      - "CNC Manufacturing"
+      - "3D Printing"
+      - "MATLAB"
+
+  - category: "Tools & Infrastructure"
+    items:
+      - "FastAPI"
+      - "Weaviate"
+      - "Docker"
+      - "Git"
+      - "Programmable Logic Controller (PLC)"
+      - "iLogic"
 
 # -----------------------------------------------------------------------
 # CERTIFICATIONS — most recent first.
 # -----------------------------------------------------------------------
 certifications:
   - include: true
-    name: "Certification Name"
-    issuer: "Issuing Organization"
-    date: "Mon YYYY"
+    name: "Generative AI with Large Language Models"
+    issuer: "DeepLearning.AI"
+    date: "Jul 2026"
+  - include: true
+    name: "Retrieval Augmented Generation (RAG)"
+    issuer: "DeepLearning.AI"
+    date: "Jul 2026"
+  - include: true
+    name: "AI Agents in LangGraph"
+    issuer: "DeepLearning.AI"
+    date: "Jun 2026"
+  - include: true
+    name: "Functions, Tools and Agents with LangChain"
+    issuer: "DeepLearning.AI"
+    date: "Jun 2026"
+  - include: true
+    name: "LangChain for LLM Application Development"
+    issuer: "DeepLearning.AI"
+    date: "[NEED DATE]"
+  - include: true
+    name: "LangChain Chat with Your Data"
+    issuer: "DeepLearning.AI"
+    date: "[NEED DATE]"
+  - include: true
+    name: "Knowledge Graphs for RAG"
+    issuer: "DeepLearning.AI"
+    date: "Jun 2026"
+  - include: true
+    name: "Robotics and Artificial Intelligence (Sber × ITMO)"
+    issuer: "Sberbank-Technology"
+    date: "Jul 2025"
+  - include: true
+    name: "Docker Certified Associate Exam Prep Specialization"
+    issuer: "LearnKartS"
+    date: "Jul 2026"
+  - include: true
+    name: "Introduction to Git and GitHub"
+    issuer: "Google"
+    date: "Feb 2025"
+  - include: true
+    name: "Introduction to CAD, CAM, and Practical CNC Machining"
+    issuer: "Autodesk"
+    date: "Mar 2021"
 
 # -----------------------------------------------------------------------
 # LANGUAGES
 # -----------------------------------------------------------------------
 languages:
   - include: true
-    name: "English"
+    name: "Arabic"
     level: "Native"
   - include: true
-    name: "German"
+    name: "English"
     level: "B2"
+  - include: true
+    name: "Russian"
+    level: "B1"
