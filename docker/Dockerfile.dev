@@ -1,0 +1,51 @@
+# docker/Dockerfile.dev
+# Dev container image: Python + uv + git/ssh (GitHub access) + WeasyPrint's
+# native dependencies (Pango/Cairo, used to render the PDF).
+#
+# Node.js (needed for `npx repomix` and the Repomix Runner VS Code extension)
+# and the GitHub CLI (`gh`) are NOT installed here — both are provided by
+# devcontainer features in .devcontainer/devcontainer.json, applied at
+# container-creation time. Do not also install them in this image; that
+# causes version drift between the two install paths.
+#
+# This image is for interactive development only (VS Code Dev Containers /
+# `docker compose run app`). It runs as root and includes compilers, git,
+# and ssh on purpose, to make the dev loop frictionless.
+# It is never published or deployed — see docker/Dockerfile.prod for the
+# production image that actually ships.
+
+FROM python:3.14-slim-bookworm
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    git \
+    curl \
+    ssh \
+    build-essential \
+    ca-certificates \
+    # --- WeasyPrint runtime deps (text shaping / rendering) ---
+    libpango-1.0-0 \
+    libpangocairo-1.0-0 \
+    libcairo2 \
+    libgdk-pixbuf-2.0-0 \
+    libffi-dev \
+    shared-mime-info \
+    fonts-dejavu-core \
+    fonts-liberation \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --from=ghcr.io/astral-sh/uv:0.11.7 /uv /uvx /usr/local/bin/
+
+ENV UV_LINK_MODE=copy \
+    UV_PROJECT_ENVIRONMENT=/workspace/.venv \
+    PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PATH="/workspace/.venv/bin:${PATH}"
+
+WORKDIR /workspace
+
+COPY scripts/entrypoint.dev.sh /usr/local/bin/entrypoint.dev.sh
+COPY scripts/welcome.sh /usr/local/bin/welcome.sh
+RUN chmod +x /usr/local/bin/entrypoint.dev.sh /usr/local/bin/welcome.sh
+
+ENTRYPOINT ["/usr/local/bin/entrypoint.dev.sh"]
+CMD ["sleep", "infinity"]

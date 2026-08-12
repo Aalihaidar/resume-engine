@@ -1,0 +1,129 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+    tags: ["v*"]
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify-pr-source:
+    if: github.event_name == 'pull_request' && github.event.pull_request.base.ref == 'main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ensure PRs into main only come from develop
+        run: |
+          HEAD_REF="${{ github.event.pull_request.head.ref }}"
+          if [ "$HEAD_REF" != "develop" ]; then
+            echo "❌ PRs into 'main' are only allowed from 'develop' (got '$HEAD_REF')."
+            exit 1
+          fi
+          echo "✅ PR source verified: develop -> main"
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+        with:
+          enable-cache: true
+          cache-suffix: lint
+      - run: uv sync --group dev --frozen
+      - run: uv run ruff check .
+      - run: uv run ruff format --check .
+
+  typecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+        with:
+          enable-cache: true
+          cache-suffix: typecheck
+      - run: uv sync --group dev --frozen
+      - run: uv run mypy src
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+        with:
+          enable-cache: true
+          cache-suffix: test
+      # WeasyPrint needs Pango/Cairo at runtime, same as the Docker image.
+      - name: Install WeasyPrint system dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends \
+            libpango-1.0-0 libpangocairo-1.0-0 libcairo2 libgdk-pixbuf-2.0-0 \
+            libffi-dev shared-mime-info fonts-dejavu-core fonts-liberation
+      - run: uv sync --group dev --frozen
+      - run: uv run pytest --cov=resume_builder --cov-report=xml
+      - uses: codecov/codecov-action@v7
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: false
+
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+        with:
+          enable-cache: true
+          cache-suffix: security
+      - run: uv sync --group dev --frozen
+      - run: uv run pip-audit
+
+  dockerfile-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      # Production image — the one actually published to GHCR. Any
+      # CRITICAL/HIGH config finding here fails the build.
+      - name: Trivy config scan — Dockerfile.prod
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          scan-type: config
+          scan-ref: docker/Dockerfile.prod
+          severity: CRITICAL,HIGH
+          exit-code: "1"
+
+      # Dev image — never published, intentionally runs as root with
+      # extra tooling for a frictionless local dev loop. Report findings
+      # for visibility but don't block CI on them.
+      - name: Trivy config scan — Dockerfile.dev (report only)
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          scan-type: config
+          scan-ref: docker/Dockerfile.dev
+          severity: CRITICAL,HIGH
+          exit-code: "0"
+
+  ci-passed:
+    if: always()
+    needs: [verify-pr-source, lint, typecheck, test, security, dockerfile-check]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check all required jobs succeeded
+        run: |
+          for result in \
+            "${{ needs.verify-pr-source.result }}" \
+            "${{ needs.lint.result }}" \
+            "${{ needs.typecheck.result }}" \
+            "${{ needs.test.result }}" \
+            "${{ needs.security.result }}" \
+            "${{ needs.dockerfile-check.result }}"; do
+            if [ "$result" != "success" ] && [ "$result" != "skipped" ]; then
+              echo "❌ A required job failed: $result"
+              exit 1
+            fi
+          done
+          echo "✅ CI passed"

@@ -1,0 +1,27 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-added-large-files
+        args: ["--maxkb=2000"]
+      - id: check-merge-conflict
+      - id: mixed-line-ending
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.16.2
+    hooks:
+      - id: ruff
+        args: [--fix]
+      - id: ruff-format
+
+  - repo: local
+    hooks:
+      - id: rebuild-resume
+        name: Rebuild resume.pdf when resume.yaml changes
+        entry: uv run resume-build render --data data/resume.yaml --out output/resume.pdf
+        language: system
+        files: ^(data/resume\.yaml|src/resume_builder/templates/.*)$
+        pass_filenames: false

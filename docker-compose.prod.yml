@@ -1,0 +1,14 @@
+# Runs the production image locally, e.g.:
+#   docker compose -f docker-compose.prod.yml run --rm resume-engine
+#
+# Mounts your local data/ (read-only) and output/ so the rendered PDF
+# lands back on the host, without needing uv/Python installed locally.
+services:
+  resume-engine:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.prod
+    image: resume-engine:latest
+    volumes:
+      - ./data:/app/data:ro
+      - ./output:/app/output

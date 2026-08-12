@@ -1,0 +1,10 @@
+{
+  "yaml.schemas": {
+    "./schema/resume.schema.json": "data/resume.yaml"
+  },
+  "cSpell.words": [
+    "mypy",
+    "pytest",
+    "repomix"
+  ]
+}

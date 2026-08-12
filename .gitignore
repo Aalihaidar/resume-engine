@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# uv
+# (uv.lock is intentionally NOT ignored - it's committed for reproducibility)
+
+# Env / secrets
+.env
+!.env.example
+
+# Generated output (rebuilt by CI / locally - not tracked except via the
+# build-resume workflow, which commits output/resume.pdf deliberately)
+output/*.html
+output/preview*.png
+
+# OS / editor
+.DS_Store
+.vscode/*
+!.vscode/extensions.json
+!.vscode/tasks.json
+!.vscode/settings.json
+*.swp
+
+resume-engine.xml

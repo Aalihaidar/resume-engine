@@ -1,0 +1,368 @@
+{
+  "$defs": {
+    "Certification": {
+      "properties": {
+        "include": {
+          "default": true,
+          "title": "Include",
+          "type": "boolean"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "issuer": {
+          "title": "Issuer",
+          "type": "string"
+        },
+        "date": {
+          "title": "Date",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "issuer",
+        "date"
+      ],
+      "title": "Certification",
+      "type": "object"
+    },
+    "Contact": {
+      "properties": {
+        "location": {
+          "title": "Location",
+          "type": "string"
+        },
+        "phone": {
+          "title": "Phone",
+          "type": "string"
+        },
+        "email": {
+          "format": "email",
+          "title": "Email",
+          "type": "string"
+        },
+        "linkedin_display": {
+          "title": "Linkedin Display",
+          "type": "string"
+        },
+        "linkedin_url": {
+          "format": "uri",
+          "maxLength": 2083,
+          "minLength": 1,
+          "title": "Linkedin Url",
+          "type": "string"
+        },
+        "github_display": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Github Display"
+        },
+        "github_url": {
+          "anyOf": [
+            {
+              "format": "uri",
+              "maxLength": 2083,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Github Url"
+        }
+      },
+      "required": [
+        "location",
+        "phone",
+        "email",
+        "linkedin_display",
+        "linkedin_url"
+      ],
+      "title": "Contact",
+      "type": "object"
+    },
+    "EducationEntry": {
+      "properties": {
+        "include": {
+          "default": true,
+          "title": "Include",
+          "type": "boolean"
+        },
+        "degree": {
+          "title": "Degree",
+          "type": "string"
+        },
+        "institution": {
+          "title": "Institution",
+          "type": "string"
+        },
+        "location": {
+          "title": "Location",
+          "type": "string"
+        },
+        "start": {
+          "title": "Start",
+          "type": "string"
+        },
+        "end": {
+          "title": "End",
+          "type": "string"
+        },
+        "details": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Details",
+          "type": "array"
+        }
+      },
+      "required": [
+        "degree",
+        "institution",
+        "location",
+        "start",
+        "end"
+      ],
+      "title": "EducationEntry",
+      "type": "object"
+    },
+    "ExperienceEntry": {
+      "properties": {
+        "include": {
+          "default": true,
+          "title": "Include",
+          "type": "boolean"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "company": {
+          "title": "Company",
+          "type": "string"
+        },
+        "location": {
+          "title": "Location",
+          "type": "string"
+        },
+        "start": {
+          "title": "Start",
+          "type": "string"
+        },
+        "end": {
+          "title": "End",
+          "type": "string"
+        },
+        "bullets": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Bullets",
+          "type": "array"
+        }
+      },
+      "required": [
+        "title",
+        "company",
+        "location",
+        "start",
+        "end",
+        "bullets"
+      ],
+      "title": "ExperienceEntry",
+      "type": "object"
+    },
+    "Language": {
+      "properties": {
+        "include": {
+          "default": true,
+          "title": "Include",
+          "type": "boolean"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "level": {
+          "title": "Level",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "level"
+      ],
+      "title": "Language",
+      "type": "object"
+    },
+    "SectionToggles": {
+      "description": "Master on/off switch for each top-level section of the resume.",
+      "properties": {
+        "summary": {
+          "default": true,
+          "title": "Summary",
+          "type": "boolean"
+        },
+        "experience": {
+          "default": true,
+          "title": "Experience",
+          "type": "boolean"
+        },
+        "education": {
+          "default": true,
+          "title": "Education",
+          "type": "boolean"
+        },
+        "skills": {
+          "default": true,
+          "title": "Skills",
+          "type": "boolean"
+        },
+        "certifications": {
+          "default": true,
+          "title": "Certifications",
+          "type": "boolean"
+        },
+        "languages": {
+          "default": true,
+          "title": "Languages",
+          "type": "boolean"
+        },
+        "photo": {
+          "default": true,
+          "title": "Photo",
+          "type": "boolean"
+        }
+      },
+      "title": "SectionToggles",
+      "type": "object"
+    },
+    "SkillGroup": {
+      "properties": {
+        "include": {
+          "default": true,
+          "title": "Include",
+          "type": "boolean"
+        },
+        "category": {
+          "title": "Category",
+          "type": "string"
+        },
+        "items": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Items",
+          "type": "array"
+        }
+      },
+      "required": [
+        "category",
+        "items"
+      ],
+      "title": "SkillGroup",
+      "type": "object"
+    }
+  },
+  "properties": {
+    "name": {
+      "title": "Name",
+      "type": "string"
+    },
+    "headline": {
+      "title": "Headline",
+      "type": "string"
+    },
+    "contact": {
+      "$ref": "#/$defs/Contact"
+    },
+    "photo": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Photo"
+    },
+    "sections": {
+      "$ref": "#/$defs/SectionToggles",
+      "default": {
+        "summary": true,
+        "experience": true,
+        "education": true,
+        "skills": true,
+        "certifications": true,
+        "languages": true,
+        "photo": true
+      }
+    },
+    "summary": {
+      "title": "Summary",
+      "type": "string"
+    },
+    "experience": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/ExperienceEntry"
+      },
+      "title": "Experience",
+      "type": "array"
+    },
+    "education": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/EducationEntry"
+      },
+      "title": "Education",
+      "type": "array"
+    },
+    "skills": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/SkillGroup"
+      },
+      "title": "Skills",
+      "type": "array"
+    },
+    "certifications": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/Certification"
+      },
+      "title": "Certifications",
+      "type": "array"
+    },
+    "languages": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/Language"
+      },
+      "title": "Languages",
+      "type": "array"
+    }
+  },
+  "required": [
+    "name",
+    "headline",
+    "contact",
+    "summary"
+  ],
+  "title": "Resume",
+  "type": "object"
+}

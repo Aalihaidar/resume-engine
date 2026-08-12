@@ -1,0 +1,69 @@
+[project]
+name = "resume-engine"
+version = "1.0.0"
+description = "Data-driven, ATS-safe CV/resume builder (YAML -> HTML -> PDF), agent-editable."
+readme = "README.md"
+requires-python = ">=3.12"
+license = { text = "MIT" }
+authors = [{ name = "Ali Haidar" }]
+
+dependencies = [
+    "weasyprint>=69.0",
+    "jinja2>=3.1.6",
+    "pyyaml>=6.0.3",
+    "pydantic[email]>=2.13.4",
+    "typer>=0.15.1",
+]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.16.2",
+    "mypy>=2.3.0",
+    "pytest>=9.1.1",
+    "pytest-cov>=7.1.0",
+    "pip-audit>=2.10.1",
+    "pre-commit>=4.6.2",
+    "types-pyyaml>=6.0.12.20250915",
+]
+
+[project.scripts]
+resume-build = "resume_builder.cli:app"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/resume_builder"]
+
+[tool.uv]
+constraint-dependencies = ["setuptools>=83.0.0"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "C4"]
+ignore = ["E501"]
+
+[tool.ruff.lint.per-file-ignores]
+"src/resume_builder/cli.py" = ["B008"]
+
+[tool.ruff.format]
+quote-style = "double"
+
+[tool.mypy]
+python_version = "3.12"
+mypy_path = "src"
+packages = ["resume_builder"]
+strict = true
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+
+[tool.coverage.run]
+source = ["src/resume_builder"]

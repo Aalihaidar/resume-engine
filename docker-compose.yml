@@ -1,0 +1,14 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.dev
+    volumes:
+      - .:/workspace:cached
+      # GitHub access from inside the container: reuse the host's existing
+      # SSH keys and git identity — nothing is baked into the image.
+      - ${USERPROFILE:-$HOME}/.ssh:/root/.ssh
+      - ${USERPROFILE:-$HOME}/.gitconfig:/root/.gitconfig:ro
+    env_file:
+      - .env
+    command: sleep infinity

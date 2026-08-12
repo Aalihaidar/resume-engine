@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>{{ resume.name }} — Resume</title>
+  <link rel="stylesheet" href="resume.css">
+</head>
+<body>
+
+  <header class="header">
+    {% if photo_path %}
+    <img class="photo" src="{{ photo_path }}" alt="{{ resume.name }}">
+    {% endif %}
+    <div class="header-text">
+      <h1>{{ resume.name }}</h1>
+      <p class="headline">{{ resume.headline }}</p>
+      <p class="contact-line">
+        {{ resume.contact.location }}
+        &nbsp;·&nbsp; {{ resume.contact.phone }}
+        &nbsp;·&nbsp; {{ resume.contact.email }}
+        &nbsp;·&nbsp; <a href="{{ resume.contact.linkedin_url }}">{{ resume.contact.linkedin_display }}</a>
+        {% if resume.contact.github_display %}
+        &nbsp;·&nbsp; <a href="{{ resume.contact.github_url }}">{{ resume.contact.github_display }}</a>
+        {% endif %}
+      </p>
+    </div>
+  </header>
+
+  {% if resume.show_summary %}
+  <section class="section">
+    <h2>Summary</h2>
+    <p class="summary">{{ resume.summary }}</p>
+  </section>
+  {% endif %}
+
+  {% if resume.visible_experience %}
+  <section class="section">
+    <h2>Experience</h2>
+    {% for job in resume.visible_experience %}
+    <div class="entry">
+      <div class="entry-header">
+        <span class="entry-title">{{ job.title }} — {{ job.company }}</span>
+        <span class="entry-dates">{{ job.start }} – {{ job.end }}</span>
+      </div>
+      <div class="entry-subline">{{ job.location }}</div>
+      <ul>
+        {% for bullet in job.bullets %}
+        <li>{{ bullet }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endfor %}
+  </section>
+  {% endif %}
+
+  {% if resume.visible_education %}
+  <section class="section">
+    <h2>Education</h2>
+    {% for edu in resume.visible_education %}
+    <div class="entry">
+      <div class="entry-header">
+        <span class="entry-title">{{ edu.degree }} — {{ edu.institution }}</span>
+        <span class="entry-dates">{{ edu.start }} – {{ edu.end }}</span>
+      </div>
+      <div class="entry-subline">{{ edu.location }}</div>
+      {% if edu.details %}
+      <ul>
+        {% for d in edu.details %}
+        <li>{{ d }}</li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </section>
+  {% endif %}
+
+  {% if resume.visible_skills %}
+  <section class="section">
+    <h2>Skills</h2>
+    {% for group in resume.visible_skills %}
+    <p class="skill-line"><strong>{{ group.category }}:</strong> {{ group.items | join(", ") }}</p>
+    {% endfor %}
+  </section>
+  {% endif %}
+
+  {% if resume.visible_certifications %}
+  <section class="section">
+    <h2>Certifications</h2>
+    <ul class="cert-list">
+      {% for cert in resume.visible_certifications %}
+      <li>{{ cert.name }} — {{ cert.issuer }} ({{ cert.date }})</li>
+      {% endfor %}
+    </ul>
+  </section>
+  {% endif %}
+
+  {% if resume.visible_languages %}
+  <section class="section">
+    <h2>Languages</h2>
+    <p class="skill-line">
+      {% for lang in resume.visible_languages %}{{ lang.name }} ({{ lang.level }}){% if not loop.last %} &nbsp;·&nbsp; {% endif %}{% endfor %}
+    </p>
+  </section>
+  {% endif %}
+
+</body>
+</html>

@@ -1,0 +1,90 @@
+name: Build Resume PDF
+
+# Rebuilds output/resume.pdf whenever the content (data/resume.yaml) or the
+# template/style changes, then commits the new PDF straight back to the repo
+# — so pushing an edited resume.yaml is all it takes to get an updated PDF,
+# no local render step required. Also runnable by hand and exposes the PDF
+# as a downloadable workflow artifact on every run.
+#
+# Runs against `develop` only. `main` is the release branch (PRs land there
+# only from `develop`, see ci.yml's verify-pr-source), so there's nothing to
+# rebuild on push/PR to main — the PDF is already current by the time it
+# gets there.
+
+on:
+  push:
+    branches: [develop]
+    paths:
+      - "data/resume.yaml"
+      - "data/**.json"
+      - "src/resume_builder/**"
+  pull_request:
+    branches: [develop]
+    paths:
+      - "data/resume.yaml"
+      - "data/**.json"
+      - "src/resume_builder/**"
+  workflow_dispatch: {}
+
+concurrency:
+  group: build-resume-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          # Needed so the commit-back step can push to the same branch.
+          # For pull_request events this checks out the PR's merge commit;
+          # see the note on the commit-back step below.
+          fetch-depth: 0
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+        with:
+          enable-cache: true
+          cache-suffix: build-resume
+
+      - name: Install WeasyPrint system dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends \
+            libpango-1.0-0 libpangocairo-1.0-0 libcairo2 libgdk-pixbuf-2.0-0 \
+            libffi-dev shared-mime-info fonts-dejavu-core fonts-liberation
+
+      - name: Install dependencies
+        run: uv sync --group dev --frozen
+
+      - name: Validate resume data
+        run: uv run python -c "from pathlib import Path; from resume_builder.render import load_resume; load_resume(Path('data/resume.yaml')); print('✅ data/resume.yaml is valid')"
+
+      - name: Render PDF
+        run: uv run resume-build render --data data/resume.yaml --out output/resume.pdf
+
+      - name: Upload PDF as workflow artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: resume-pdf
+          path: output/resume.pdf
+          retention-days: 90
+
+      - name: Commit updated PDF back to repo
+        # Only commit-back on push. On pull_request, checkout gives you an
+        # ephemeral merge commit that isn't the PR head branch — pushing
+        # here would either fail (no ref to push to) or commit to the wrong
+        # place. PR runs still render + validate + upload the artifact
+        # above, just don't write back.
+        if: github.event_name == 'push'
+        uses: stefanzweifel/git-auto-commit-action@v7
+        with:
+          commit_message: "chore: rebuild resume.pdf [skip ci]"
+          file_pattern: "output/resume.pdf"
+          commit_user_name: "github-actions[bot]"
+          commit_user_email: "github-actions[bot]@users.noreply.github.com"
