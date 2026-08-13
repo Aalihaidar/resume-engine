@@ -141,3 +141,42 @@ class Resume(BaseModel):
         if not self.sections.languages:
             return []
         return [lang for lang in self.languages if lang.include]
+
+
+class CoverLetterSectionToggles(BaseModel):
+    """Master on/off switch for each part of the cover letter."""
+
+    date: bool = True
+    recipient: bool = True
+    body: bool = True
+
+
+class CoverLetterRecipient(BaseModel):
+    name: str | None = None
+    title: str | None = None
+    company: str
+    company_address: str | None = None
+
+
+class CoverLetter(BaseModel):
+    applicant_name: str
+    applicant_contact: Contact
+    date: str
+    recipient: CoverLetterRecipient
+    role_title: str
+    salutation: str = "Dear Hiring Manager,"
+    sections: CoverLetterSectionToggles = CoverLetterSectionToggles()
+    body_paragraphs: list[str] = []
+    closing: str = "Sincerely,"
+
+    @property
+    def show_date(self) -> bool:
+        return self.sections.date and bool(self.date)
+
+    @property
+    def show_recipient(self) -> bool:
+        return self.sections.recipient and bool(self.recipient.company)
+
+    @property
+    def visible_body(self) -> list[str]:
+        return self.body_paragraphs if self.sections.body else []

@@ -1,0 +1,28 @@
+applicant_name: "Ali Haidar"
+applicant_contact:
+  location: "Saint Petersburg, Russia"
+  phone: "+7 (931) 585-08-58"
+  email: "aalihaidar.1995@gmail.com"
+  linkedin_display: "linkedin.com/in/alihaidar1995"
+  linkedin_url: "https://linkedin.com/in/alihaidar1995"
+  github_display: "github.com/Aalihaidar"
+  github_url: "https://github.com/Aalihaidar"
+
+date: "[DATE]"
+
+recipient:
+  name: null
+  title: "Hiring Manager"
+  company: "[COMPANY NAME]"
+  company_address: null
+
+role_title: "[JOB TITLE]"
+salutation: "Dear Hiring Manager,"
+
+body_paragraphs:
+  - "I'm writing to apply for the [JOB TITLE] role at [COMPANY NAME]. I hold an MSc (Honors) in Robotics and Artificial Intelligence from ITMO University, where my thesis focused on real-time visual object tracking using deep learning, and I bring hands-on AI/ML delivery experience across research, industry, and freelance work."
+  - "As a Freelance AI/ML Engineer, I designed and shipped an agentic RAG chatbot backend for a restaurant chain, using FastAPI, LangGraph, and Weaviate Cloud for retrieval, with logging and observability via Arize Phoenix — work that's since extended to a similar engagement for a gym client. In parallel, at IROS-System I built a cost-prediction regression model and a cosine-similarity-based part-matching system from BOM and assembly data, applying applied machine learning inside an industrial CAD/manufacturing workflow."
+  - "My background also includes 7+ years in mechatronics and robotics — from designing a high-precision Delta Linear Robot to supervising robotics capstone projects and teaching CAD and automation to 100+ students at HIAST. This combination lets me work across the full stack of an AI/ML or hybrid AI-robotics role: from model development to the physical or production systems those models ultimately need to run in."
+  - "I'd welcome the opportunity to discuss how this background could contribute to [COMPANY NAME]'s work. Thank you for your time and consideration."
+
+closing: "Sincerely,"

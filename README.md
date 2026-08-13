@@ -1,36 +1,43 @@
 # resume-engine
 
-Data-driven, ATS-safe CV builder. Content lives in `data/resume.yaml`; layout
-lives in `src/resume_builder/templates/`. Edit the YAML (by hand, or via an
-AI agent), rebuild, get a polished PDF. No Word/Europass wrestling required.
+Data-driven, ATS-safe CV and cover letter builder. Content lives in
+`data/resume.yaml` and `data/cover_letter.yaml`; layout lives in
+`src/resume_builder/templates/`. Edit the YAML (by hand, or via an AI
+agent), rebuild, get polished PDFs. No Word/Europass wrestling required.
 
 ## Why this structure
 
 - **Content/design separation** — an AI agent (or you) only ever edits
-  `data/resume.yaml`, a plain structured file. The HTML/CSS template stays
-  untouched, so formatting can never break from a bad edit.
-- **Validated data** — `resume.yaml` is validated against a Pydantic schema
-  (`src/resume_builder/models.py`) before rendering, so a missing field or
-  wrong type fails the build loudly instead of corrupting the PDF silently.
-  A matching JSON Schema (`schema/resume.schema.json`) is generated from the
-  same models for editor autocomplete/validation.
-- **Tailorable per application** — every section has a master on/off switch,
-  and every entry (job, degree, skill group, cert, language) has its own
-  `include` flag, so a résumé can be tailored per job posting without
-  deleting content. See [Tailoring sections](#tailoring-sections-per-application).
-- **ATS-safe by construction** — the template is single-column, no tables,
-  no text boxes, no floats — the layout style that parses reliably across
-  Workday / Greenhouse / Lever / iCIMS / Taleo.
+  `data/resume.yaml` or `data/cover_letter.yaml`, plain structured files.
+  The HTML/CSS templates stay untouched, so formatting can never break from
+  a bad edit.
+- **Validated data** — both YAML files are validated against Pydantic
+  schemas (`src/resume_builder/models.py`) before rendering, so a missing
+  field or wrong type fails the build loudly instead of corrupting the PDF
+  silently. A matching JSON Schema (`schema/resume.schema.json`) is
+  generated from the same models for editor autocomplete/validation.
+- **Tailorable per application** — the resume's every section has a master
+  on/off switch, and every entry (job, degree, skill group, cert, language)
+  has its own `include` flag, so it can be tailored per job posting without
+  deleting content. The cover letter is *designed* to be edited per
+  application — `role_title`, `recipient`, and `body_paragraphs` are
+  expected to change for every job. See
+  [Tailoring sections](#tailoring-sections-per-application).
+- **ATS-safe by construction** — both templates are single-column, no
+  tables, no text boxes, no floats — the layout style that parses reliably
+  across Workday / Greenhouse / Lever / iCIMS / Taleo.
 - **Reproducible** — everything runs in a pinned Docker image via a VS Code
   Dev Container, so "it works on my machine" isn't a variable.
-- **CI-built PDF** — push a change to `data/resume.yaml` and GitHub Actions
-  rebuilds `output/resume.pdf` automatically (see below).
+- **CI-built PDFs** — push a change to `data/resume.yaml` or
+  `data/cover_letter.yaml` and GitHub Actions rebuilds both `output/resume.pdf`
+  and `output/cover_letter.pdf` automatically (see below).
 
 ## Quick start (local, with uv)
 
 ```bash
 uv sync
 uv run resume-build render --data data/resume.yaml --out output/resume.pdf
+uv run resume-build cover-letter --data data/cover_letter.yaml --out output/cover_letter.pdf
 ```
 
 ### Makefile shortcuts
@@ -39,6 +46,8 @@ uv run resume-build render --data data/resume.yaml --out output/resume.pdf
 |---|---|
 | `make render` | Render `data/resume.yaml` → `output/resume.pdf` |
 | `make render-html` | Same, plus `output/resume.html` for a quick preview |
+| `make cover-letter` | Render `data/cover_letter.yaml` → `output/cover_letter.pdf` |
+| `make cover-letter-html` | Same, plus `output/cover_letter.html` for a quick preview |
 | `make lint` | `ruff check` + `ruff format --check` |
 | `make format` | `ruff format` + `ruff check --fix` |
 | `make typecheck` | `mypy src` |
@@ -56,14 +65,16 @@ uv run resume-build render --data data/resume.yaml --out output/resume.pdf
 - **Ctrl+Shift+P** → **Tasks: Run Test Task** — runs the default test task,
   **Test** (`make test`).
 - **Ctrl+Shift+P** → **Tasks: Run Task** — lists everything else: *Render
-  Resume (PDF + HTML)*, *Lint*, *Format*, *Typecheck*, *CI*.
+  Resume (PDF + HTML)*, *Render Cover Letter (PDF)*, *Render Cover Letter
+  (PDF + HTML)*, *Lint*, *Format*, *Typecheck*, *CI*.
 
 ## Quick start (VS Code Dev Container)
 
 1. Open this folder in VS Code.
 2. Install the **Dev Containers** extension if you don't have it.
 3. `Cmd/Ctrl+Shift+P` → **Dev Containers: Reopen in Container**.
-4. Once inside: `uv run resume-build render`.
+4. Once inside: `uv run resume-build render` (and/or
+   `uv run resume-build cover-letter`).
 
 Your SSH agent and `~/.gitconfig` are forwarded into the container (see
 `.devcontainer/devcontainer.json`), so `git push`/`git pull` and any GitHub
@@ -74,6 +85,7 @@ container, no extra setup.
 
 ```bash
 docker compose run --rm app uv run resume-build render
+docker compose run --rm app uv run resume-build cover-letter
 ```
 
 ## Production image
@@ -115,8 +127,9 @@ for a blank, commented starting point. Sections: `contact`, `summary`,
 `photo` field (filename inside `src/resume_builder/static/`, or `null` to
 omit the photo entirely).
 
-Change something, rebuild, check `output/resume.pdf`. Push to `main` and CI
-rebuilds and commits the PDF automatically — see `.github/workflows/build-resume.yml`.
+Change something, rebuild, check `output/resume.pdf`. Push to `develop` and
+CI rebuilds and commits the PDF automatically — see
+`.github/workflows/build-resume.yml`.
 
 ### Tailoring sections per application
 
@@ -133,11 +146,31 @@ Two independent, additive controls in `resume.yaml`:
 An entry only renders when both its section's master switch and its own
 `include` flag are true — nothing is ever deleted, just toggled off.
 
+## Editing your cover letter
+
+Everything is in `data/cover_letter.yaml` — start from
+`data/cover_letter.template.yaml` for a blank, commented starting point.
+Fields: `applicant_name`, `applicant_contact` (reuses the same shape as the
+resume's `contact`), `date`, `recipient` (name/title/company/address),
+`role_title`, `salutation`, `body_paragraphs`, and `closing`.
+
+Unlike the resume, a cover letter is meant to change **every application**
+— `role_title`, `recipient`, and `body_paragraphs` should be rewritten per
+job, not toggled on/off. `sections.date` and `sections.recipient` can be set
+to `false` if you don't have that information for a given application (e.g.
+no named recipient).
+
+Change something, rebuild, check `output/cover_letter.pdf`. Push to
+`develop` and CI rebuilds and commits the PDF automatically — see
+`.github/workflows/build-resume.yml`.
+
 ## Schema
 
 `schema/resume.schema.json` is a JSON Schema generated from the Pydantic
-models in `src/resume_builder/models.py`, useful for editor autocomplete
-and validating `resume.yaml` outside of a full render. Regenerate it after changing `models.py`:
+models in `src/resume_builder/models.py` (covering both the `Resume` and
+`CoverLetter` models), useful for editor autocomplete and validating either
+YAML file outside of a full render. Regenerate it after changing
+`models.py`:
 
 ```bash
 make schema   # or: uv run python scripts/generate_schema.py
@@ -157,14 +190,20 @@ make ci           # all three, same checks CI runs
 
 ## Using an AI agent to edit this
 
-Point an agent at `data/resume.yaml` with instructions to only modify that
-file (never the templates). A sensible workflow:
+Point an agent at `data/resume.yaml` and/or `data/cover_letter.yaml` with
+instructions to only modify those files (never the templates). A sensible
+workflow:
 
-1. Agent reads `data/resume.yaml` + a target job description.
-2. Agent proposes edits to `bullets`/`skills`/`summary`, and toggles
-   `include`/`sections` flags to fit the role, without inventing new facts.
-3. `uv run resume-build render` to preview locally, or open a PR — CI will
-   build a fresh PDF automatically so you can review before merging.
+1. Agent reads `data/resume.yaml` and/or `data/cover_letter.yaml` + a
+   target job description.
+2. For the resume: agent proposes edits to `bullets`/`skills`/`summary`,
+   and toggles `include`/`sections` flags to fit the role, without
+   inventing new facts. For the cover letter: agent fills in `role_title`,
+   `recipient`, and rewrites `body_paragraphs` for the specific
+   application, again without inventing facts.
+3. `uv run resume-build render` and/or `uv run resume-build cover-letter`
+   to preview locally, or open a PR — CI will build fresh PDFs
+   automatically so you can review before merging.
 
 ## Project layout
 
@@ -176,17 +215,19 @@ file (never the templates). A sensible workflow:
 │   ├── workflows/
 │   │   ├── ci.yml                    # lint, typecheck, test, security, dockerfile scan
 │   │   ├── docker.yml                # build, scan & push production image to GHCR
-│   │   └── build-resume.yml          # render PDF on data changes, commit back
+│   │   └── build-resume.yml          # render PDFs on data changes, commit back
 │   └── dependabot.yml
 ├── src/resume_builder/
-│   ├── models.py                     # Pydantic schema for resume.yaml
+│   ├── models.py                     # Pydantic schema for resume.yaml + cover_letter.yaml
 │   ├── render.py                     # YAML -> HTML (Jinja2) -> PDF (WeasyPrint)
-│   ├── cli.py                        # `resume-build render ...`
-│   ├── templates/                    # resume.html.j2 + resume.css
+│   ├── cli.py                        # `resume-build render / cover-letter ...`
+│   ├── templates/                    # resume.html.j2 + resume.css, cover_letter.html.j2 + cover_letter.css
 │   └── static/                       # optional photo lives here
 ├── data/
 │   ├── resume.yaml                   # <-- edit this
-│   └── resume.template.yaml          # blank starting point
+│   ├── resume.template.yaml          # blank starting point
+│   ├── cover_letter.yaml             # <-- edit this per application
+│   └── cover_letter.template.yaml    # blank starting point
 ├── schema/resume.schema.json         # JSON Schema generated from models.py
 ├── scripts/
 │   ├── generate_schema.py            # regenerates schema/resume.schema.json
@@ -196,7 +237,7 @@ file (never the templates). A sensible workflow:
 │   ├── Dockerfile.dev                # dev container image (VS Code / docker compose)
 │   └── Dockerfile.prod               # production image (published to GHCR)
 ├── tests/test_render.py              # smoke tests for the render pipeline
-├── output/                           # generated resume.pdf / resume.html
+├── output/                           # generated resume.pdf / resume.html / cover_letter.pdf / cover_letter.html
 ├── Makefile                          # shortcuts for common commands
 ├── docker-compose.yml                # dev container service
 └── docker-compose.prod.yml           # run the production image locally
@@ -204,6 +245,7 @@ file (never the templates). A sensible workflow:
 
 ## Formats
 
-- **PDF** (`output/resume.pdf`) — the deliverable you send to employers.
-- **HTML** (`output/resume.html`, optional) — useful for quick visual
-  review without regenerating the whole PDF.
+- **PDF** (`output/resume.pdf`, `output/cover_letter.pdf`) — the
+  deliverables you send to employers.
+- **HTML** (`output/resume.html`, `output/cover_letter.html`, optional) —
+  useful for quick visual review without regenerating the whole PDF.

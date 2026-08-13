@@ -29,6 +29,30 @@
       "problemMatcher": []
     },
     {
+      "label": "Render Cover Letter (PDF)",
+      "type": "shell",
+      "command": "make cover-letter",
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Render Cover Letter (PDF + HTML)",
+      "type": "shell",
+      "command": "make cover-letter-html",
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
       "label": "Lint",
       "type": "shell",
       "command": "make lint",

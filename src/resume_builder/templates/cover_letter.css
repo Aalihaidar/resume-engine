@@ -1,0 +1,63 @@
+@page {
+    size: A4;
+    margin: 25mm;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: "Liberation Sans", Arial, sans-serif;
+    font-size: 11pt;
+    line-height: 1.5;
+    color: #1a1a1a;
+    margin: 0;
+}
+
+.cl-header h1 {
+    font-size: 18pt;
+    color: #1f3a5f;
+    margin: 0 0 4px 0;
+}
+
+.cl-contact {
+    font-size: 9.5pt;
+    color: #444;
+    margin: 0 0 2px 0;
+}
+
+.cl-contact a {
+    color: #33507a;
+    text-decoration: none;
+}
+
+.cl-date {
+    margin: 20px 0 16px 0;
+}
+
+.cl-recipient p {
+    margin: 0;
+}
+
+.cl-recipient {
+    margin-bottom: 16px;
+}
+
+.cl-salutation {
+    margin-bottom: 12px;
+}
+
+.cl-body {
+    margin: 0 0 12px 0;
+    text-align: left;
+}
+
+.cl-closing {
+    margin: 20px 0 32px 0;
+}
+
+.cl-signoff {
+    font-weight: 600;
+    margin: 0;
+}

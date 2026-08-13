@@ -1,10 +1,16 @@
-.PHONY: render render-html lint format typecheck test schema repomix ci clean
+.PHONY: render render-html cover-letter cover-letter-html lint format typecheck test schema repomix ci clean
 
 render:
 	uv run resume-build render --data data/resume.yaml --out output/resume.pdf
 
 render-html:
 	uv run resume-build render --data data/resume.yaml --out output/resume.pdf --html output/resume.html
+
+cover-letter:
+	uv run resume-build cover-letter --data data/cover_letter.yaml --out output/cover_letter.pdf
+
+cover-letter-html:
+	uv run resume-build cover-letter --data data/cover_letter.yaml --out output/cover_letter.pdf --html output/cover_letter.html
 
 lint:
 	uv run ruff check .

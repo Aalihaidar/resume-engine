@@ -91,21 +91,13 @@ education:
       - "Research focus: implementing deep learning algorithms for visual perception in dynamic environments."
 
   - include: true
-    degree: "Russian Language Preparatory Program"
-    institution: "ITMO University"
-    location: "Saint Petersburg, Russia"
-    start: "Oct 2022"
-    end: "Sep 2023"
-    details: []
-
-  - include: true
     degree: "BEng, Mechatronics Engineering"
     institution: "Higher Institute for Applied Sciences and Technology (HIAST)"
     location: "Damascus, Syria"
     start: "Oct 2013"
     end: "Oct 2018"
     details:
-      - "Graduated Top Performer (Ranked 'A' for distinguished academic performance); final grade 82.55%."
+      - "Graduated with a grade of Very Good (82.55% average)."
       - "Graduation project: designed and manufactured a Delta Linear Robot with 20µm positioning accuracy for laser drawing and 3D printing applications."
       - "4th-year project: designed an open-wheel electric vehicle (Go-Kart)."
 
@@ -203,10 +195,6 @@ certifications:
     name: "Docker Certified Associate Exam Prep Specialization"
     issuer: "LearnKartS"
     date: "Jul 2026"
-  - include: true
-    name: "Introduction to Git and GitHub"
-    issuer: "Google"
-    date: "Feb 2025"
   - include: true
     name: "Introduction to CAD, CAM, and Practical CNC Machining"
     issuer: "Autodesk"
