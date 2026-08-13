@@ -29,6 +29,7 @@
     "docker-compose.yml",
     "docker-compose.prod.yml",
     ".env.example",
+    ".pre-commit-config.yaml",
     "Makefile"
   ],
   "ignore": {
@@ -40,7 +41,7 @@
       "*.png",
       "*.jpg",
       "*.jpeg",
-      "devcontainer-lock.json"
+      "**/devcontainer-lock.json"
     ]
   },
   "security": {

@@ -1,14 +1,15 @@
 name: Build Resume PDF
 
-# Rebuilds output/resume.pdf whenever the content (data/resume.yaml) or the
-# template/style changes, then commits the new PDF straight back to the repo
-# — so pushing an edited resume.yaml is all it takes to get an updated PDF,
-# no local render step required. Also runnable by hand and exposes the PDF
-# as a downloadable workflow artifact on every run.
+# Rebuilds output/resume.pdf and output/cover_letter.pdf whenever their
+# content (data/resume.yaml, data/cover_letter.yaml) or the template/style
+# changes, then commits the new PDFs straight back to the repo — so pushing
+# an edited YAML is all it takes to get an updated PDF, no local render step
+# required. Also runnable by hand and exposes both PDFs as downloadable
+# workflow artifacts on every run.
 #
 # Runs against `develop` only. `main` is the release branch (PRs land there
 # only from `develop`, see ci.yml's verify-pr-source), so there's nothing to
-# rebuild on push/PR to main — the PDF is already current by the time it
+# rebuild on push/PR to main — the PDFs are already current by the time it
 # gets there.
 
 on:
@@ -16,12 +17,14 @@ on:
     branches: [develop]
     paths:
       - "data/resume.yaml"
+      - "data/cover_letter.yaml"
       - "data/**.json"
       - "src/resume_builder/**"
   pull_request:
     branches: [develop]
     paths:
       - "data/resume.yaml"
+      - "data/cover_letter.yaml"
       - "data/**.json"
       - "src/resume_builder/**"
   workflow_dispatch: {}
@@ -65,17 +68,25 @@ jobs:
       - name: Validate resume data
         run: uv run python -c "from pathlib import Path; from resume_builder.render import load_resume; load_resume(Path('data/resume.yaml')); print('✅ data/resume.yaml is valid')"
 
-      - name: Render PDF
+      - name: Validate cover letter data
+        run: uv run python -c "from pathlib import Path; from resume_builder.render import load_cover_letter; load_cover_letter(Path('data/cover_letter.yaml')); print('✅ data/cover_letter.yaml is valid')"
+
+      - name: Render resume PDF
         run: uv run resume-build render --data data/resume.yaml --out output/resume.pdf
 
-      - name: Upload PDF as workflow artifact
+      - name: Render cover letter PDF
+        run: uv run resume-build cover-letter --data data/cover_letter.yaml --out output/cover_letter.pdf
+
+      - name: Upload PDFs as workflow artifacts
         uses: actions/upload-artifact@v7
         with:
           name: resume-pdf
-          path: output/resume.pdf
+          path: |
+            output/resume.pdf
+            output/cover_letter.pdf
           retention-days: 90
 
-      - name: Commit updated PDF back to repo
+      - name: Commit updated PDFs back to repo
         # Only commit-back on push. On pull_request, checkout gives you an
         # ephemeral merge commit that isn't the PR head branch — pushing
         # here would either fail (no ref to push to) or commit to the wrong
@@ -84,7 +95,7 @@ jobs:
         if: github.event_name == 'push'
         uses: stefanzweifel/git-auto-commit-action@v7
         with:
-          commit_message: "chore: rebuild resume.pdf [skip ci]"
-          file_pattern: "output/resume.pdf"
+          commit_message: "chore: rebuild resume.pdf and cover_letter.pdf [skip ci]"
+          file_pattern: "output/resume.pdf output/cover_letter.pdf"
           commit_user_name: "github-actions[bot]"
           commit_user_email: "github-actions[bot]@users.noreply.github.com"

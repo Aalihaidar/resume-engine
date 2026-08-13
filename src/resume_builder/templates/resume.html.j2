@@ -18,7 +18,9 @@
         {{ resume.contact.location }}
         &nbsp;·&nbsp; {{ resume.contact.phone }}
         &nbsp;·&nbsp; {{ resume.contact.email }}
-        &nbsp;·&nbsp; <a href="{{ resume.contact.linkedin_url }}">{{ resume.contact.linkedin_display }}</a>
+      </p>
+      <p class="contact-line contact-links">
+        <a href="{{ resume.contact.linkedin_url }}">{{ resume.contact.linkedin_display }}</a>
         {% if resume.contact.github_display %}
         &nbsp;·&nbsp; <a href="{{ resume.contact.github_url }}">{{ resume.contact.github_display }}</a>
         {% endif %}

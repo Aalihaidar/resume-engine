@@ -1,0 +1,65 @@
+# =============================================================================
+# cover_letter.yaml — source of truth for the cover letter.
+# Unlike resume.yaml, this is meant to be edited per application: role_title,
+# recipient, and body_paragraphs will typically change for every job you
+# apply to. Run `resume-build cover-letter` (or `make cover-letter`) to
+# regenerate cover_letter.pdf. Do not edit the template or the PDF directly
+# — they are generated output.
+#
+# VISIBILITY CONTROLS
+# --------------------
+# - `sections:` below is the master switch for each optional part of the
+#   letter. Set `date` or `recipient` to false to omit them entirely (e.g.
+#   if you don't have a named recipient/company address). `body` gates the
+#   body_paragraphs list — set false only if you want an otherwise-empty
+#   letter shell, which is rarely useful.
+# =============================================================================
+
+applicant_name: "Jane Doe"
+
+applicant_contact:
+  location: "Berlin, Germany"
+  phone: "+49 151 23456789"
+  email: "jane.doe@example.com"
+  linkedin_display: "linkedin.com/in/janedoe"
+  linkedin_url: "https://www.linkedin.com/in/janedoe/"
+  github_display: "github.com/janedoe"
+  github_url: "https://github.com/janedoe"
+
+# Master on/off switch per optional part of the letter.
+sections:
+  date: true
+  recipient: true
+  body: true
+
+date: "Mon DD, YYYY"
+
+# Set name/title to null if unknown — "Dear Hiring Manager," in the
+# salutation below covers that case. company is required if sections.recipient
+# is true.
+recipient:
+  name: null
+  title: "Hiring Manager"
+  company: "Company Name"
+  company_address: null
+
+role_title: "Job Title you're applying for"
+salutation: "Dear Hiring Manager,"
+
+# -----------------------------------------------------------------------
+# BODY — typically 3-4 paragraphs:
+#   1. Who you are + the role you're applying for.
+#   2. Your strongest, most relevant achievement(s) — quantify where real
+#      numbers exist. Do not invent numbers or claims.
+#   3. (Optional) Additional relevant background/breadth.
+#   4. Brief closing: interest in discussing further, thanks.
+# Keep each paragraph to 3-5 sentences. Do not repeat the resume verbatim —
+# this should add context/narrative the resume's bullet format can't.
+# -----------------------------------------------------------------------
+body_paragraphs:
+  - "Opening paragraph: who you are, the role and company you're applying to, and a one-line hook."
+  - "Core paragraph: your strongest relevant achievement(s), with real detail and quantified outcomes where they exist."
+  - "Optional paragraph: additional relevant breadth, background, or context not covered above."
+  - "Closing paragraph: interest in discussing further, thank the reader for their time."
+
+closing: "Sincerely,"

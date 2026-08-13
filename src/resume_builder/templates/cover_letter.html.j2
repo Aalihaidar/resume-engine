@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>{{ letter.applicant_name }} — Cover Letter</title>
+  <link rel="stylesheet" href="cover_letter.css">
+</head>
+<body>
+
+  <header class="cl-header">
+    <h1>{{ letter.applicant_name }}</h1>
+    <p class="cl-contact">
+      {{ letter.applicant_contact.location }}
+      &nbsp;·&nbsp; {{ letter.applicant_contact.phone }}
+      &nbsp;·&nbsp; {{ letter.applicant_contact.email }}
+    </p>
+    <p class="cl-contact">
+      <a href="{{ letter.applicant_contact.linkedin_url }}">{{ letter.applicant_contact.linkedin_display }}</a>
+      {% if letter.applicant_contact.github_display %}
+      &nbsp;·&nbsp; <a href="{{ letter.applicant_contact.github_url }}">{{ letter.applicant_contact.github_display }}</a>
+      {% endif %}
+    </p>
+  </header>
+
+  {% if letter.show_date %}
+  <p class="cl-date">{{ letter.date }}</p>
+  {% endif %}
+
+  {% if letter.show_recipient %}
+  <div class="cl-recipient">
+    {% if letter.recipient.name %}<p>{{ letter.recipient.name }}</p>{% endif %}
+    {% if letter.recipient.title %}<p>{{ letter.recipient.title }}</p>{% endif %}
+    <p>{{ letter.recipient.company }}</p>
+    {% if letter.recipient.company_address %}<p>{{ letter.recipient.company_address }}</p>{% endif %}
+  </div>
+  {% endif %}
+
+  <p class="cl-salutation">{{ letter.salutation }}</p>
+
+  {% for paragraph in letter.visible_body %}
+  <p class="cl-body">{{ paragraph }}</p>
+  {% endfor %}
+
+  <p class="cl-closing">{{ letter.closing }}</p>
+  <p class="cl-signoff">{{ letter.applicant_name }}</p>
+
+</body>
+</html>
