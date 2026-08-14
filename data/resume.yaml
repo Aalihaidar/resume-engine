@@ -30,6 +30,9 @@ summary: >
   Graduate research focused on real-time visual object tracking using deep learning techniques, complemented by a mechatronics
   and robotics background spanning motion control, kinematics, and mechatronic system design.
 
+# -----------------------------------------------------------------------
+# EXPERIENCE
+# -----------------------------------------------------------------------
 experience:
   - include: true
     title: "AI/ML & CAD Engineer — Industrial Automation"
@@ -74,6 +77,11 @@ experience:
       - "Designed and implemented a custom 500×500×500mm Cartesian 3D printer, managing the full lifecycle from mechanical design to firmware integration."
       - "Developed a high-precision volumetric filling machine, a cup feeder machine, and an end-line picker machine for high-viscosity, food-grade production lines."
       - "Managed development of a Building Management System (BMS), improving facility automation and energy efficiency."
+
+# -----------------------------------------------------------------------
+# PROJECTS
+# -----------------------------------------------------------------------
+projects: []
 
 # -----------------------------------------------------------------------
 # EDUCATION
