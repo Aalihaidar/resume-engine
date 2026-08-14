@@ -126,6 +126,22 @@ body {
   margin-bottom: 2px;
 }
 
+.entry-tech {
+  font-size: 9.3pt;
+  color: #333;
+  margin: 3px 0 0 0;
+}
+
+.entry-links {
+  font-size: 9pt;
+  margin: 2px 0 0 0;
+}
+
+.entry-links a {
+  color: #33507a;
+  text-decoration: none;
+}
+
 ul {
   margin: 2px 0 0 0;
   padding-left: 16px;

@@ -123,9 +123,16 @@ docker run --rm \
 
 Everything is in `data/resume.yaml` — start from `data/resume.template.yaml`
 for a blank, commented starting point. Sections: `contact`, `summary`,
-`experience`, `education`, `skills`, `certifications`, `languages`, plus a
-`photo` field (filename inside `src/resume_builder/static/`, or `null` to
-omit the photo entirely).
+`experience`, `projects`, `education`, `skills`, `certifications`,
+`languages`, plus a `photo` field (filename inside
+`src/resume_builder/static/`, or `null` to omit the photo entirely).
+
+`projects` is for personal, academic, freelance, or open-source work that
+isn't a paid job — each entry supports an optional `organization` (e.g.
+"Associated with X University"), achievement `bullets`, a `technologies`
+keyword list, and clickable `links` (repo, live demo, published model,
+etc.). Add a new list item under `projects:` any time you ship something
+new; nothing else needs to change.
 
 Change something, rebuild, check `output/resume.pdf`. Push to `develop` and
 CI rebuilds and commits the PDF automatically — see
@@ -136,10 +143,12 @@ CI rebuilds and commits the PDF automatically — see
 Two independent, additive controls in `resume.yaml`:
 
 - **`sections:`** — a master boolean per top-level section (`summary`,
-  `experience`, `education`, `skills`, `certifications`, `languages`,
-  `photo`). Set one to `false` to drop that whole section from the PDF.
-- **`include:`** — every entry in `experience`, `education`, `skills`,
-  `certifications`, and `languages` carries its own `include: true|false`.
+  `experience`, `projects`, `education`, `skills`, `certifications`,
+  `languages`, `photo`). Set one to `false` to drop that whole section from
+  the PDF.
+- **`include:`** — every entry in `experience`, `projects`, `education`,
+  `skills`, `certifications`, and `languages` carries its own
+  `include: true|false`.
   Set to `false` to hide a single entry (e.g. an older job) while keeping
   the rest of the section and the data itself.
 

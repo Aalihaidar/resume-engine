@@ -15,6 +15,7 @@ def test_resume_yaml_loads_and_validates() -> None:
     assert isinstance(resume, Resume)
     assert resume.name
     assert resume.experience, "expected at least one experience entry"
+    assert resume.projects, "expected at least one project entry"
 
 
 def test_render_html_contains_key_fields() -> None:
@@ -35,6 +36,11 @@ def test_render_html_contains_key_fields() -> None:
     for job in resume.visible_experience:
         assert str(escape(job.title)) in html
         assert str(escape(job.company)) in html
+
+    for project in resume.visible_projects:
+        assert str(escape(project.name)) in html
+        for tech in project.technologies:
+            assert str(escape(tech)) in html
 
     for edu in resume.visible_education:
         assert str(escape(edu.degree)) in html
