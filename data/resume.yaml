@@ -1,7 +1,6 @@
 name: "Ali Haidar"
 headline: "AI/ML & Robotics Engineer | Computer Vision · Deep Learning · Applied ML in Automation"
 
-# Master on/off switch per top-level section.
 sections:
   summary: true
   experience: true
@@ -23,24 +22,18 @@ contact:
 photo: headshot.jpg
 
 summary: >
-  AI/ML Engineer with an MSc (Honors) in Robotics & AI from ITMO University and hands-on delivery across research,
-  industry, and freelance work — spanning applied generative AI, deep learning-based computer vision, and production ML.
-  Built an agentic RAG chatbot backend (FastAPI, LangGraph, Weaviate) for bilingual restaurant and gym clients,
-  and applied regression modeling and similarity-based matching for cost estimation at IROS-System.
-  Extends this AI/ML foundation into physical systems through robotics work (motion control, kinematics, ROS), bringing research-grade models into real-world automation.
+  AI/ML & Robotics Engineer with an MSc (Honors) in Robotics and Artificial Intelligence from ITMO University,
+  specializing in applied generative AI, production ML systems, and deep learning-based computer vision.
+  Built an agentic RAG chatbot backend for bilingual restaurant and gym clients, with logging
+  and observability via Arize Phoenix. At IROS-System, developed a cost-prediction regression model and a cosine-similarity-based
+  part-matching system from BOM and assembly data, alongside CAD automation and FEA validation for industrial automation.
+  Graduate research focused on real-time visual object tracking using deep learning techniques, complemented by a mechatronics
+  and robotics background spanning motion control, kinematics, and mechatronic system design.
 
+# -----------------------------------------------------------------------
+# EXPERIENCE
+# -----------------------------------------------------------------------
 experience:
-  - include: true
-    title: "Freelance AI/ML Engineer"
-    company: "Self-employed"
-    location: "Remote"
-    start: "Aug 2025"
-    end: "Present"
-    bullets:
-      - "Designed and shipped an AI agent for a restaurant chain's RAG chatbot backend (bilingual RU/EN menu + FAQ), using FastAPI, LangGraph, and Weaviate Cloud for retrieval."
-      - "Implemented logging, monitoring, and observability with Arize Phoenix to track and debug agent behavior in production."
-      - "Delivered an AI agent-based chatbot engagement for a gym client."
-
   - include: true
     title: "AI/ML & CAD Engineer — Industrial Automation"
     company: "IROS-System"
@@ -51,6 +44,17 @@ experience:
       - "Built a cost-prediction regression model and a cosine-similarity-based part-matching system (Python, pandas, scikit-learn) from BOM and assembly data, enabling earlier cost estimates and reducing part duplication."
       - "Designed 3D part models, assemblies, and technical drawings, and built rule-based automation scripts (iLogic, Inventor API) to auto-generate design variants and drawings, cutting modeling time and reducing manual errors."
       - "Performed stress calculations and FEA validation across all design outputs, maintaining 100% compliance with regulatory standards."
+
+  - include: true
+    title: "Freelance AI/ML Engineer"
+    company: "Self-employed"
+    location: "Remote"
+    start: "Aug 2025"
+    end: "Present"
+    bullets:
+      - "Designed and shipped an AI agent for a restaurant chain's RAG chatbot backend (bilingual RU/EN menu + FAQ), using FastAPI, LangGraph, and Weaviate Cloud for retrieval."
+      - "Implemented logging, monitoring, and observability with Arize Phoenix to track and debug agent behavior in production."
+      - "Delivered an AI agent-based chatbot engagement for a gym client."
 
   - include: true
     title: "Research Assistant & Robotics Engineer"
@@ -75,6 +79,11 @@ experience:
       - "Managed development of a Building Management System (BMS), improving facility automation and energy efficiency."
 
 # -----------------------------------------------------------------------
+# PROJECTS
+# -----------------------------------------------------------------------
+projects: []
+
+# -----------------------------------------------------------------------
 # EDUCATION
 # -----------------------------------------------------------------------
 education:
@@ -85,9 +94,8 @@ education:
     start: "Oct 2023"
     end: "Jul 2025"
     details:
-      - "Graduated with Honors (Red Diploma)."
       - 'Thesis: "Real-Time Visual Object Tracking Methods with Deep Learning Techniques."'
-      - "Coursework: Machine Learning in Robotics, Computer Vision, ROS, Motion Control, Path Planning, Cyber-Physical Systems, Big Data Processing."
+      - "Coursework: Machine Learning in Robotics, Introduction to ML Tools and Applied AI in Science and Business, Data Preprocessing and Big Data Storage Technologies, Cyber-Physical Systems and Technologies, Robot Programming, Robot Modeling and Motion Control, Trajectory Planning and Control, Simulation of Robotic Systems, Design of Mechatronic Systems."
       - "Research focus: implementing deep learning algorithms for visual perception in dynamic environments."
 
   - include: true
@@ -97,14 +105,11 @@ education:
     start: "Oct 2013"
     end: "Oct 2018"
     details:
-      - "Graduated with a grade of Very Good (82.55% average)."
-      - "Graduation project: designed and manufactured a Delta Linear Robot with 20µm positioning accuracy for laser drawing and 3D printing applications."
+      - "Graduation project: designed and manufactured a Delta Linear Robot with 0.1mm positioning accuracy for laser drawing and 3D printing applications."
       - "4th-year project: designed an open-wheel electric vehicle (Go-Kart)."
 
 # -----------------------------------------------------------------------
-# SKILLS — grouped for ATS category matching. include: false hides an
-# entire category (e.g. omit "Languages: French" tooling from a resume
-# where it's not relevant).
+# SKILLS
 # -----------------------------------------------------------------------
 skills:
   - category: "AI/ML & Data Science"
@@ -129,7 +134,7 @@ skills:
     items:
       - "Robot Operating System (ROS)"
       - "Motion Control & Kinematics"
-      - "Path Planning"
+      - "Trajectory Planning and Control"
       - "Mechatronic System Design"
 
   - category: "Engineering & CAD"
@@ -156,7 +161,7 @@ skills:
       - "iLogic"
 
 # -----------------------------------------------------------------------
-# CERTIFICATIONS — most recent first.
+# CERTIFICATIONS
 # -----------------------------------------------------------------------
 certifications:
   - include: true
@@ -195,10 +200,6 @@ certifications:
     name: "Docker Certified Associate Exam Prep Specialization"
     issuer: "LearnKartS"
     date: "Jul 2026"
-  - include: true
-    name: "Introduction to CAD, CAM, and Practical CNC Machining"
-    issuer: "Autodesk"
-    date: "Mar 2021"
 
 # -----------------------------------------------------------------------
 # LANGUAGES

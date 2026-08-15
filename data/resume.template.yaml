@@ -24,6 +24,7 @@ headline: "Headline or tagline goes here, e.g. 'AI/ML Engineer | Robotics Engine
 sections:
   summary: true
   experience: true
+  projects: true
   education: true
   skills: true
   certifications: true
@@ -49,10 +50,7 @@ summary: >
   person, no "I".
 
 # -----------------------------------------------------------------------
-# EXPERIENCE — most recent first. Keep bullets to ~2 lines, start with a
-# strong verb, quantify wherever a real number exists. Do not invent numbers.
-# Set include: false on an entry to hide it (e.g. an older/less relevant
-# role) without deleting it.
+# EXPERIENCE
 # -----------------------------------------------------------------------
 experience:
   - include: true
@@ -76,6 +74,28 @@ experience:
       - "Bullet describing a specific technical contribution."
 
 # -----------------------------------------------------------------------
+# PROJECTS
+# -----------------------------------------------------------------------
+projects:
+  - include: true
+    name: "Project Name"
+    organization: "Associated with X University" # optional — delete this line to omit
+    start: "Mon YYYY"
+    end: "Mon YYYY"
+    bullets:
+      - "What you built and why, in one sentence."
+      - "A specific technical contribution or design decision."
+      - "A quantified result or outcome, if you have a real number."
+    technologies:
+      - "Tech 1"
+      - "Tech 2"
+    links:
+      - label: "GitHub"
+        url: "https://github.com/janedoe/project-name"
+      - label: "Live Demo"
+        url: "https://project-name.example.com"
+
+# -----------------------------------------------------------------------
 # EDUCATION
 # -----------------------------------------------------------------------
 education:
@@ -89,9 +109,7 @@ education:
       - "Honors, thesis title, or notable coursework (optional)."
 
 # -----------------------------------------------------------------------
-# SKILLS — grouped for ATS category matching. include: false hides an
-# entire category (e.g. omit "Languages: French" tooling from a resume
-# where it's not relevant).
+# SKILLS
 # -----------------------------------------------------------------------
 skills:
   - include: true
@@ -102,7 +120,7 @@ skills:
       - "Skill 3"
 
 # -----------------------------------------------------------------------
-# CERTIFICATIONS — most recent first.
+# CERTIFICATIONS.
 # -----------------------------------------------------------------------
 certifications:
   - include: true

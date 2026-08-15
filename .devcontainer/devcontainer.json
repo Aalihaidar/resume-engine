@@ -41,6 +41,6 @@
     }
   },
 
-  "postCreateCommand": "uv sync --group dev",
+  "postCreateCommand": "uv sync --group dev && git config core.fileMode false",
   "remoteUser": "root"
 }

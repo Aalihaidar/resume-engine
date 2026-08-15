@@ -55,6 +55,38 @@
   </section>
   {% endif %}
 
+  {% if resume.visible_projects %}
+  <section class="section">
+    <h2>Projects</h2>
+    {% for project in resume.visible_projects %}
+    <div class="entry">
+      <div class="entry-header">
+        <span class="entry-title">{{ project.name }}</span>
+        <span class="entry-dates">{{ project.start }} – {{ project.end }}</span>
+      </div>
+      {% if project.organization %}
+      <div class="entry-subline">{{ project.organization }}</div>
+      {% endif %}
+      {% if project.bullets %}
+      <ul>
+        {% for bullet in project.bullets %}
+        <li>{{ bullet }}</li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+      {% if project.technologies %}
+      <p class="entry-tech"><strong>Technologies:</strong> {{ project.technologies | join(", ") }}</p>
+      {% endif %}
+      {% if project.links %}
+      <p class="entry-links">
+        {% for link in project.links %}<a href="{{ link.url }}">{{ link.label }}</a>{% if not loop.last %} &nbsp;·&nbsp; {% endif %}{% endfor %}
+      </p>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </section>
+  {% endif %}
+
   {% if resume.visible_education %}
   <section class="section">
     <h2>Education</h2>

@@ -11,10 +11,24 @@ DATA_FILE = REPO_ROOT / "data" / "resume.yaml"
 
 
 def test_resume_yaml_loads_and_validates() -> None:
+    """Loads resume.yaml and confirms it validates against the schema.
+
+    Every optional section (experience, projects, education, skills,
+    certifications, languages) is allowed to be an empty list -- the
+    schema only requires top-level identity fields (name, headline) to
+    be present. This mirrors the `sections:` visibility switches, which
+    let a section be toggled off entirely regardless of whether it has
+    entries.
+    """
     resume = load_resume(DATA_FILE)
     assert isinstance(resume, Resume)
     assert resume.name
-    assert resume.experience, "expected at least one experience entry"
+    assert isinstance(resume.experience, list)
+    assert isinstance(resume.projects, list)
+    assert isinstance(resume.education, list)
+    assert isinstance(resume.skills, list)
+    assert isinstance(resume.certifications, list)
+    assert isinstance(resume.languages, list)
 
 
 def test_render_html_contains_key_fields() -> None:
@@ -35,6 +49,11 @@ def test_render_html_contains_key_fields() -> None:
     for job in resume.visible_experience:
         assert str(escape(job.title)) in html
         assert str(escape(job.company)) in html
+
+    for project in resume.visible_projects:
+        assert str(escape(project.name)) in html
+        for tech in project.technologies:
+            assert str(escape(tech)) in html
 
     for edu in resume.visible_education:
         assert str(escape(edu.degree)) in html

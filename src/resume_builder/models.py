@@ -30,6 +30,7 @@ class SectionToggles(BaseModel):
 
     summary: bool = True
     experience: bool = True
+    projects: bool = True
     education: bool = True
     skills: bool = True
     certifications: bool = True
@@ -55,6 +56,33 @@ class ExperienceEntry(BaseModel):
     start: str
     end: str
     bullets: list[str]
+
+
+class ProjectLink(BaseModel):
+    """A single external link attached to a project (repo, live demo, model card, etc.)."""
+
+    label: str
+    url: HttpUrl
+
+
+class ProjectEntry(BaseModel):
+    """One personal/academic/freelance project.
+
+    Distinct from `ExperienceEntry` because projects are typically unpaid,
+    tied to an organization only loosely (e.g. "Associated with X
+    University"), and benefit from an explicit `technologies` list and
+    clickable `links` (repo, live demo, published model, etc.) that a job
+    doesn't need.
+    """
+
+    include: bool = True
+    name: str
+    organization: str | None = None
+    start: str
+    end: str
+    bullets: list[str] = []
+    technologies: list[str] = []
+    links: list[ProjectLink] = []
 
 
 class EducationEntry(BaseModel):
@@ -94,6 +122,7 @@ class Resume(BaseModel):
     sections: SectionToggles = SectionToggles()
     summary: str
     experience: list[ExperienceEntry] = []
+    projects: list[ProjectEntry] = []
     education: list[EducationEntry] = []
     skills: list[SkillGroup] = []
     certifications: list[Certification] = []
@@ -117,6 +146,12 @@ class Resume(BaseModel):
         if not self.sections.experience:
             return []
         return [e for e in self.experience if e.include]
+
+    @property
+    def visible_projects(self) -> list[ProjectEntry]:
+        if not self.sections.projects:
+            return []
+        return [p for p in self.projects if p.include]
 
     @property
     def visible_education(self) -> list[EducationEntry]:

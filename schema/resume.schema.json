@@ -207,6 +207,93 @@
       "title": "Language",
       "type": "object"
     },
+    "ProjectEntry": {
+      "description": "One personal/academic/freelance project.\n\nDistinct from `ExperienceEntry` because projects are typically unpaid,\ntied to an organization only loosely (e.g. \"Associated with X\nUniversity\"), and benefit from an explicit `technologies` list and\nclickable `links` (repo, live demo, published model, etc.) that a job\ndoesn't need.",
+      "properties": {
+        "include": {
+          "default": true,
+          "title": "Include",
+          "type": "boolean"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "organization": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Organization"
+        },
+        "start": {
+          "title": "Start",
+          "type": "string"
+        },
+        "end": {
+          "title": "End",
+          "type": "string"
+        },
+        "bullets": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Bullets",
+          "type": "array"
+        },
+        "technologies": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Technologies",
+          "type": "array"
+        },
+        "links": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/ProjectLink"
+          },
+          "title": "Links",
+          "type": "array"
+        }
+      },
+      "required": [
+        "name",
+        "start",
+        "end"
+      ],
+      "title": "ProjectEntry",
+      "type": "object"
+    },
+    "ProjectLink": {
+      "description": "A single external link attached to a project (repo, live demo, model card, etc.).",
+      "properties": {
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "url": {
+          "format": "uri",
+          "maxLength": 2083,
+          "minLength": 1,
+          "title": "Url",
+          "type": "string"
+        }
+      },
+      "required": [
+        "label",
+        "url"
+      ],
+      "title": "ProjectLink",
+      "type": "object"
+    },
     "SectionToggles": {
       "description": "Master on/off switch for each top-level section of the resume.",
       "properties": {
@@ -218,6 +305,11 @@
         "experience": {
           "default": true,
           "title": "Experience",
+          "type": "boolean"
+        },
+        "projects": {
+          "default": true,
+          "title": "Projects",
           "type": "boolean"
         },
         "education": {
@@ -305,6 +397,7 @@
       "default": {
         "summary": true,
         "experience": true,
+        "projects": true,
         "education": true,
         "skills": true,
         "certifications": true,
@@ -322,6 +415,14 @@
         "$ref": "#/$defs/ExperienceEntry"
       },
       "title": "Experience",
+      "type": "array"
+    },
+    "projects": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/ProjectEntry"
+      },
+      "title": "Projects",
       "type": "array"
     },
     "education": {
