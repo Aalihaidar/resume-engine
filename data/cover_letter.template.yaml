@@ -43,6 +43,9 @@ recipient:
   company: "Company Name"
   company_address: null
 
+# Rendered as a "Re: <role_title>" line between the recipient block and the
+# salutation. Required — the whole point of this field is that the reader
+# sees at a glance which posting this letter is for.
 role_title: "Job Title you're applying for"
 salutation: "Dear Hiring Manager,"
 
