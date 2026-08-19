@@ -23,7 +23,7 @@ dev = [
     "pytest-cov>=7.1.0",
     "pip-audit>=2.10.1",
     "pre-commit>=4.6.2",
-    "types-pyyaml>=6.0.12.20250915",
+    "types-pyyaml>=6.0.12.20260815",
 ]
 
 [project.scripts]
