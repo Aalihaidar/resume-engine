@@ -1,14 +1,16 @@
 # Runs the production image locally, e.g.:
-#   docker compose -f docker-compose.prod.yml run --rm resume-engine
+#   docker compose -f docker-compose.prod.yml up --build
 #
-# Mounts your local data/ (read-only) and output/ so the rendered PDF
-# lands back on the host, without needing uv/Python installed locally.
+# Starts the FastAPI server on http://localhost:8000 — same image
+# deployed to Render. No volumes needed: input comes in as JSON over
+# HTTP, not from local data/ files.
 services:
   resume-engine:
     build:
       context: .
       dockerfile: docker/Dockerfile.prod
     image: resume-engine:latest
-    volumes:
-      - ./data:/app/data:ro
-      - ./output:/app/output
+    ports:
+      - "8000:8000"
+    environment:
+      - PORT=8000

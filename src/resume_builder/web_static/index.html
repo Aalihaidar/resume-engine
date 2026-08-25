@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Resume Engine</title>
+<style>
+  :root { --bg:#0f1115; --panel:#171a21; --text:#e6e8ec; --muted:#8a8f98; --accent:#5b8cff; --err:#ff6b6b; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family: -apple-system, Segoe UI, Roboto, sans-serif; background:var(--bg); color:var(--text); }
+  header { padding:24px 32px; border-bottom:1px solid #262a33; }
+  header h1 { margin:0; font-size:20px; }
+  header p { margin:6px 0 0; color:var(--muted); font-size:14px; }
+  main { max-width:960px; margin:0 auto; padding:24px 32px 64px; }
+  .tabs { display:flex; gap:8px; margin-bottom:16px; }
+  .tab { padding:8px 16px; border-radius:8px; background:var(--panel); border:1px solid #262a33; cursor:pointer; color:var(--text); font-size:14px; }
+  .tab.active { background:var(--accent); border-color:var(--accent); color:#fff; }
+  textarea { width:100%; height:480px; background:var(--panel); color:var(--text); border:1px solid #262a33; border-radius:10px; padding:16px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size:13px; resize:vertical; }
+  .row { display:flex; gap:12px; margin-top:16px; align-items:center; }
+  button.primary { background:var(--accent); color:#fff; border:none; padding:12px 20px; border-radius:8px; font-size:14px; cursor:pointer; }
+  button.primary:disabled { opacity:0.5; cursor:default; }
+  button.secondary { background:transparent; color:var(--muted); border:1px solid #262a33; padding:12px 16px; border-radius:8px; cursor:pointer; }
+  #status { font-size:13px; color:var(--muted); }
+  #status.error { color:var(--err); white-space:pre-wrap; }
+  .hint { font-size:13px; color:var(--muted); margin-top:8px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Resume Engine</h1>
+  <p>Paste JSON matching your resume or cover-letter schema and download a PDF. Same engine used by the API.</p>
+</header>
+<main>
+  <div class="tabs">
+    <div class="tab active" data-kind="resume">Resume</div>
+    <div class="tab" data-kind="cover-letter">Cover Letter</div>
+  </div>
+  <textarea id="jsonInput" spellcheck="false"></textarea>
+  <div class="row">
+    <button class="primary" id="generateBtn">Generate PDF</button>
+    <button class="secondary" id="loadExampleBtn">Load example</button>
+    <span id="status"></span>
+  </div>
+  <p class="hint">This calls <code>POST /api/resume/pdf</code> or <code>/api/cover-letter/pdf</code> directly — the same endpoints any app or AI agent would use.</p>
+</main>
+<script>
+  const tabs = document.querySelectorAll('.tab');
+  const jsonInput = document.getElementById('jsonInput');
+  const statusEl = document.getElementById('status');
+  const generateBtn = document.getElementById('generateBtn');
+  const loadExampleBtn = document.getElementById('loadExampleBtn');
+  let kind = 'resume';
+
+  const examples = {
+    resume: {
+      name: "Jane Doe",
+      headline: "Backend Engineer",
+      contact: {
+        location: "Berlin, DE",
+        phone: "+49 000 000000",
+        email: "jane@example.com",
+        linkedin_display: "linkedin.com/in/janedoe",
+        linkedin_url: "https://linkedin.com/in/janedoe"
+      },
+      summary: "Backend engineer focused on distributed systems.",
+      experience: [
+        { title: "Software Engineer", company: "Acme", location: "Remote",
+          start: "2022", end: "Present", bullets: ["Built X", "Shipped Y"] }
+      ],
+      education: [
+        { degree: "B.Sc. Computer Science", institution: "TU Example",
+          location: "Berlin", start: "2018", end: "2022", details: [] }
+      ],
+      skills: [{ category: "Languages", items: ["Python", "Go"] }]
+    },
+    "cover-letter": {
+      applicant_name: "Jane Doe",
+      applicant_contact: {
+        location: "Berlin, DE",
+        phone: "+49 000 000000",
+        email: "jane@example.com",
+        linkedin_display: "linkedin.com/in/janedoe",
+        linkedin_url: "https://linkedin.com/in/janedoe"
+      },
+      date: "2026-08-25",
+      recipient: { company: "Acme Corp" },
+      role_title: "Backend Engineer",
+      body_paragraphs: ["I'm excited to apply for this role because..."]
+    }
+  };
+
+  function loadExample() {
+    jsonInput.value = JSON.stringify(examples[kind], null, 2);
+  }
+
+  tabs.forEach(t => t.addEventListener('click', () => {
+    tabs.forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    kind = t.dataset.kind;
+    loadExample();
+    statusEl.textContent = '';
+    statusEl.className = '';
+  }));
+
+  loadExampleBtn.addEventListener('click', loadExample);
+  loadExample();
+
+  generateBtn.addEventListener('click', async () => {
+    let payload;
+    try {
+      payload = JSON.parse(jsonInput.value);
+    } catch (e) {
+      statusEl.className = 'error';
+      statusEl.textContent = 'Invalid JSON: ' + e.message;
+      return;
+    }
+    generateBtn.disabled = true;
+    statusEl.className = '';
+    statusEl.textContent = 'Rendering PDF…';
+
+    const endpoint = kind === 'resume' ? '/api/resume/pdf' : '/api/cover-letter/pdf';
+    try {
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(JSON.stringify(err.detail ?? err, null, 2));
+      }
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = kind === 'resume' ? 'resume.pdf' : 'cover_letter.pdf';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      statusEl.textContent = 'Done.';
+    } catch (e) {
+      statusEl.className = 'error';
+      statusEl.textContent = e.message;
+    } finally {
+      generateBtn.disabled = false;
+    }
+  });
+</script>
+</body>
+</html>
