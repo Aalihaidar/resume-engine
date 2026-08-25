@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: resume-engine
+    runtime: docker
+    repo: https://github.com/<owner>/resume-engine
+    branch: main
+    dockerfilePath: ./docker/Dockerfile.prod
+    dockerContext: .
+    plan: free
+    autoDeployTrigger: commit
+    healthCheckPath: /healthz
+    envVars:
+      - key: PORT
+        value: 8000

@@ -5,17 +5,25 @@ Data-driven, ATS-safe CV and cover letter builder. Content lives in
 `src/resume_builder/templates/`. Edit the YAML (by hand, or via an AI
 agent), rebuild, get polished PDFs. No Word/Europass wrestling required.
 
+The same rendering pipeline is available three ways: the **CLI** (local,
+scriptable), a **JSON API** (for other apps or AI agents to call
+programmatically), and a **web form** (fill in JSON by hand, download a
+PDF) — all built from the same `Resume`/`CoverLetter` models and the same
+`render.py`, so there's exactly one source of truth for how a resume gets
+laid out.
+
 ## Why this structure
 
 - **Content/design separation** — an AI agent (or you) only ever edits
   `data/resume.yaml` or `data/cover_letter.yaml`, plain structured files.
   The HTML/CSS templates stay untouched, so formatting can never break from
   a bad edit.
-- **Validated data** — both YAML files are validated against Pydantic
-  schemas (`src/resume_builder/models.py`) before rendering, so a missing
-  field or wrong type fails the build loudly instead of corrupting the PDF
-  silently. A matching JSON Schema (`schema/resume.schema.json`) is
-  generated from the same models for editor autocomplete/validation.
+- **Validated data** — both YAML files, and every JSON payload sent to the
+  API, are validated against Pydantic schemas (`src/resume_builder/models.py`)
+  before rendering, so a missing field or wrong type fails loudly instead of
+  corrupting the PDF silently. A matching JSON Schema
+  (`schema/resume.schema.json`) is generated from the same models for editor
+  autocomplete/validation.
 - **Tailorable per application** — the resume's every section has a master
   on/off switch, and every entry (job, degree, skill group, cert, language)
   has its own `include` flag, so it can be tailored per job posting without
@@ -31,6 +39,9 @@ agent), rebuild, get polished PDFs. No Word/Europass wrestling required.
 - **CI-built PDFs** — push a change to `data/resume.yaml` or
   `data/cover_letter.yaml` and GitHub Actions rebuilds both `output/resume.pdf`
   and `output/cover_letter.pdf` automatically (see below).
+- **Programmatically accessible** — a FastAPI wrapper (`src/resume_builder/api.py`)
+  exposes the exact same pipeline as two JSON-in/PDF-out endpoints, so any
+  app or AI agent can generate a resume without shelling out to the CLI.
 
 ## Quick start (local, with uv)
 
@@ -88,35 +99,85 @@ docker compose run --rm app uv run resume-build render
 docker compose run --rm app uv run resume-build cover-letter
 ```
 
-## Production image
+## Web API & manual-fill site
+
+`src/resume_builder/api.py` is a FastAPI wrapper around the exact same
+`render_html` / `render_cover_letter_html` functions the CLI uses. It
+serves both a JSON API and a small static form, from one process:
+
+| Route | Method | Purpose |
+|---|---|---|
+| `/api/resume/pdf` | `POST` | Body: JSON matching `Resume` (see `schema/resume.schema.json`) → returns `application/pdf` |
+| `/api/cover-letter/pdf` | `POST` | Body: JSON matching `CoverLetter` → returns `application/pdf` |
+| `/healthz` | `GET` | Liveness check, used by the platform's health probe |
+| `/` | `GET` | Serves `web_static/index.html` — paste/edit JSON, click Generate, get a PDF download |
+
+Example call from any app or AI agent:
+
+```bash
+curl -X POST https://<your-deployment>/api/resume/pdf \
+  -H "Content-Type: application/json" \
+  -d @data/resume.json \
+  -o resume.pdf
+```
+
+A bad payload returns `422` with the Pydantic validation errors instead of
+a broken PDF — the same guarantee the CLI gives you locally.
+
+Run it locally:
+
+```bash
+uv run uvicorn resume_builder.api:app --reload --port 8000
+# open http://localhost:8000
+```
+
+### Deployment (Render, free tier)
+
+`docker/Dockerfile.prod` is the image deployed to Render — it serves the
+FastAPI app (API + web form) described above.
+
+Live at: `https://resume-engine.onrender.com` *(update once deployed)*
+
+**One-time setup:**
+
+1. `fastapi` and `uvicorn[standard]` are already in `pyproject.toml` —
+   run `uv lock` once so `uv.lock` matches.
+2. Push to GitHub.
+3. In the [Render dashboard](https://dashboard.render.com): **New → Blueprint**,
+   point it at this repo's `main` branch. Render reads `render.yaml` and
+   builds `docker/Dockerfile.prod` automatically — no manual service
+   configuration needed.
+4. Every push to `main` triggers an auto-deploy (`autoDeployTrigger: commit`
+   in `render.yaml`).
+
+**Notes:**
+
+- Free tier sleeps after 15 minutes of no traffic; the first request after
+  that takes ~30-60s to wake the container. Fine for personal/manual use or
+  an agent that can tolerate a slow first call — not meant for
+  latency-sensitive production traffic.
+- `/healthz` is wired as Render's health check path.
+- To move to a platform with faster cold starts later (e.g. Google Cloud
+  Run's free tier), the same `docker/Dockerfile.prod` works unchanged —
+  only the deploy command differs.
+
+## Docker images
 
 `docker/Dockerfile.dev` and `docker/Dockerfile.prod` are two separate,
 purpose-built images:
 
 | | `Dockerfile.dev` | `Dockerfile.prod` |
 |---|---|---|
-| Used by | VS Code Dev Container, `docker-compose.yml` | CI publish, `docker-compose.prod.yml` |
+| Used by | VS Code Dev Container, `docker-compose.yml` | Render, `docker-compose.prod.yml` |
 | User | root | non-root (`uid 1000`) |
-| Contains | compilers, git, ssh, `gh` CLI | only the render runtime |
-| Purpose | interactive local development | the artifact that actually ships |
+| Contains | compilers, git, ssh, `gh` CLI | only the API/web runtime |
+| Purpose | interactive local development | serves the live API + web form |
 
-The production image is what `.github/workflows/docker.yml` builds,
-SBOM/provenance-signs, Trivy-scans, and publishes to
-`ghcr.io/<owner>/resume-engine` on every merge to `main`.
-
-Run it locally without touching VS Code or `uv`:
+Run the production image locally without touching VS Code or `uv`:
 
 ```bash
-docker compose -f docker-compose.prod.yml run --rm resume-engine
-```
-
-or, once published:
-
-```bash
-docker run --rm \
-  -v "$(pwd)/data:/app/data:ro" \
-  -v "$(pwd)/output:/app/output" \
-  ghcr.io/<owner>/resume-engine:latest
+docker compose -f docker-compose.prod.yml up --build
+# open http://localhost:8000
 ```
 
 ## Editing your resume
@@ -178,8 +239,8 @@ Change something, rebuild, check `output/cover_letter.pdf`. Push to
 `schema/resume.schema.json` is a JSON Schema generated from the Pydantic
 models in `src/resume_builder/models.py` (covering both the `Resume` and
 `CoverLetter` models), useful for editor autocomplete and validating either
-YAML file outside of a full render. Regenerate it after changing
-`models.py`:
+YAML file outside of a full render. The API validates against the same
+models directly. Regenerate it after changing `models.py`:
 
 ```bash
 make schema   # or: uv run python scripts/generate_schema.py
@@ -214,6 +275,10 @@ workflow:
    to preview locally, or open a PR — CI will build fresh PDFs
    automatically so you can review before merging.
 
+An agent with network access can skip the CLI step entirely and call the
+deployed API directly with the edited JSON — see
+[Web API & manual-fill site](#web-api--manual-fill-site).
+
 ## Project layout
 
 ```
@@ -223,14 +288,15 @@ workflow:
 ├── .github/
 │   ├── workflows/
 │   │   ├── ci.yml                    # lint, typecheck, test, security, dockerfile scan
-│   │   ├── docker.yml                # build, scan & push production image to GHCR
 │   │   └── build-resume.yml          # render PDFs on data changes, commit back
 │   └── dependabot.yml
 ├── src/resume_builder/
 │   ├── models.py                     # Pydantic schema for resume.yaml + cover_letter.yaml
-│   ├── render.py                     # YAML -> HTML (Jinja2) -> PDF (WeasyPrint)
+│   ├── render.py                     # YAML/JSON -> HTML (Jinja2) -> PDF (WeasyPrint)
 │   ├── cli.py                        # `resume-build render / cover-letter ...`
+│   ├── api.py                        # FastAPI: JSON -> PDF endpoints + web form
 │   ├── templates/                    # resume.html.j2 + resume.css, cover_letter.html.j2 + cover_letter.css
+│   ├── web_static/                   # index.html served at `/` by api.py
 │   └── static/                       # optional photo lives here
 ├── data/
 │   ├── resume.yaml                   # <-- edit this
@@ -244,10 +310,11 @@ workflow:
 │   └── welcome.sh
 ├── docker/
 │   ├── Dockerfile.dev                # dev container image (VS Code / docker compose)
-│   └── Dockerfile.prod               # production image (published to GHCR)
+│   └── Dockerfile.prod               # production image — API + web form, deployed to Render
 ├── tests/test_render.py              # smoke tests for the render pipeline
 ├── output/                           # generated resume.pdf / resume.html / cover_letter.pdf / cover_letter.html
 ├── Makefile                          # shortcuts for common commands
+├── render.yaml                       # Render Blueprint for the API/web deployment
 ├── docker-compose.yml                # dev container service
 └── docker-compose.prod.yml           # run the production image locally
 ```

@@ -86,8 +86,8 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      # Production image — the one actually published to GHCR. Any
-      # CRITICAL/HIGH config finding here fails the build.
+      # Production image — the one deployed to Render. Any CRITICAL/HIGH
+      # config finding here fails the build.
       - name: Trivy config scan — Dockerfile.prod
         uses: aquasecurity/trivy-action@v0.36.0
         with:

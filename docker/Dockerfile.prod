@@ -1,5 +1,6 @@
 # docker/Dockerfile.prod
-# Production image: renders data/resume.yaml -> output/resume.pdf.
+# Production image: serves the FastAPI app (api.py) — JSON-in/PDF-out API
+# plus the manual-fill web form. This is the image deployed to Render.
 #
 # Multi-stage build:
 #   1. "builder" — has compilers/uv, resolves + installs dependencies and
@@ -9,8 +10,7 @@
 #      packages, no compilers, no git/ssh), and runs as a non-root user.
 #
 # Result: no build tools, no shell-access tooling, no root, small final
-# image. This is the image built/scanned/published by
-# .github/workflows/docker.yml.
+# image.
 
 # ---------- Stage 1: builder ----------
 FROM python:3.14-slim-bookworm AS builder
@@ -61,10 +61,13 @@ ENV PATH="/opt/venv/bin:${PATH}" \
 
 WORKDIR /app
 
-COPY --chown=app:app data ./data
-RUN mkdir -p output && chown app:app output
+# api.py and web_static/ are part of the resume_builder package itself
+# (src/resume_builder/), so they're already installed into /opt/venv by
+# the builder stage above — nothing extra to copy here.
 
 USER app
 
-ENTRYPOINT ["resume-build"]
-CMD ["render", "--data", "data/resume.yaml", "--out", "output/resume.pdf"]
+# Render/Cloud Run inject $PORT; default to 8000 for local runs.
+ENV PORT=8000
+EXPOSE 8000
+CMD ["sh", "-c", "uvicorn resume_builder.api:app --host 0.0.0.0 --port ${PORT}"]
