@@ -22,7 +22,11 @@ flipping booleans instead of deleting/re-adding content.
 
 from __future__ import annotations
 
-from pydantic import BaseModel, EmailStr, HttpUrl
+import re
+
+from pydantic import BaseModel, EmailStr, HttpUrl, model_validator
+
+_PLACEHOLDER_RE = re.compile(r"\[[A-Z][A-Z0-9 _-]*\]")
 
 
 class SectionToggles(BaseModel):
@@ -203,6 +207,32 @@ class CoverLetter(BaseModel):
     sections: CoverLetterSectionToggles = CoverLetterSectionToggles()
     body_paragraphs: list[str] = []
     closing: str = "Sincerely,"
+
+    @model_validator(mode="after")
+    def _no_leftover_placeholders(self) -> CoverLetter:
+        """Fail the build if a [BRACKET] template placeholder was never
+        filled in — e.g. role_title left as "[JOB TITLE]" or a recipient
+        company left as "[COMPANY NAME]". Without this, an unfilled
+        placeholder renders straight into the PDF silently.
+        """
+        candidates = {
+            "role_title": self.role_title,
+            "recipient.company": self.recipient.company,
+            "recipient.name": self.recipient.name,
+            "recipient.title": self.recipient.title,
+            "date": self.date,
+            **{f"body_paragraphs[{i}]": p for i, p in enumerate(self.body_paragraphs)},
+        }
+        offenders = [
+            field for field, value in candidates.items() if value and _PLACEHOLDER_RE.search(value)
+        ]
+        if offenders:
+            raise ValueError(
+                "Unfilled template placeholder(s) found in cover_letter.yaml: "
+                f"{', '.join(offenders)}. Replace the [BRACKETED] text with "
+                "real content before building."
+            )
+        return self
 
     @property
     def show_date(self) -> bool:

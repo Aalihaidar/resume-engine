@@ -35,6 +35,10 @@
   </div>
   {% endif %}
 
+  {% if letter.role_title %}
+  <p class="cl-re"><strong>Re: {{ letter.role_title }}</strong></p>
+  {% endif %}
+
   <p class="cl-salutation">{{ letter.salutation }}</p>
 
   {% for paragraph in letter.visible_body %}

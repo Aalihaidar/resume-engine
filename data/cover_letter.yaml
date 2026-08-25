@@ -1,28 +1,34 @@
 applicant_name: "Ali Haidar"
+
 applicant_contact:
   location: "Saint Petersburg, Russia"
   phone: "+7 (931) 585-08-58"
   email: "aalihaidar.1995@gmail.com"
   linkedin_display: "linkedin.com/in/alihaidar1995"
-  linkedin_url: "https://linkedin.com/in/alihaidar1995"
+  linkedin_url: "https://www.linkedin.com/in/alihaidar1995/"
   github_display: "github.com/Aalihaidar"
   github_url: "https://github.com/Aalihaidar"
 
-date: "[DATE]"
+sections:
+  date: true
+  recipient: true
+  body: true
+
+date: "Aug 15, 2026"
 
 recipient:
   name: null
   title: "Hiring Manager"
-  company: "[COMPANY NAME]"
+  company: "UNDP Digital, AI and Innovation Hub"
   company_address: null
 
-role_title: "[JOB TITLE]"
+role_title: "Digital, AI and Innovation Internship — Global Call for 2026 (Job ID 33001)"
 salutation: "Dear Hiring Manager,"
 
 body_paragraphs:
-  - "I'm writing to apply for the [JOB TITLE] role at [COMPANY NAME]. I hold an MSc (Honors) in Robotics and Artificial Intelligence from ITMO University, where my thesis explored real-time visual object tracking using deep learning, and I've since built on that foundation with hands-on AI/ML delivery experience spanning research, industry, and independent client work."
-  - "At IROS-System, I brought applied ML into an industrial CAD and manufacturing workflow, developing a cost-prediction regression model and a cosine-similarity-based part-matching system directly from BOM and assembly data. Alongside this, as a Freelance AI/ML Engineer, I designed and shipped an agentic RAG chatbot backend for a restaurant chain — built on FastAPI, LangGraph, and Weaviate Cloud, with production logging and observability through Arize Phoenix — and later adapted the same architecture for a gym client."
-  - "This is paired with over seven years in mechatronics and robotics: designing a high-precision Delta Linear Robot, supervising robotics capstone projects, and teaching CAD and automation to more than 100 students at HIAST. Together, this gives me range across the full stack of an AI/ML or hybrid AI-robotics role — from model development through to the production and physical systems those models ultimately need to run in."
-  - "I'd welcome the chance to discuss how this background could support [COMPANY NAME]'s goals in more detail. Thank you for your consideration — I look forward to the possibility of speaking further."
+  - "I am writing to apply for the Digital, AI and Innovation Internship with UNDP's DAI Hub, with particular interest in the Digital and AI Initiatives and Product Design, Development and Management workstreams. I hold an MSc (Honours) in Robotics and Artificial Intelligence from ITMO University, where my thesis examined real-time visual object tracking using deep learning, and I have since built hands-on delivery experience across applied AI/ML, computer vision, and industrial automation."
+  - "As a Freelance AI/ML Engineer, I designed and shipped an agentic RAG chatbot backend for a bilingual (Russian/English) restaurant chain, built on FastAPI, LangGraph, and Weaviate Cloud, with production logging and observability implemented through Arize Phoenix. I later adapted the same architecture for a gym client. At IROS-System, I brought applied machine learning into an industrial CAD workflow, developing a cost-prediction regression model and a cosine-similarity-based part-matching system directly from bill-of-materials and assembly data."
+  - "This technical grounding sits alongside eight years in mechatronics, robotics, and technical training: I designed a Delta Linear Robot with 0.1mm positioning accuracy, supervised robotics and mechatronics capstone projects, and taught CAD, industrial automation, and CAM to more than 100 students at HIAST in Damascus."
+  - "I am drawn to this internship specifically because it treats digital and AI capability as infrastructure for development outcomes rather than technology for its own sake, and I would welcome the opportunity to contribute that perspective to the DAI Hub's work. I am submitting my application through both the UNDP Careers portal and the accompanying Airtable form, and I would be glad to provide any further information."
 
 closing: "Sincerely,"
