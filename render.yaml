@@ -2,7 +2,7 @@ services:
   - type: web
     name: resume-engine
     runtime: docker
-    repo: https://github.com/<owner>/resume-engine
+    repo: https://github.com/Aalihaidar/resume-engine
     branch: main
     dockerfilePath: ./docker/Dockerfile.prod
     dockerContext: .
