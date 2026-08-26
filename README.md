@@ -63,6 +63,7 @@ uv run resume-build cover-letter --data data/cover_letter.yaml --out output/cove
 | `make typecheck` | `mypy --strict src` |
 | `make test` | `pytest` with coverage |
 | `make schema` | Regenerate `schema/resume.schema.json` from `models.py` |
+| `make serve-api` | Run the FastAPI app locally on `:8000` with auto-reload |
 | `make ci` | `lint` + `typecheck` + `test` — same checks CI runs |
 | `make clean` | Remove build output and tool caches |
 
@@ -86,7 +87,8 @@ curl -X POST https://resume-engine-sud4.onrender.com/api/resume/pdf \
 
 A bad payload returns `422` with the Pydantic validation errors.
 
-Run locally: `uv run uvicorn resume_builder.api:app --reload --port 8000`
+Run locally: `make serve-api` (or the **Serve API (dev)** VS Code task) —
+starts on `http://localhost:8000` with auto-reload.
 
 ## Deployment
 
@@ -112,10 +114,13 @@ docker compose -f docker-compose.prod.yml up --build   # http://localhost:8000
 
 ## Quick start (VS Code Dev Container)
 
-1. Open this folder in VS Code.
-2. Install the **Dev Containers** extension if you don't have it.
-3. `Cmd/Ctrl+Shift+P` → **Dev Containers: Reopen in Container**.
-4. Once inside: `uv run resume-build render` (and/or
+1. `cp .env.example .env` — required for `docker-compose.yml` to start at
+   all (Compose fails if the file it references doesn't exist), even
+   though nothing inside it needs to be filled in to build or render.
+2. Open this folder in VS Code.
+3. Install the **Dev Containers** extension if you don't have it.
+4. `Cmd/Ctrl+Shift+P` → **Dev Containers: Reopen in Container**.
+5. Once inside: `uv run resume-build render` (and/or
    `uv run resume-build cover-letter`).
 
 Your SSH agent and `~/.gitconfig` are forwarded into the container (see
@@ -125,11 +130,16 @@ container, no extra setup.
 
 `.vscode/tasks.json` wires Makefile targets into VS Code's task runner —
 default build task (`Ctrl+Shift+B`) is `make render`; default test task
-is `make test`; `Tasks: Run Task` lists the rest.
+is `make test`. **Serve API (dev)** (`Tasks: Run Task` → pick it) starts
+the FastAPI app on port `8000` with auto-reload; `forwardPorts` in
+`devcontainer.json` means VS Code shows it in the **Ports** tab
+automatically, no manual forwarding needed. `Tasks: Run Task` lists the
+rest (lint, format, typecheck, CI).
 
 ## Quick start (Docker Compose, no VS Code)
 
 ```bash
+cp .env.example .env   # same requirement as above
 docker compose run --rm app uv run resume-build render
 docker compose run --rm app uv run resume-build cover-letter
 ```
@@ -145,6 +155,14 @@ academic, freelance, or open-source work — `organization`, `bullets`,
 Section visibility: `sections:` is a master boolean per top-level
 section; every entry additionally carries its own `include: true|false`.
 An entry renders only when both are true.
+
+**Photo:** `photo` accepts two forms. For the CLI/local YAML workflow,
+it's a filename in `src/resume_builder/static/`. For the API and web
+form, it's a `data:image/...;base64,...` data URI embedded directly in
+the JSON — no server-side file needed, which matters since the deployed
+container has no persistent disk. The web form's **Set photo** button
+handles the base64 encoding automatically; an API caller just needs to
+base64-encode the image bytes into that field itself.
 
 `data/cover_letter.yaml` (start from `data/cover_letter.template.yaml`):
 `applicant_name`, `applicant_contact`, `date`, `recipient`, `role_title`,

@@ -23,7 +23,16 @@ def load_resume(data_path: Path) -> Resume:
 
 
 def render_html(resume: Resume, template_name: str = "resume.html.j2") -> str:
-    """Render the resume data into an HTML string using the Jinja2 template."""
+    """Render the resume data into an HTML string using the Jinja2 template.
+
+    `resume.photo` accepts two forms:
+      - a filename inside STATIC_DIR (the original CLI workflow — bake a
+        headshot into the image/repo, reference it by name)
+      - a `data:image/...;base64,...` URI (the API/web-form workflow — the
+        caller embeds the image bytes directly in the JSON payload, no
+        server-side file needed; this is what the web form's photo picker
+        produces)
+    """
     env = Environment(
         loader=FileSystemLoader(str(TEMPLATES_DIR)),
         autoescape=select_autoescape(["html", "j2"]),
@@ -32,9 +41,12 @@ def render_html(resume: Resume, template_name: str = "resume.html.j2") -> str:
 
     photo_path = None
     if resume.show_photo and resume.photo is not None:
-        candidate = STATIC_DIR / resume.photo
-        if candidate.exists():
-            photo_path = candidate.resolve().as_uri()
+        if resume.photo.startswith("data:image"):
+            photo_path = resume.photo
+        else:
+            candidate = STATIC_DIR / resume.photo
+            if candidate.exists():
+                photo_path = candidate.resolve().as_uri()
 
     return template.render(resume=resume, photo_path=photo_path)
 

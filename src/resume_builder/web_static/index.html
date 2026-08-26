@@ -5,51 +5,94 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Resume Engine</title>
 <style>
-  :root { --bg:#0f1115; --panel:#171a21; --text:#e6e8ec; --muted:#8a8f98; --accent:#5b8cff; --err:#ff6b6b; }
+  :root { --bg:#0f1115; --panel:#171a21; --text:#e6e8ec; --muted:#8a8f98; --accent:#5b8cff; --err:#ff6b6b; --ok:#4caf7d; }
   * { box-sizing: border-box; }
-  body { margin:0; font-family: -apple-system, Segoe UI, Roboto, sans-serif; background:var(--bg); color:var(--text); }
-  header { padding:24px 32px; border-bottom:1px solid #262a33; }
-  header h1 { margin:0; font-size:20px; }
-  header p { margin:6px 0 0; color:var(--muted); font-size:14px; }
-  main { max-width:960px; margin:0 auto; padding:24px 32px 64px; }
-  .tabs { display:flex; gap:8px; margin-bottom:16px; }
-  .tab { padding:8px 16px; border-radius:8px; background:var(--panel); border:1px solid #262a33; cursor:pointer; color:var(--text); font-size:14px; }
+  html, body { height: 100%; margin: 0; }
+  body { font-family: -apple-system, Segoe UI, Roboto, sans-serif; background:var(--bg); color:var(--text); display:flex; flex-direction:column; }
+  header { padding:16px 24px; border-bottom:1px solid #262a33; flex-shrink:0; }
+  header h1 { margin:0; font-size:18px; }
+  header p { margin:4px 0 0; color:var(--muted); font-size:13px; }
+  .tabs { display:flex; gap:8px; padding: 12px 24px 0; flex-shrink:0; }
+  .tab { padding:7px 14px; border-radius:8px; background:var(--panel); border:1px solid #262a33; cursor:pointer; color:var(--text); font-size:13px; }
   .tab.active { background:var(--accent); border-color:var(--accent); color:#fff; }
-  textarea { width:100%; height:480px; background:var(--panel); color:var(--text); border:1px solid #262a33; border-radius:10px; padding:16px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size:13px; resize:vertical; }
-  .row { display:flex; gap:12px; margin-top:16px; align-items:center; }
-  button.primary { background:var(--accent); color:#fff; border:none; padding:12px 20px; border-radius:8px; font-size:14px; cursor:pointer; }
-  button.primary:disabled { opacity:0.5; cursor:default; }
-  button.secondary { background:transparent; color:var(--muted); border:1px solid #262a33; padding:12px 16px; border-radius:8px; cursor:pointer; }
-  #status { font-size:13px; color:var(--muted); }
-  #status.error { color:var(--err); white-space:pre-wrap; }
-  .hint { font-size:13px; color:var(--muted); margin-top:8px; }
+  main { flex:1; display:flex; gap:16px; padding:16px 24px 24px; min-height:0; }
+  .pane { flex:1; display:flex; flex-direction:column; min-width:0; }
+  .pane-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+  .pane-header h2 { font-size:13px; margin:0; color:var(--muted); font-weight:600; text-transform:uppercase; letter-spacing:0.04em; }
+  textarea { flex:1; width:100%; background:var(--panel); color:var(--text); border:1px solid #262a33; border-radius:10px; padding:14px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size:12.5px; resize:none; line-height:1.5; }
+  #pdfPane { flex:1; background:var(--panel); border:1px solid #262a33; border-radius:10px; overflow:hidden; position:relative; display:flex; align-items:center; justify-content:center; }
+  #pdfFrame { width:100%; height:100%; border:none; background:#fff; }
+  #pdfPlaceholder { color:var(--muted); font-size:13px; text-align:center; padding:24px; }
+  #pdfOverlay { position:absolute; inset:0; background:rgba(15,17,21,0.55); display:none; align-items:center; justify-content:center; font-size:13px; color:var(--muted); }
+  #pdfOverlay.visible { display:flex; }
+  .row { display:flex; gap:10px; align-items:center; margin-top:4px; }
+  button.primary { background:var(--accent); color:#fff; border:none; padding:9px 16px; border-radius:8px; font-size:13px; cursor:pointer; }
+  button.primary:disabled { opacity:0.4; cursor:default; }
+  button.secondary { background:transparent; color:var(--muted); border:1px solid #262a33; padding:9px 14px; border-radius:8px; cursor:pointer; font-size:13px; }
+  #status { font-size:12.5px; color:var(--muted); }
+  #status.error { color:var(--err); }
+  #status.ok { color:var(--ok); }
+  .hint { font-size:12px; color:var(--muted); margin:0; }
+  @media (max-width: 760px) {
+    main { flex-direction:column; }
+  }
 </style>
 </head>
 <body>
 <header>
   <h1>Resume Engine</h1>
-  <p>Paste JSON matching your resume or cover-letter schema and download a PDF. Same engine used by the API.</p>
+  <p>Edit the JSON, watch the PDF update, download when it looks right.</p>
 </header>
+<div class="tabs">
+  <div class="tab active" data-kind="resume">Resume</div>
+  <div class="tab" data-kind="cover-letter">Cover Letter</div>
+</div>
 <main>
-  <div class="tabs">
-    <div class="tab active" data-kind="resume">Resume</div>
-    <div class="tab" data-kind="cover-letter">Cover Letter</div>
+  <div class="pane">
+    <div class="pane-header">
+      <h2>JSON</h2>
+      <div class="row" style="margin:0; gap:8px;">
+        <button class="secondary" id="loadExampleBtn">Load example</button>
+        <label class="secondary" id="photoLabel" style="display:none; cursor:pointer; margin:0;">
+          Set photo
+          <input type="file" id="photoInput" accept="image/png,image/jpeg,image/webp" style="display:none;" />
+        </label>
+      </div>
+    </div>
+    <textarea id="jsonInput" spellcheck="false"></textarea>
+    <div class="row">
+      <button class="primary" id="downloadBtn" disabled>Download PDF</button>
+      <span id="status"></span>
+    </div>
   </div>
-  <textarea id="jsonInput" spellcheck="false"></textarea>
-  <div class="row">
-    <button class="primary" id="generateBtn">Generate PDF</button>
-    <button class="secondary" id="loadExampleBtn">Load example</button>
-    <span id="status"></span>
+  <div class="pane">
+    <div class="pane-header">
+      <h2>Preview</h2>
+    </div>
+    <div id="pdfPane">
+      <div id="pdfPlaceholder">Start typing — the preview renders automatically.</div>
+      <iframe id="pdfFrame" style="display:none"></iframe>
+      <div id="pdfOverlay">Rendering…</div>
+    </div>
+    <p class="hint">Same endpoints any app or AI agent would call: <code>POST /api/resume/pdf</code> / <code>/api/cover-letter/pdf</code>.</p>
   </div>
-  <p class="hint">This calls <code>POST /api/resume/pdf</code> or <code>/api/cover-letter/pdf</code> directly — the same endpoints any app or AI agent would use.</p>
 </main>
 <script>
   const tabs = document.querySelectorAll('.tab');
   const jsonInput = document.getElementById('jsonInput');
   const statusEl = document.getElementById('status');
-  const generateBtn = document.getElementById('generateBtn');
+  const downloadBtn = document.getElementById('downloadBtn');
   const loadExampleBtn = document.getElementById('loadExampleBtn');
+  const photoLabel = document.getElementById('photoLabel');
+  const photoInput = document.getElementById('photoInput');
+  const pdfFrame = document.getElementById('pdfFrame');
+  const pdfPlaceholder = document.getElementById('pdfPlaceholder');
+  const pdfOverlay = document.getElementById('pdfOverlay');
+
   let kind = 'resume';
+  let currentBlobUrl = null;
+  let debounceTimer = null;
+  let requestSeq = 0;
 
   const examples = {
     resume: {
@@ -89,62 +132,147 @@
     }
   };
 
+  function endpointFor(k) {
+    return k === 'resume' ? '/api/resume/pdf' : '/api/cover-letter/pdf';
+  }
+
+  function setStatus(text, cls) {
+    statusEl.textContent = text;
+    statusEl.className = cls || '';
+  }
+
+  function showOverlay(show) {
+    pdfOverlay.classList.toggle('visible', show);
+  }
+
   function loadExample() {
     jsonInput.value = JSON.stringify(examples[kind], null, 2);
+    scheduleRender(0);
   }
 
   tabs.forEach(t => t.addEventListener('click', () => {
     tabs.forEach(x => x.classList.remove('active'));
     t.classList.add('active');
     kind = t.dataset.kind;
+    photoLabel.style.display = kind === 'resume' ? 'block' : 'none';
+    resetPreview();
     loadExample();
-    statusEl.textContent = '';
-    statusEl.className = '';
   }));
 
   loadExampleBtn.addEventListener('click', loadExample);
-  loadExample();
 
-  generateBtn.addEventListener('click', async () => {
-    let payload;
-    try {
-      payload = JSON.parse(jsonInput.value);
-    } catch (e) {
-      statusEl.className = 'error';
-      statusEl.textContent = 'Invalid JSON: ' + e.message;
+  photoInput.addEventListener('change', () => {
+    const file = photoInput.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      let payload;
+      try {
+        payload = JSON.parse(jsonInput.value || '{}');
+      } catch (e) {
+        setStatus('Fix the JSON syntax error before setting a photo: ' + e.message, 'error');
+        return;
+      }
+      payload.photo = reader.result; // data:image/...;base64,... — render.py accepts this directly
+      jsonInput.value = JSON.stringify(payload, null, 2);
+      scheduleRender(0);
+    };
+    reader.onerror = () => setStatus('Could not read that image file', 'error');
+    reader.readAsDataURL(file);
+    photoInput.value = ''; // allow re-selecting the same file later
+  });
+
+  function resetPreview() {
+    if (currentBlobUrl) {
+      URL.revokeObjectURL(currentBlobUrl);
+      currentBlobUrl = null;
+    }
+    pdfFrame.style.display = 'none';
+    pdfFrame.src = '';
+    pdfPlaceholder.style.display = 'flex';
+    downloadBtn.disabled = true;
+    setStatus('');
+  }
+
+  jsonInput.addEventListener('input', () => scheduleRender(700));
+
+  function scheduleRender(delayMs) {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(renderPreview, delayMs);
+  }
+
+  async function renderPreview() {
+    const raw = jsonInput.value.trim();
+    if (!raw) {
+      resetPreview();
       return;
     }
-    generateBtn.disabled = true;
-    statusEl.className = '';
-    statusEl.textContent = 'Rendering PDF…';
 
-    const endpoint = kind === 'resume' ? '/api/resume/pdf' : '/api/cover-letter/pdf';
+    let payload;
     try {
-      const res = await fetch(endpoint, {
+      payload = JSON.parse(raw);
+    } catch (e) {
+      setStatus('Invalid JSON: ' + e.message, 'error');
+      downloadBtn.disabled = true;
+      return;
+    }
+
+    const seq = ++requestSeq;
+    showOverlay(true);
+    setStatus('Rendering…');
+
+    try {
+      const res = await fetch(endpointFor(kind), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
+
+      if (seq !== requestSeq) return; // a newer request superseded this one
+
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
-        throw new Error(JSON.stringify(err.detail ?? err, null, 2));
+        const detail = Array.isArray(err.detail)
+          ? err.detail.map(d => `${(d.loc || []).join('.')}: ${d.msg}`).join('\n')
+          : JSON.stringify(err.detail ?? err);
+        setStatus(detail || 'Render failed', 'error');
+        downloadBtn.disabled = true;
+        showOverlay(false);
+        return;
       }
+
       const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = kind === 'resume' ? 'resume.pdf' : 'cover_letter.pdf';
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      statusEl.textContent = 'Done.';
+      if (seq !== requestSeq) return;
+
+      if (currentBlobUrl) URL.revokeObjectURL(currentBlobUrl);
+      currentBlobUrl = URL.createObjectURL(blob);
+      pdfFrame.src = currentBlobUrl;
+      pdfFrame.style.display = 'block';
+      pdfPlaceholder.style.display = 'none';
+      downloadBtn.disabled = false;
+      setStatus('Up to date', 'ok');
     } catch (e) {
-      statusEl.className = 'error';
-      statusEl.textContent = e.message;
+      if (seq !== requestSeq) return;
+      setStatus(e.message, 'error');
+      downloadBtn.disabled = true;
     } finally {
-      generateBtn.disabled = false;
+      if (seq === requestSeq) showOverlay(false);
     }
+  }
+
+  downloadBtn.addEventListener('click', () => {
+    if (!currentBlobUrl) return;
+    const a = document.createElement('a');
+    a.href = currentBlobUrl;
+    a.download = kind === 'resume' ? 'resume.pdf' : 'cover_letter.pdf';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
   });
+
+  photoLabel.style.display = kind === 'resume' ? 'block' : 'none';
+  loadExample();
 </script>
 </body>
 </html>

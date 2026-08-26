@@ -1,4 +1,4 @@
-.PHONY: render render-html cover-letter cover-letter-html lint format typecheck test schema repomix ci clean
+.PHONY: render render-html cover-letter cover-letter-html lint format typecheck test schema serve-api repomix ci clean
 
 render:
 	uv run resume-build render --data data/resume.yaml --out output/resume.pdf
@@ -28,6 +28,9 @@ test:
 
 schema:
 	uv run python scripts/generate_schema.py
+
+serve-api:
+	uv run uvicorn resume_builder.api:app --host 0.0.0.0 --port 8000 --reload
 
 repomix:
 	npx --yes repomix@latest
