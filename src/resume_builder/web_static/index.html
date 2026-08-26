@@ -1,87 +1,235 @@
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html>
+<html class="dark" lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>Resume Engine</title>
-<style>
-  :root { --bg:#0f1115; --panel:#171a21; --text:#e6e8ec; --muted:#8a8f98; --accent:#5b8cff; --err:#ff6b6b; --ok:#4caf7d; }
-  * { box-sizing: border-box; }
-  html, body { height: 100%; margin: 0; }
-  body { font-family: -apple-system, Segoe UI, Roboto, sans-serif; background:var(--bg); color:var(--text); display:flex; flex-direction:column; }
-  header { padding:16px 24px; border-bottom:1px solid #262a33; flex-shrink:0; }
-  header h1 { margin:0; font-size:18px; }
-  header p { margin:4px 0 0; color:var(--muted); font-size:13px; }
-  .tabs { display:flex; gap:8px; padding: 12px 24px 0; flex-shrink:0; }
-  .tab { padding:7px 14px; border-radius:8px; background:var(--panel); border:1px solid #262a33; cursor:pointer; color:var(--text); font-size:13px; }
-  .tab.active { background:var(--accent); border-color:var(--accent); color:#fff; }
-  main { flex:1; display:flex; gap:16px; padding:16px 24px 24px; min-height:0; }
-  .pane { flex:1; display:flex; flex-direction:column; min-width:0; }
-  .pane-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
-  .pane-header h2 { font-size:13px; margin:0; color:var(--muted); font-weight:600; text-transform:uppercase; letter-spacing:0.04em; }
-  textarea { flex:1; width:100%; background:var(--panel); color:var(--text); border:1px solid #262a33; border-radius:10px; padding:14px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size:12.5px; resize:none; line-height:1.5; }
-  #pdfPane { flex:1; background:var(--panel); border:1px solid #262a33; border-radius:10px; overflow:hidden; position:relative; display:flex; align-items:center; justify-content:center; }
-  #pdfFrame { width:100%; height:100%; border:none; background:#fff; }
-  #pdfPlaceholder { color:var(--muted); font-size:13px; text-align:center; padding:24px; }
-  #pdfOverlay { position:absolute; inset:0; background:rgba(15,17,21,0.55); display:none; align-items:center; justify-content:center; font-size:13px; color:var(--muted); }
-  #pdfOverlay.visible { display:flex; }
-  .row { display:flex; gap:10px; align-items:center; margin-top:4px; }
-  button.primary { background:var(--accent); color:#fff; border:none; padding:9px 16px; border-radius:8px; font-size:13px; cursor:pointer; }
-  button.primary:disabled { opacity:0.4; cursor:default; }
-  button.secondary { background:transparent; color:var(--muted); border:1px solid #262a33; padding:9px 14px; border-radius:8px; cursor:pointer; font-size:13px; }
-  button.secondary:hover { border-color:#3a3f4a; }
-  #status { font-size:12.5px; color:var(--muted); white-space:pre-wrap; }
-  #status.error { color:var(--err); }
-  #status.ok { color:var(--ok); }
-  .hint { font-size:12px; color:var(--muted); margin:0; }
-  #photoStatus { display:none; font-size:12px; color:var(--ok); margin:0 0 8px; }
-  #photoStatus.error { color:var(--err); }
-  @media (max-width: 760px) {
-    main { flex-direction:column; }
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+                "inverse-primary": "#006b5d",
+                "text-on-surface": "#d4e4fa",
+                "error": "#ffb4ab",
+                "on-secondary-container": "#00463d",
+                "on-primary-fixed-variant": "#005045",
+                "secondary-fixed-dim": "#47dcc4",
+                "glass-border": "rgba(255, 255, 255, 0.1)",
+                "on-tertiary-fixed-variant": "#723522",
+                "tertiary": "#ffb5a0",
+                "surface": "#051424",
+                "surface-container-highest": "#283647",
+                "on-error-container": "#ffdad6",
+                "teal-primary": "#016b5d",
+                "on-surface-variant": "#bec9c5",
+                "surface-variant": "#283647",
+                "on-tertiary-fixed": "#3a0b01",
+                "primary-container": "#016b5d",
+                "surface-container": "#122031",
+                "on-primary": "#00382f",
+                "outline": "#88938f",
+                "surface-container-high": "#1d2b3c",
+                "on-secondary": "#003730",
+                "tertiary-fixed-dim": "#ffb5a0",
+                "surface-dim": "#051424",
+                "surface-bright": "#2c3a4c",
+                "primary-fixed": "#9ff2e0",
+                "inverse-on-surface": "#233143",
+                "on-tertiary-container": "#ffcfc1",
+                "surface-container-lowest": "#010f1f",
+                "on-secondary-fixed-variant": "#005046",
+                "obsidian-base": "#051424",
+                "background": "#051424",
+                "on-tertiary": "#561f0f",
+                "outline-variant": "#3e4946",
+                "on-surface": "#d5e4fa",
+                "tertiary-container": "#904c38",
+                "on-primary-container": "#95e8d6",
+                "inverse-surface": "#d5e4fa",
+                "error-container": "#93000a",
+                "surface-tint": "#83d6c4",
+                "on-secondary-fixed": "#00201b",
+                "secondary-container": "#07bda6",
+                "primary-fixed-dim": "#83d6c4",
+                "surface-container-low": "#0e1c2d",
+                "on-error": "#690005",
+                "on-background": "#d5e4fa",
+                "secondary-fixed": "#6af9e0",
+                "tertiary-fixed": "#ffdbd1",
+                "secondary": "#47dcc4",
+                "primary": "#83d6c4",
+                "on-primary-fixed": "#00201b",
+                "emerald-accent": "#0fbfa8"
+        },
+        "borderRadius": {
+                "DEFAULT": "0.125rem",
+                "lg": "0.25rem",
+                "xl": "0.5rem",
+                "full": "0.75rem"
+        },
+        "spacing": {
+                "margin-desktop": "64px",
+                "unit": "4px",
+                "pane-preview": "55%",
+                "gutter-md": "24px",
+                "pane-editor": "45%",
+                "margin-mobile": "16px",
+                "gutter": "24px",
+                "editor-width": "45%",
+                "preview-width": "55%"
+        },
+        "fontFamily": {
+                "headline-md-mobile": ["Geist"],
+                "display-lg": ["Geist"],
+                "code-sm": ["JetBrains Mono"],
+                "headline-md": ["Geist"],
+                "label-xs": ["JetBrains Mono"],
+                "body-lg": ["Geist"],
+                "body-md": ["Geist"]
+        },
+        "fontSize": {
+                "headline-md-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                "code-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                "headline-md": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                "label-xs": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500" }],
+                "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }]
+        }
+      },
+    },
   }
+</script>
+<style>
+  body { font-family: 'Geist', sans-serif; }
+  .code-font { font-family: 'JetBrains Mono', monospace; }
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #283647; border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: #0fbfa8; }
+
+  .glass-panel {
+      background: rgba(15, 23, 42, 0.8);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+  }
+
+  /* -- interactive states driven by JS class toggles -- */
+  .tab {
+    padding: 6px 16px;
+    border-radius: 0.125rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    line-height: 20px;
+    font-weight: 500;
+    color: #bec9c5;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: background .15s ease, color .15s ease;
+  }
+  .tab:hover { background: rgba(255,255,255,0.05); color: #d5e4fa; }
+  .tab.active { background: #016b5d; color: #95e8d6; }
+
+  #status {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.05em;
+    padding: 4px 10px;
+    border-radius: 0.125rem;
+    color: #bec9c5;
+    background: rgba(190,201,197,0.06);
+    border: 1px solid rgba(190,201,197,0.12);
+  }
+  #status.ok { color: #83d6c4; background: rgba(131,214,196,0.1); border-color: rgba(131,214,196,0.25); }
+  #status.error { color: #ffb4ab; background: rgba(255,180,171,0.1); border-color: rgba(255,180,171,0.25); }
+  #status:empty { display: none; }
+
+
+  #pdfOverlay { display: none; }
+  #pdfOverlay.visible { display: flex; }
+
+  #yamlInput { caret-color: #83d6c4; }
+  #yamlInput::placeholder { color: #3e4946; }
+
+  #lineNumbers { white-space: pre; }
 </style>
 </head>
-<body>
-<header>
-  <h1>Resume Engine</h1>
-  <p>Edit the YAML, watch the PDF update, download when it looks right.</p>
-</header>
-<div class="tabs">
-  <div class="tab active" data-kind="resume">Resume</div>
-  <div class="tab" data-kind="cover-letter">Cover Letter</div>
-</div>
-<main>
-  <div class="pane">
-    <div class="pane-header">
-      <h2>YAML</h2>
-      <div class="row" style="margin:0; gap:8px;">
-        <button class="secondary" id="loadExampleBtn">Load template</button>
-        <label class="secondary" id="photoLabel" style="display:none; cursor:pointer; margin:0;">
-          Set photo
-          <input type="file" id="photoInput" accept="image/png,image/jpeg,image/webp" style="display:none;" />
+<body class="bg-background text-on-surface h-screen flex flex-col overflow-hidden">
+<!-- TopNavBar -->
+<nav class="bg-surface-container/80 backdrop-blur-xl border-b border-white/10 flex justify-between items-center px-gutter py-unit h-16 w-full flex-shrink-0">
+  <div class="flex items-center gap-4">
+    <div class="text-body-lg font-display-lg font-bold tracking-tighter text-on-surface">
+      Resume Engine
+    </div>
+    <div class="hidden md:flex gap-2 ml-8" role="tablist">
+      <button type="button" class="tab active" data-kind="resume" role="tab" aria-selected="true">Resume</button>
+      <button type="button" class="tab" data-kind="cover-letter" role="tab" aria-selected="false">Cover Letter</button>
+    </div>
+  </div>
+  <button type="button" id="downloadBtn" disabled class="bg-primary hover:bg-primary-container text-on-primary disabled:opacity-40 disabled:cursor-default disabled:hover:bg-primary font-bold py-1.5 px-6 rounded transition-colors text-body-md font-body-md flex items-center gap-2 border-t border-white/30">
+    <span class="material-symbols-outlined text-[18px]">download</span>Download PDF
+  </button>
+</nav>
+
+<!-- Main Workspace Split -->
+<main class="flex-1 flex flex-col md:flex-row overflow-hidden relative p-gutter gap-gutter bg-surface">
+
+  <!-- Engine / Code Editor (Left) -->
+  <section class="w-full md:w-1/2 h-full flex flex-col glass-panel rounded-xl overflow-hidden relative">
+    <div class="flex justify-between items-center px-4 py-2 h-11 border-b border-white/5 bg-surface-container-low flex-shrink-0">
+      <div class="flex items-center gap-3">
+        <span class="text-label-xs font-label-xs text-on-surface-variant uppercase tracking-wider">YAML</span>
+        <label id="photoLabel" style="display:none;" class="text-primary hover:bg-white/5 transition-colors px-3 py-1 rounded text-label-xs font-label-xs border border-primary/30 uppercase cursor-pointer">
+          Set Photo
+          <input type="file" id="photoInput" accept="image/png,image/jpeg,image/webp" class="hidden" />
         </label>
-        <button class="secondary" id="removePhotoBtn" style="display:none;">Remove photo</button>
+        <button type="button" id="removePhotoBtn" style="display:none;" class="text-on-surface-variant hover:text-error hover:border-error/40 transition-colors px-3 py-1 rounded text-label-xs font-label-xs border border-outline-variant uppercase">
+          Remove
+        </button>
+      </div>
+      <button type="button" id="loadExampleBtn" class="text-label-xs font-label-xs text-on-surface hover:text-primary transition-colors border border-outline-variant px-3 py-1 rounded">
+        Load template
+      </button>
+    </div>
+    <div class="flex-1 flex overflow-hidden bg-[#020617] relative">
+      <div id="lineNumbers" class="w-12 flex-shrink-0 py-4 px-2 text-right bg-surface-container-lowest border-r border-white/5 text-on-surface-variant/40 code-font text-code-sm select-none overflow-hidden">1</div>
+      <textarea id="yamlInput" spellcheck="false" class="flex-1 h-full resize-none bg-transparent text-tertiary code-font text-code-sm leading-relaxed p-4 outline-none overflow-auto"></textarea>
+    </div>
+  </section>
+
+  <!-- Output / Preview (Right) -->
+  <section class="w-full md:w-1/2 h-full flex flex-col glass-panel rounded-xl overflow-hidden relative">
+    <div class="flex justify-between items-center px-4 py-2 h-11 border-b border-white/5 bg-surface-container-low flex-shrink-0">
+      <span class="text-label-xs font-label-xs text-on-surface-variant uppercase tracking-wider">Preview</span>
+    </div>
+    <div id="pdfPane" class="flex-1 relative bg-white overflow-hidden">
+      <div id="pdfPlaceholder" class="absolute inset-0 flex items-center justify-center text-center text-gray-400 text-body-md font-body-md p-10">
+        Start typing — the preview renders automatically.
+      </div>
+      <iframe id="pdfFrame" style="display:none;" class="w-full h-full border-0"></iframe>
+      <div id="pdfOverlay" class="absolute inset-0 items-center justify-center bg-black/50 backdrop-blur-sm text-white text-label-xs font-label-xs">
+        Rendering…
       </div>
     </div>
-    <p id="photoStatus"></p>
-    <textarea id="yamlInput" spellcheck="false"></textarea>
-    <div class="row">
-      <button class="primary" id="downloadBtn" disabled>Download PDF</button>
-      <span id="status"></span>
-    </div>
-  </div>
-  <div class="pane">
-    <div class="pane-header">
-      <h2>Preview</h2>
-    </div>
-    <div id="pdfPane">
-      <div id="pdfPlaceholder">Start typing — the preview renders automatically.</div>
-      <iframe id="pdfFrame" style="display:none"></iframe>
-      <div id="pdfOverlay">Rendering…</div>
-    </div>
-    <p class="hint">Edits happen in YAML (same shape as data/resume.template.yaml); this is converted to JSON in the browser before hitting the same endpoints any app or AI agent would call: <code>POST /api/resume/pdf</code> / <code>/api/cover-letter/pdf</code>.</p>
-  </div>
+  </section>
 </main>
+
+<!-- Footer -->
+<footer class="bg-surface-container-lowest/90 backdrop-blur-md border-t border-white/5 flex justify-between items-center px-gutter py-2 h-12 flex-shrink-0">
+  <div class="flex items-center gap-4">
+    <span id="status"></span>
+  </div>
+  <div class="text-label-xs font-label-xs text-on-surface-variant flex items-center gap-4">
+    <span>Resume Engine © 2026</span>
+  </div>
+</footer>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
 <script>
   const tabs = document.querySelectorAll('.tab');
@@ -92,7 +240,6 @@
   const photoLabel = document.getElementById('photoLabel');
   const photoInput = document.getElementById('photoInput');
   const removePhotoBtn = document.getElementById('removePhotoBtn');
-  const photoStatusEl = document.getElementById('photoStatus');
   const pdfFrame = document.getElementById('pdfFrame');
   const pdfPlaceholder = document.getElementById('pdfPlaceholder');
   const pdfOverlay = document.getElementById('pdfOverlay');
@@ -127,7 +274,7 @@ sections:
   skills: true
   certifications: true
   languages: true
-  photo: true
+  photo: false
 
 contact:
   location: "Berlin, Germany"
@@ -137,8 +284,6 @@ contact:
   linkedin_url: "https://www.linkedin.com/in/janedoe/"
   github_display: "github.com/janedoe"
   github_url: "https://github.com/janedoe"
-
-photo: headshot.jpg
 
 summary: >
   One-paragraph, 3-5 sentence overview: your role, years of experience,
@@ -295,14 +440,8 @@ closing: "Sincerely,"
 
   function updatePhotoStatus() {
     if (currentPhotoDataUrl) {
-      const base64Len = currentPhotoDataUrl.length - currentPhotoDataUrl.indexOf(',') - 1;
-      const approxKb = Math.round((base64Len * 0.75) / 1024);
-      photoStatusEl.textContent = `📎 ${currentPhotoName} attached (~${approxKb}KB after compression) — included on render`;
-      photoStatusEl.className = '';
-      photoStatusEl.style.display = 'block';
       removePhotoBtn.style.display = 'inline-block';
     } else {
-      photoStatusEl.style.display = 'none';
       removePhotoBtn.style.display = 'none';
     }
   }
@@ -434,8 +573,11 @@ closing: "Sincerely,"
     // Photo is merged in here, right before sending — it never lives in the
     // YAML text itself, so it doesn't get re-parsed/re-typed by the user
     // and doesn't bloat every debounced request beyond what changed.
+    // Also force sections.photo on, since the default template ships with
+    // it off (no-photo-by-default) and an uploaded photo should always show.
     if (kind === 'resume' && currentPhotoDataUrl) {
       payload.photo = currentPhotoDataUrl;
+      payload.sections = { ...(payload.sections || {}), photo: true };
     }
 
     const seq = ++requestSeq;
@@ -453,10 +595,17 @@ closing: "Sincerely,"
 
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
-        const detail = Array.isArray(err.detail)
-          ? err.detail.map(d => `${(d.loc || []).join('.')}: ${d.msg}`).join('\n')
-          : JSON.stringify(err.detail ?? err);
-        setStatus(detail || 'Render failed', 'error');
+        let detail;
+        if (Array.isArray(err.detail)) {
+          detail = err.detail.map(d => `${(d.loc || []).join('.')}: ${d.msg}`).join('\n');
+        } else if (err.detail) {
+          detail = typeof err.detail === 'string' ? err.detail : JSON.stringify(err.detail);
+        } else if (Object.keys(err).length > 0) {
+          detail = JSON.stringify(err);
+        } else {
+          detail = '';
+        }
+        setStatus(detail || `Render failed (${res.status})`, 'error');
         downloadBtn.disabled = true;
         showOverlay(false);
         return;
@@ -493,6 +642,20 @@ closing: "Sincerely,"
 
   photoLabel.style.display = kind === 'resume' ? 'block' : 'none';
   loadTemplate();
+
+  // --- Line-number gutter (visual only, additive; does not touch existing logic) ---
+  const lineNumbersEl = document.getElementById('lineNumbers');
+  function updateLineNumbers() {
+    if (!lineNumbersEl) return;
+    const count = yamlInput.value.split('\n').length;
+    let out = '';
+    for (let i = 1; i <= count; i++) out += i + '\n';
+    lineNumbersEl.textContent = out;
+  }
+  yamlInput.addEventListener('input', updateLineNumbers);
+  yamlInput.addEventListener('scroll', () => { lineNumbersEl.scrollTop = yamlInput.scrollTop; });
+  updateLineNumbers();
+
 </script>
 </body>
 </html>
