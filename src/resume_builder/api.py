@@ -10,10 +10,18 @@ Endpoints:
   POST /api/resume/pdf         body: Resume JSON      -> returns application/pdf
   POST /api/cover-letter/pdf   body: CoverLetter JSON  -> returns application/pdf
   GET  /healthz                -> {"status": "ok"}
-  GET  /                        -> serves static/index.html (manual JSON-fill UI)
+  GET  /                        -> serves static/index.html (manual YAML-fill UI;
+                                    converts to JSON client-side before posting)
 
 Any app or AI agent can call the two POST endpoints directly with a JSON
 body matching schema/resume.schema.json — no auth, no YAML step.
+
+Since there's no auth, MaxBodySizeMiddleware (middleware.py) caps request
+size before Pydantic validation ever runs, and Resume.photo itself is
+validated in models.py (MIME type, decoded size, and — for the filename
+form — that it can't reference anything outside the static images
+directory). See render.py's `_resolve_photo_path` for the second,
+independent containment check on the filename form.
 """
 
 from __future__ import annotations
@@ -27,6 +35,7 @@ from fastapi.responses import HTMLResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import ValidationError
 
+from resume_builder.middleware import MAX_BODY_BYTES, MaxBodySizeMiddleware
 from resume_builder.models import CoverLetter, Resume
 from resume_builder.render import render_cover_letter_html, render_html
 
@@ -38,6 +47,8 @@ app = FastAPI(
     description="POST a resume or cover letter as JSON, get back a PDF.",
     version="1.0.0",
 )
+
+app.add_middleware(MaxBodySizeMiddleware, max_bytes=MAX_BODY_BYTES)
 
 
 def _pdf_response(html_content: str, filename: str) -> StreamingResponse:
