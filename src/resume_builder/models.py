@@ -18,15 +18,36 @@ something to render):
 
 This lets an AI agent (or you) tailor a resume per job application by
 flipping booleans instead of deleting/re-adding content.
+
+Photo validation
+-----------------
+`Resume.photo` accepts two forms (see render.py for how each is resolved):
+  - a `data:image/{png,jpeg,webp};base64,...` URI — validated here for MIME
+    type, size, and that the payload is actually well-formed base64, since
+    this is a no-auth public endpoint (api.py) and nothing else stops a
+    caller from POSTing an oversized or malformed value.
+  - a plain filename referencing an image inside STATIC_DIR (the original
+    CLI workflow) — validated here to reject path separators and '..' so it
+    can never be used to reference a file outside STATIC_DIR. render.py
+    re-derives the basename and re-checks containment independently, so this
+    stays safe even if a Resume is ever constructed without going through
+    this validator.
 """
 
 from __future__ import annotations
 
+import base64
 import re
 
-from pydantic import BaseModel, EmailStr, HttpUrl, model_validator
+from pydantic import BaseModel, EmailStr, HttpUrl, field_validator, model_validator
 
 _PLACEHOLDER_RE = re.compile(r"\[[A-Z][A-Z0-9 _-]*\]")
+
+# --- Photo constraints -------------------------------------------------
+# Applied in Resume._validate_photo below.
+_DATA_URI_RE = re.compile(r"^data:image/(png|jpeg|jpg|webp);base64,")
+MAX_PHOTO_DECODED_BYTES = 3 * 1024 * 1024  # 3MB decoded image
+MAX_PHOTO_FILENAME_LEN = 255
 
 
 class SectionToggles(BaseModel):
@@ -131,6 +152,58 @@ class Resume(BaseModel):
     skills: list[SkillGroup] = []
     certifications: list[Certification] = []
     languages: list[Language] = []
+
+    @field_validator("photo")
+    @classmethod
+    def _validate_photo(cls, v: str | None) -> str | None:
+        if v is None or v == "":
+            return v
+
+        if v.startswith("data:image"):
+            match = _DATA_URI_RE.match(v)
+            if not match:
+                raise ValueError(
+                    "photo data URI must start with one of: "
+                    "data:image/png;base64,  data:image/jpeg;base64,  "
+                    "data:image/webp;base64,"
+                )
+
+            b64_data = v[match.end() :]
+
+            # Base64 expands data by ~4/3 — reject on the *encoded* length
+            # first (cheap, no decode) so an oversized payload never gets
+            # fully decoded just to be rejected.
+            approx_decoded_bytes = len(b64_data) * 3 // 4
+            if approx_decoded_bytes > MAX_PHOTO_DECODED_BYTES:
+                raise ValueError(
+                    f"photo is too large (~{approx_decoded_bytes / 1024 / 1024:.1f}MB "
+                    f"decoded, max {MAX_PHOTO_DECODED_BYTES / 1024 / 1024:.0f}MB). "
+                    "Compress or downscale it before submitting."
+                )
+
+            # Confirms the payload is actually well-formed base64 — catches a
+            # truncated/corrupt data URI here, with a clear error, instead of
+            # failing deep inside WeasyPrint mid-render.
+            try:
+                base64.b64decode(b64_data, validate=True)
+            except Exception as exc:
+                raise ValueError("photo data URI is not valid base64") from exc
+
+            return v
+
+        # Otherwise this is a plain filename referencing an image inside
+        # STATIC_DIR (the CLI workflow) — never a path. Reject anything that
+        # could traverse outside STATIC_DIR; render.py independently
+        # re-derives the basename and re-checks containment too.
+        if len(v) > MAX_PHOTO_FILENAME_LEN:
+            raise ValueError(f"photo filename is too long (max {MAX_PHOTO_FILENAME_LEN} chars)")
+        if "/" in v or "\\" in v or v in {".", ".."}:
+            raise ValueError(
+                "photo must be a data:image/... URI or a plain filename with no "
+                "path separators or '..' (it's resolved inside the app's static "
+                "images directory, not an arbitrary path)"
+            )
+        return v
 
     # --- Visibility helpers -------------------------------------------------
     # Centralizing the "section on AND entry included" logic here keeps the

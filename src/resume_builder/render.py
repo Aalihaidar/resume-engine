@@ -22,17 +22,44 @@ def load_resume(data_path: Path) -> Resume:
     return Resume.model_validate(raw)
 
 
-def render_html(resume: Resume, template_name: str = "resume.html.j2") -> str:
-    """Render the resume data into an HTML string using the Jinja2 template.
+def _resolve_photo_path(photo: str) -> str | None:
+    """Resolve `Resume.photo` into something usable as an <img src="...">.
 
-    `resume.photo` accepts two forms:
-      - a filename inside STATIC_DIR (the original CLI workflow — bake a
-        headshot into the image/repo, reference it by name)
+    Accepts two forms:
       - a `data:image/...;base64,...` URI (the API/web-form workflow — the
         caller embeds the image bytes directly in the JSON payload, no
         server-side file needed; this is what the web form's photo picker
-        produces)
+        produces) — used as-is.
+      - a filename inside STATIC_DIR (the original CLI workflow — bake a
+        headshot into the image/repo, reference it by name) — resolved to
+        a `file://` URI.
+
+    `Resume.photo` is already validated in models.py (MIME/size for data
+    URIs; no path separators or '..' for filenames), but this function
+    re-derives the basename and independently re-checks that the resolved
+    path is still contained within STATIC_DIR before returning it. That
+    keeps this safe even if it's ever called with a Resume-like object built
+    outside the normal validated path — a filename is never trusted to be
+    a path.
     """
+    if photo.startswith("data:image"):
+        return photo
+
+    safe_name = Path(photo).name  # strips any directory components outright
+    if not safe_name:
+        return None
+
+    static_root = STATIC_DIR.resolve()
+    candidate = (STATIC_DIR / safe_name).resolve()
+
+    if candidate.is_relative_to(static_root) and candidate.is_file():
+        return candidate.as_uri()
+
+    return None
+
+
+def render_html(resume: Resume, template_name: str = "resume.html.j2") -> str:
+    """Render the resume data into an HTML string using the Jinja2 template."""
     env = Environment(
         loader=FileSystemLoader(str(TEMPLATES_DIR)),
         autoescape=select_autoescape(["html", "j2"]),
@@ -41,12 +68,7 @@ def render_html(resume: Resume, template_name: str = "resume.html.j2") -> str:
 
     photo_path = None
     if resume.show_photo and resume.photo is not None:
-        if resume.photo.startswith("data:image"):
-            photo_path = resume.photo
-        else:
-            candidate = STATIC_DIR / resume.photo
-            if candidate.exists():
-                photo_path = candidate.resolve().as_uri()
+        photo_path = _resolve_photo_path(resume.photo)
 
     return template.render(resume=resume, photo_path=photo_path)
 

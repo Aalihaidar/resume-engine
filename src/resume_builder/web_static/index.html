@@ -29,10 +29,13 @@
   button.primary { background:var(--accent); color:#fff; border:none; padding:9px 16px; border-radius:8px; font-size:13px; cursor:pointer; }
   button.primary:disabled { opacity:0.4; cursor:default; }
   button.secondary { background:transparent; color:var(--muted); border:1px solid #262a33; padding:9px 14px; border-radius:8px; cursor:pointer; font-size:13px; }
-  #status { font-size:12.5px; color:var(--muted); }
+  button.secondary:hover { border-color:#3a3f4a; }
+  #status { font-size:12.5px; color:var(--muted); white-space:pre-wrap; }
   #status.error { color:var(--err); }
   #status.ok { color:var(--ok); }
   .hint { font-size:12px; color:var(--muted); margin:0; }
+  #photoStatus { display:none; font-size:12px; color:var(--ok); margin:0 0 8px; }
+  #photoStatus.error { color:var(--err); }
   @media (max-width: 760px) {
     main { flex-direction:column; }
   }
@@ -41,7 +44,7 @@
 <body>
 <header>
   <h1>Resume Engine</h1>
-  <p>Edit the JSON, watch the PDF update, download when it looks right.</p>
+  <p>Edit the YAML, watch the PDF update, download when it looks right.</p>
 </header>
 <div class="tabs">
   <div class="tab active" data-kind="resume">Resume</div>
@@ -50,16 +53,18 @@
 <main>
   <div class="pane">
     <div class="pane-header">
-      <h2>JSON</h2>
+      <h2>YAML</h2>
       <div class="row" style="margin:0; gap:8px;">
-        <button class="secondary" id="loadExampleBtn">Load example</button>
+        <button class="secondary" id="loadExampleBtn">Load template</button>
         <label class="secondary" id="photoLabel" style="display:none; cursor:pointer; margin:0;">
           Set photo
           <input type="file" id="photoInput" accept="image/png,image/jpeg,image/webp" style="display:none;" />
         </label>
+        <button class="secondary" id="removePhotoBtn" style="display:none;">Remove photo</button>
       </div>
     </div>
-    <textarea id="jsonInput" spellcheck="false"></textarea>
+    <p id="photoStatus"></p>
+    <textarea id="yamlInput" spellcheck="false"></textarea>
     <div class="row">
       <button class="primary" id="downloadBtn" disabled>Download PDF</button>
       <span id="status"></span>
@@ -74,17 +79,20 @@
       <iframe id="pdfFrame" style="display:none"></iframe>
       <div id="pdfOverlay">Rendering…</div>
     </div>
-    <p class="hint">Same endpoints any app or AI agent would call: <code>POST /api/resume/pdf</code> / <code>/api/cover-letter/pdf</code>.</p>
+    <p class="hint">Edits happen in YAML (same shape as data/resume.template.yaml); this is converted to JSON in the browser before hitting the same endpoints any app or AI agent would call: <code>POST /api/resume/pdf</code> / <code>/api/cover-letter/pdf</code>.</p>
   </div>
 </main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
 <script>
   const tabs = document.querySelectorAll('.tab');
-  const jsonInput = document.getElementById('jsonInput');
+  const yamlInput = document.getElementById('yamlInput');
   const statusEl = document.getElementById('status');
   const downloadBtn = document.getElementById('downloadBtn');
   const loadExampleBtn = document.getElementById('loadExampleBtn');
   const photoLabel = document.getElementById('photoLabel');
   const photoInput = document.getElementById('photoInput');
+  const removePhotoBtn = document.getElementById('removePhotoBtn');
+  const photoStatusEl = document.getElementById('photoStatus');
   const pdfFrame = document.getElementById('pdfFrame');
   const pdfPlaceholder = document.getElementById('pdfPlaceholder');
   const pdfOverlay = document.getElementById('pdfOverlay');
@@ -94,42 +102,176 @@
   let debounceTimer = null;
   let requestSeq = 0;
 
-  const examples = {
-    resume: {
-      name: "Jane Doe",
-      headline: "Backend Engineer",
-      contact: {
-        location: "Berlin, DE",
-        phone: "+49 000 000000",
-        email: "jane@example.com",
-        linkedin_display: "linkedin.com/in/janedoe",
-        linkedin_url: "https://linkedin.com/in/janedoe"
-      },
-      summary: "Backend engineer focused on distributed systems.",
-      experience: [
-        { title: "Software Engineer", company: "Acme", location: "Remote",
-          start: "2022", end: "Present", bullets: ["Built X", "Shipped Y"] }
-      ],
-      education: [
-        { degree: "B.Sc. Computer Science", institution: "TU Example",
-          location: "Berlin", start: "2018", end: "2022", details: [] }
-      ],
-      skills: [{ category: "Languages", items: ["Python", "Go"] }]
-    },
-    "cover-letter": {
-      applicant_name: "Jane Doe",
-      applicant_contact: {
-        location: "Berlin, DE",
-        phone: "+49 000 000000",
-        email: "jane@example.com",
-        linkedin_display: "linkedin.com/in/janedoe",
-        linkedin_url: "https://linkedin.com/in/janedoe"
-      },
-      date: "2026-08-25",
-      recipient: { company: "Acme Corp" },
-      role_title: "Backend Engineer",
-      body_paragraphs: ["I'm excited to apply for this role because..."]
-    }
+  // Photo lives entirely in JS memory, never written into the YAML textarea.
+  // It's merged into the payload only at render/submit time — this keeps the
+  // editor readable (no giant base64 blob inline) and keeps every keystroke's
+  // debounced re-render from re-transmitting the full image on unrelated edits.
+  let currentPhotoDataUrl = null;
+  let currentPhotoName = null;
+
+  const MAX_UPLOAD_BYTES = 15 * 1024 * 1024;   // raw file guard, before compression
+  const MAX_ENCODED_BYTES = 2 * 1024 * 1024;   // guard on the compressed data URI
+  const MAX_PHOTO_DIMENSION = 900;             // px, longest side, after downscale
+  const PHOTO_JPEG_QUALITY = 0.85;
+
+  const templates = {
+    resume: `name: "Jane Doe"
+headline: "Headline or tagline goes here, e.g. 'AI/ML Engineer | Robotics Engineer'"
+
+# Master on/off switch per top-level section.
+sections:
+  summary: true
+  experience: true
+  projects: true
+  education: true
+  skills: true
+  certifications: true
+  languages: true
+  photo: true
+
+contact:
+  location: "Berlin, Germany"
+  phone: "+49 151 23456789"
+  email: "jane.doe@example.com"
+  linkedin_display: "linkedin.com/in/janedoe"
+  linkedin_url: "https://www.linkedin.com/in/janedoe/"
+  github_display: "github.com/janedoe"
+  github_url: "https://github.com/janedoe"
+
+photo: headshot.jpg
+
+summary: >
+  One-paragraph, 3-5 sentence overview: your role, years of experience,
+  domain focus, and one or two standout achievements. Written in third
+  person, no "I".
+
+# -----------------------------------------------------------------------
+# EXPERIENCE
+# -----------------------------------------------------------------------
+experience:
+  - include: true
+    title: "Job Title"
+    company: "Company Name"
+    location: "City, Country"
+    start: "Mon YYYY"
+    end: "Present"
+    bullets:
+      - "Achievement-focused bullet starting with a strong past/present-tense verb."
+      - "Another bullet, ideally with a quantified outcome (%, $, time saved)."
+
+  - include: true
+    title: "Previous Job Title"
+    company: "Previous Company"
+    location: "City, Country"
+    start: "Mon YYYY"
+    end: "Mon YYYY"
+    bullets:
+      - "Bullet describing scope and impact."
+      - "Bullet describing a specific technical contribution."
+
+# -----------------------------------------------------------------------
+# PROJECTS
+# -----------------------------------------------------------------------
+projects:
+  - include: true
+    name: "Project Name"
+    organization: "Associated with X University" # optional — delete this line to omit
+    start: "Mon YYYY"
+    end: "Mon YYYY"
+    bullets:
+      - "What you built and why, in one sentence."
+      - "A specific technical contribution or design decision."
+      - "A quantified result or outcome, if you have a real number."
+    technologies:
+      - "Tech 1"
+      - "Tech 2"
+    links:
+      - label: "GitHub"
+        url: "https://github.com/janedoe/project-name"
+      - label: "Live Demo"
+        url: "https://project-name.example.com"
+
+# -----------------------------------------------------------------------
+# EDUCATION
+# -----------------------------------------------------------------------
+education:
+  - include: true
+    degree: "Degree, Field of Study"
+    institution: "Institution Name"
+    location: "City, Country"
+    start: "Mon YYYY"
+    end: "Mon YYYY"
+    details:
+      - "Honors, thesis title, or notable coursework (optional)."
+
+# -----------------------------------------------------------------------
+# SKILLS
+# -----------------------------------------------------------------------
+skills:
+  - include: true
+    category: "Category Name"
+    items:
+      - "Skill 1"
+      - "Skill 2"
+      - "Skill 3"
+
+# -----------------------------------------------------------------------
+# CERTIFICATIONS.
+# -----------------------------------------------------------------------
+certifications:
+  - include: true
+    name: "Certification Name"
+    issuer: "Issuing Organization"
+    date: "Mon YYYY"
+
+# -----------------------------------------------------------------------
+# LANGUAGES
+# -----------------------------------------------------------------------
+languages:
+  - include: true
+    name: "English"
+    level: "Native"
+  - include: true
+    name: "German"
+    level: "B2"
+`,
+    'cover-letter': `applicant_name: "Jane Doe"
+
+applicant_contact:
+  location: "Berlin, Germany"
+  phone: "+49 151 23456789"
+  email: "jane.doe@example.com"
+  linkedin_display: "linkedin.com/in/janedoe"
+  linkedin_url: "https://www.linkedin.com/in/janedoe/"
+  github_display: "github.com/janedoe"
+  github_url: "https://github.com/janedoe"
+
+
+sections:
+  date: true
+  recipient: true
+  body: true
+
+date: "Mon DD, YYYY"
+
+recipient:
+  name: null
+  title: "Hiring Manager"
+  company: "Company Name"
+  company_address: null
+
+role_title: "Job Title you're applying for"
+salutation: "Dear Hiring Manager,"
+
+
+body_paragraphs:
+  - "Opening paragraph: who you are, the role and company you're applying to, and a one-line hook."
+  - "Core paragraph: your strongest relevant achievement(s), with real detail and quantified outcomes where they exist."
+  - "Optional paragraph: additional relevant breadth, background, or context not covered above."
+  - "Closing paragraph: interest in discussing further, thank the reader for their time."
+
+closing: "Sincerely,"
+`
   };
 
   function endpointFor(k) {
@@ -145,9 +287,66 @@
     pdfOverlay.classList.toggle('visible', show);
   }
 
-  function loadExample() {
-    jsonInput.value = JSON.stringify(examples[kind], null, 2);
+  function clearPhoto() {
+    currentPhotoDataUrl = null;
+    currentPhotoName = null;
+    updatePhotoStatus();
+  }
+
+  function updatePhotoStatus() {
+    if (currentPhotoDataUrl) {
+      const base64Len = currentPhotoDataUrl.length - currentPhotoDataUrl.indexOf(',') - 1;
+      const approxKb = Math.round((base64Len * 0.75) / 1024);
+      photoStatusEl.textContent = `📎 ${currentPhotoName} attached (~${approxKb}KB after compression) — included on render`;
+      photoStatusEl.className = '';
+      photoStatusEl.style.display = 'block';
+      removePhotoBtn.style.display = 'inline-block';
+    } else {
+      photoStatusEl.style.display = 'none';
+      removePhotoBtn.style.display = 'none';
+    }
+  }
+
+  function loadTemplate() {
+    yamlInput.value = templates[kind];
+    clearPhoto();
     scheduleRender(0);
+  }
+
+  function parseYaml(raw) {
+    // jsyaml.load throws jsyaml.YAMLException with a readable .message
+    // (including the line/column) on malformed YAML.
+    return jsyaml.load(raw);
+  }
+
+  // Downscales + re-encodes an image file client-side so a resume headshot
+  // never ships as an untouched multi-MB phone photo. Always outputs JPEG,
+  // which compresses far better than PNG for photos.
+  function compressImage(file, maxDim, quality) {
+    return new Promise((resolve, reject) => {
+      const objectUrl = URL.createObjectURL(file);
+      const img = new Image();
+      img.onload = () => {
+        let { width, height } = img;
+        if (width > maxDim || height > maxDim) {
+          const scale = maxDim / Math.max(width, height);
+          width = Math.round(width * scale);
+          height = Math.round(height * scale);
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+        URL.revokeObjectURL(objectUrl);
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      };
+      img.onerror = () => {
+        URL.revokeObjectURL(objectUrl);
+        reject(new Error('Could not decode that image file'));
+      };
+      img.src = objectUrl;
+    });
   }
 
   tabs.forEach(t => t.addEventListener('click', () => {
@@ -156,31 +355,45 @@
     kind = t.dataset.kind;
     photoLabel.style.display = kind === 'resume' ? 'block' : 'none';
     resetPreview();
-    loadExample();
+    loadTemplate();
   }));
 
-  loadExampleBtn.addEventListener('click', loadExample);
+  loadExampleBtn.addEventListener('click', loadTemplate);
 
-  photoInput.addEventListener('change', () => {
+  removePhotoBtn.addEventListener('click', () => {
+    clearPhoto();
+    scheduleRender(0);
+  });
+
+  photoInput.addEventListener('change', async () => {
     const file = photoInput.files[0];
+    photoInput.value = ''; // allow re-selecting the same file later
     if (!file) return;
 
-    const reader = new FileReader();
-    reader.onload = () => {
-      let payload;
-      try {
-        payload = JSON.parse(jsonInput.value || '{}');
-      } catch (e) {
-        setStatus('Fix the JSON syntax error before setting a photo: ' + e.message, 'error');
+    if (file.size > MAX_UPLOAD_BYTES) {
+      setStatus(`That image is too large (${Math.round(file.size / 1024 / 1024)}MB, max 15MB before compression)`, 'error');
+      return;
+    }
+
+    setStatus('Compressing photo…');
+    try {
+      const dataUrl = await compressImage(file, MAX_PHOTO_DIMENSION, PHOTO_JPEG_QUALITY);
+      const base64Len = dataUrl.length - dataUrl.indexOf(',') - 1;
+      const approxBytes = Math.round(base64Len * 0.75);
+
+      if (approxBytes > MAX_ENCODED_BYTES) {
+        setStatus(`Photo is still too large after compression (~${Math.round(approxBytes / 1024)}KB, max ${MAX_ENCODED_BYTES / 1024 / 1024}MB) — try a smaller or simpler image`, 'error');
         return;
       }
-      payload.photo = reader.result; // data:image/...;base64,... — render.py accepts this directly
-      jsonInput.value = JSON.stringify(payload, null, 2);
+
+      currentPhotoDataUrl = dataUrl;
+      currentPhotoName = file.name;
+      updatePhotoStatus();
+      setStatus('');
       scheduleRender(0);
-    };
-    reader.onerror = () => setStatus('Could not read that image file', 'error');
-    reader.readAsDataURL(file);
-    photoInput.value = ''; // allow re-selecting the same file later
+    } catch (e) {
+      setStatus(e.message, 'error');
+    }
   });
 
   function resetPreview() {
@@ -195,7 +408,7 @@
     setStatus('');
   }
 
-  jsonInput.addEventListener('input', () => scheduleRender(700));
+  yamlInput.addEventListener('input', () => scheduleRender(700));
 
   function scheduleRender(delayMs) {
     clearTimeout(debounceTimer);
@@ -203,7 +416,7 @@
   }
 
   async function renderPreview() {
-    const raw = jsonInput.value.trim();
+    const raw = yamlInput.value.trim();
     if (!raw) {
       resetPreview();
       return;
@@ -211,11 +424,18 @@
 
     let payload;
     try {
-      payload = JSON.parse(raw);
+      payload = parseYaml(raw);
     } catch (e) {
-      setStatus('Invalid JSON: ' + e.message, 'error');
+      setStatus('Invalid YAML: ' + e.message, 'error');
       downloadBtn.disabled = true;
       return;
+    }
+
+    // Photo is merged in here, right before sending — it never lives in the
+    // YAML text itself, so it doesn't get re-parsed/re-typed by the user
+    // and doesn't bloat every debounced request beyond what changed.
+    if (kind === 'resume' && currentPhotoDataUrl) {
+      payload.photo = currentPhotoDataUrl;
     }
 
     const seq = ++requestSeq;
@@ -272,7 +492,7 @@
   });
 
   photoLabel.style.display = kind === 'resume' ? 'block' : 'none';
-  loadExample();
+  loadTemplate();
 </script>
 </body>
 </html>
