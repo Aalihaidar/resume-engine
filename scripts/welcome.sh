@@ -4,6 +4,7 @@ set -euo pipefail
 echo ""
 echo "  resume-engine dev container"
 echo "  -------------------------------------------------------------"
+echo "  http://localhost:8000          web form + API (started automatically)"
 echo "  uv run resume-build render     build output/resume.pdf"
 echo "  uv run pytest                  run tests"
 echo "  uv run ruff check .            lint"
