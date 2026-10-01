@@ -37,10 +37,10 @@ Photo validation
     caller from POSTing an oversized or malformed value.
   - a plain filename referencing an image inside STATIC_DIR (the original
     CLI workflow) — validated here to reject path separators and '..' so it
-    can never be used to reference a file outside STATIC_DIR. render.py
-    re-derives the basename and re-checks containment independently, so this
-    stays safe even if a Resume is ever constructed without going through
-    this validator. The HTTP API additionally refuses this form altogether.
+    can never be used to reference a file outside STATIC_DIR. render.py only
+    accepts names that match an existing file in that directory, so this stays
+    safe even if a Resume is ever constructed without going through this
+    validator. The HTTP API additionally refuses this form altogether.
 """
 
 from __future__ import annotations
@@ -237,8 +237,8 @@ class Resume(_StrictModel):
 
         # Otherwise this is a plain filename referencing an image inside
         # STATIC_DIR (the CLI workflow) — never a path. Reject anything that
-        # could traverse outside STATIC_DIR; render.py independently
-        # re-derives the basename and re-checks containment too.
+        # could traverse outside STATIC_DIR; render.py independently only
+        # accepts names that match an existing file in that directory.
         if len(v) > MAX_PHOTO_FILENAME_LEN:
             raise ValueError(f"photo filename is too long (max {MAX_PHOTO_FILENAME_LEN} chars)")
         if "/" in v or "\\" in v or v in {".", ".."}:

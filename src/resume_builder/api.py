@@ -27,7 +27,8 @@ expose (none of them is relied on to cover for another):
     the whole offending input once per error, which would multiply a large body);
   - the filename form of `photo` references a file baked into the server, so
     it is refused here — over HTTP a photo has to be sent inline. (render.py's
-    `_resolve_photo_path` still re-checks containment for the CLI path.);
+    `_resolve_photo_path` still only accepts names of files that exist in the
+    static directory, for the CLI path.);
   - rendering is CPU-heavy, so at most RESUME_MAX_CONCURRENT_RENDERS PDFs are
     produced at once and the rest get a 503 + Retry-After instead of piling up;
   - WeasyPrint may only read local template files (render.py).

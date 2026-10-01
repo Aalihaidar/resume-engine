@@ -8,6 +8,7 @@ import pytest
 from markupsafe import escape
 from pydantic import ValidationError
 
+from resume_builder import render as render_module
 from resume_builder.models import CoverLetter, Resume
 from resume_builder.render import (
     STATIC_DIR,
@@ -190,17 +191,43 @@ def test_existing_static_file_resolves_to_a_file_uri() -> None:
     assert resolved == (STATIC_DIR / "headshot.jpg").resolve().as_uri()
 
 
-@pytest.mark.parametrize("name", ["missing.jpg", "", "/", ".."])
+@pytest.mark.parametrize("name", ["missing.jpg", "", "/", "..", ".", ".gitkeep"])
 def test_unknown_or_degenerate_photo_names_resolve_to_nothing(name: str) -> None:
     assert _resolve_photo_path(name) is None
 
 
-@pytest.mark.parametrize("name", ["../pyproject.toml", "../../etc/passwd", "/etc/passwd"])
-def test_traversal_is_reduced_to_a_basename_inside_static(name: str) -> None:
-    # Even if a Resume skipped model validation, directory parts are stripped
-    # and nothing outside STATIC_DIR is ever returned.
-    resolved = _resolve_photo_path(name)
-    assert resolved is None or Path(resolved.removeprefix("file://")).parent == STATIC_DIR.resolve()
+@pytest.mark.parametrize(
+    "name",
+    [
+        "../pyproject.toml",
+        "../../etc/passwd",
+        "/etc/passwd",
+        "../static/headshot.jpg",  # even a path that leads back to a real file
+        "static/headshot.jpg",
+        "..\\headshot.jpg",
+        "headshot.jpg/",
+        "HEADSHOT.JPG",
+    ],
+)
+def test_anything_but_an_exact_static_filename_has_no_match(name: str) -> None:
+    # Even if a Resume skipped model validation, the string is only ever compared
+    # with existing names; it is never used to build a path.
+    assert _resolve_photo_path(name) is None
+
+
+def test_a_symlink_leading_out_of_the_static_dir_is_refused(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    static = tmp_path / "static"
+    static.mkdir()
+    secret = tmp_path / "secret.jpg"
+    secret.write_bytes(b"\xff\xd8\xff")
+    (static / "inside.jpg").write_bytes(b"\xff\xd8\xff")
+    (static / "escape.jpg").symlink_to(secret)
+    monkeypatch.setattr(render_module, "STATIC_DIR", static)
+
+    assert _resolve_photo_path("inside.jpg") == (static / "inside.jpg").resolve().as_uri()
+    assert _resolve_photo_path("escape.jpg") is None
 
 
 # --- resource fetching ----------------------------------------------------

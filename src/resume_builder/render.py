@@ -74,27 +74,31 @@ def _resolve_photo_path(photo: str) -> str | None:
         a `file://` URI.
 
     `Resume.photo` is already validated in models.py (MIME/size for data
-    URIs; no path separators or '..' for filenames), but this function
-    re-derives the basename and independently re-checks that the resolved
-    path is still contained within STATIC_DIR before returning it. That
-    keeps this safe even if it's ever called with a Resume-like object built
-    outside the normal validated path — a filename is never trusted to be
-    a path.
+    URIs; no path separators or '..' for filenames), but this function does
+    not rely on that. The caller's string is never turned into a path at all:
+    it is only compared, as a whole, with the names of the regular files that
+    already exist in STATIC_DIR. Anything else — a directory part, '..', an
+    absolute path, a dotfile, an unknown name — simply has no match. A file
+    that is a symlink out of STATIC_DIR is refused as well. That keeps this
+    safe even if it's ever called with a Resume-like object built outside the
+    normal validated path.
     """
     if photo.startswith("data:image"):
         return photo
 
-    safe_name = Path(photo).name  # strips any directory components outright
-    if not safe_name:
+    static_root = STATIC_DIR.resolve()
+    available = {
+        entry.name: entry
+        for entry in static_root.iterdir()
+        if entry.is_file() and not entry.name.startswith(".")
+    }
+
+    match = available.get(photo)
+    if match is None:
         return None
 
-    static_root = STATIC_DIR.resolve()
-    candidate = (STATIC_DIR / safe_name).resolve()
-
-    if candidate.is_relative_to(static_root) and candidate.is_file():
-        return candidate.as_uri()
-
-    return None
+    resolved = match.resolve()
+    return resolved.as_uri() if resolved.is_relative_to(static_root) else None
 
 
 def render_html(resume: Resume, template_name: str = "resume.html.j2") -> str:
