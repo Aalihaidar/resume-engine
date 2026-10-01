@@ -188,7 +188,7 @@ Five ecosystems, weekly (Monday 04:00 UTC), all opening PRs against
 | Ecosystem | Scans |
 | --- | --- |
 | `uv` | `pyproject.toml` + `uv.lock` |
-| `docker` | `FROM` lines in `docker/Dockerfile.*` — the Python base image and the `uv` stage |
+| `docker` | `FROM` lines in `docker/Dockerfile.*` — the Python base image and the `uv` stage, each pinned as `tag@sha256:…` (tag and digest bumped together) |
 | `github-actions` | SHA pins + version comments in `.github/workflows/` |
 | `devcontainers` | Features in `.devcontainer/devcontainer.json` (+ lock file) |
 | `pre-commit` | Hook `rev`s in `.pre-commit-config.yaml` |
