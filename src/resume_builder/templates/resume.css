@@ -101,18 +101,19 @@ body {
 }
 
 .entry-header {
-  display: table;
-  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
   font-weight: 700;
 }
 
 .entry-title {
-  display: table-cell;
   font-size: 10.3pt;
 }
 
 .entry-dates {
-  display: table-cell;
+  flex-shrink: 0;
   font-size: 9pt;
   color: #555;
   white-space: nowrap;

@@ -1,6 +1,15 @@
 {
   "yaml.schemas": {
-    "./schema/resume.schema.json": "data/resume.yaml"
+    "./schema/resume.schema.json": [
+      "data/resume.yaml",
+      "data/resume.template.yaml",
+      "src/resume_builder/web_static/assets/templates/resume.yaml"
+    ],
+    "./schema/cover_letter.schema.json": [
+      "data/cover_letter.yaml",
+      "data/cover_letter.template.yaml",
+      "src/resume_builder/web_static/assets/templates/cover-letter.yaml"
+    ]
   },
   "cSpell.words": [
     "mypy",

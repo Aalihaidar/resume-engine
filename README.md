@@ -30,17 +30,23 @@ flowchart LR
   so a content change can't break the formatting.
 - **One pipeline, three interfaces.** The CLI, the API and the web form all
   call the same render functions and validate against the same models.
-- **Validated input.** Pydantic models reject a missing field or wrong type
-  with a clear error (API: `422`) instead of producing a broken PDF. A cover
-  letter with leftover `[PLACEHOLDER]` text is rejected on purpose.
+- **Validated input.** Pydantic models reject a missing field, a wrong type or
+  an unknown key (a typo like `experiance:` is an error, not silently dropped)
+  with a clear message — a one-line-per-problem error in the CLI, `422` in the
+  API — instead of producing a broken PDF. A cover letter with leftover
+  `[PLACEHOLDER]` text is rejected on purpose.
 - **Tailor by toggling, not deleting.** Every resume section has a master
   switch and every entry its own `include:` flag; something renders only when
   both are on.
 - **ATS-safe by construction.** Single column — no tables, text boxes or
   floats.
-- **Hardened public API.** Request-size limit, strict photo validation
-  (type, size, encoding) and path-containment checks, each enforced
-  independently.
+- **Hardened public API.** Request-size limit, length limits on every field,
+  strict photo validation (type, size, encoding, image signature),
+  path-containment checks, a cap on concurrent renders, a renderer that can
+  only read its own template files, security headers and a closed
+  Content-Security-Policy on the web form — each enforced independently.
+- **Self-hosted web form.** No CDN scripts, styles or fonts: the page works
+  offline and makes no third-party requests.
 
 ## Quick start
 
@@ -63,8 +69,16 @@ including the Pango/Cairo libraries WeasyPrint needs to draw PDFs.
 
 Your SSH agent and `~/.gitconfig` are forwarded, so `git` works as on the
 host. `.vscode/tasks.json` exposes the Makefile targets as tasks
-(`Ctrl+Shift+B` renders the resume), and **Serve API (dev)** starts the web
-app on port 8000, which VS Code forwards automatically.
+(`Ctrl+Shift+B` renders the resume).
+
+**The web app starts by itself** every time the container starts
+([`scripts/start-dev-server.sh`](scripts/start-dev-server.sh)) and opens in
+VS Code's built-in Simple Browser on port 8000, with auto-reload on edits under
+`src/`. Reopen it any time from the **Ports** tab or at
+<http://localhost:8000>; the server's log is `/tmp/resume-engine-dev-server.log`.
+Only this dev setup allows the page to be embedded in an editor
+(`RESUME_ALLOW_EMBEDDING=1`); the deployed app refuses to be framed. If the PDF
+preview stays blank inside Simple Browser, use its *Open in browser* button.
 
 </details>
 
@@ -102,7 +116,7 @@ make render
 uv run resume-build render                     # data/resume.yaml → output/resume.pdf
 uv run resume-build cover-letter               # data/cover_letter.yaml → output/cover_letter.pdf
 uv run resume-build render --data my.yaml --out cv.pdf --html cv.html
-uv run resume-build version
+uv run resume-build --version
 ```
 
 | Option | Default (`render` / `cover-letter`) | Purpose |
@@ -128,8 +142,8 @@ the PDF. **Set Photo** handles the image encoding for you.
 | `/docs` | `GET` | Interactive OpenAPI documentation |
 
 ```bash
-# Convert the YAML template to JSON, then render it
-uv run python -c "import json, sys, yaml; json.dump(yaml.safe_load(open('data/resume.template.yaml')), sys.stdout)" > resume.json
+# Convert the YAML template to JSON (no photo: see below), then render it
+uv run python -c "import json, sys, yaml; d = yaml.safe_load(open('data/resume.template.yaml')); d['photo'] = None; json.dump(d, sys.stdout)" > resume.json
 
 curl -fsS -X POST https://resume-engine-sud4.onrender.com/api/resume/pdf \
   -H "Content-Type: application/json" \
@@ -137,8 +151,12 @@ curl -fsS -X POST https://resume-engine-sud4.onrender.com/api/resume/pdf \
   -o resume.pdf
 ```
 
-Requests are limited to **8 MB**; an invalid payload returns **`422`** with
-the validation errors. The free-tier instance sleeps when idle, so the first
+Requests are limited to **8 MB** (`413` above that); an invalid payload —
+including an unknown field — returns **`422`** with the validation errors. At
+most two PDFs render at once (`RESUME_MAX_CONCURRENT_RENDERS`); further
+requests wait briefly and then get `503` with a `Retry-After` header. Over
+HTTP a photo must be sent inline as a `data:image/…` URI: filename references
+only exist for the CLI. The free-tier instance sleeps when idle, so the first
 request after a while can take 30–60 s.
 
 ## Editing content
@@ -155,12 +173,18 @@ request after a while can take 30–60 s.
 - **Cover letter:** rewritten per application (`role_title`, `recipient`,
   `body_paragraphs`). `sections.date` / `sections.recipient` can be turned off
   when that information isn't known.
-- **Photo:** either a filename inside `src/resume_builder/static/` (CLI), or a
-  `data:image/{png,jpeg,webp};base64,…` URI of at most 3 MB decoded (API and
-  web form — the deployed container has no persistent disk).
-- **Editor support:** `schema/resume.schema.json` (generated from the
-  `Resume` model) gives autocomplete and validation for `resume.yaml` in
-  VS Code. Regenerate it with `make schema` after changing `models.py`.
+- **Photo:** either a filename inside `src/resume_builder/static/` (CLI only),
+  or a `data:image/{png,jpeg,webp};base64,…` URI of at most 3 MB decoded (the
+  only form the API and web form accept — the deployed container has no
+  persistent disk). The decoded bytes must really be a PNG, JPEG or WebP.
+- **Limits:** strings are capped at 200 characters (2,000 for bullets, 5,000
+  for the summary and cover-letter paragraphs) and lists at 50 entries (30
+  bullets) — far above what a real document needs.
+- **Editor support:** `schema/resume.schema.json` and
+  `schema/cover_letter.schema.json` (generated from the models) give
+  autocomplete and validation for both YAML files in VS Code, and describe the
+  JSON the API accepts. Regenerate them with `make schema` after changing
+  `models.py`.
 
 ## Development
 
@@ -171,10 +195,11 @@ request after a while can take 30–60 s.
 | `make serve-api` | API + web form on `:8000` with auto-reload |
 | `make lint` / `make format` | Ruff lint + format check / auto-fix |
 | `make typecheck` | `mypy --strict` |
-| `make test` | pytest with coverage |
+| `make test` | pytest with coverage (fails below the threshold in `pyproject.toml`) |
 | `make spell` | cspell over every tracked file |
 | `make audit` | `pip-audit` of `uv.lock` — runtime packages fail, dev tooling warns |
-| `make schema` | Regenerate `schema/resume.schema.json` |
+| `make schema` | Regenerate `schema/resume.schema.json` and `schema/cover_letter.schema.json` |
+| `make web-assets` | Rebuild the web form's CSS, fonts and vendored js-yaml (Node 20+; only after changing `web/` or the page's classes) |
 | `make ci` | lint + typecheck + test + spell — the checks CI runs |
 | `make clean` | Remove build output and caches |
 
@@ -183,9 +208,9 @@ Pre-commit hooks run Ruff, cspell and whitespace fixers, and re-render
 
 ### CI/CD and security
 
-Every pull request runs lint, type checks, tests on Python 3.12 and 3.14,
-spelling, a JSON Schema drift check, a dependency audit, and a Docker build
-with a smoke test of the production image. CodeQL, zizmor, Trivy and OpenSSF
+Every pull request runs lint, type checks, tests on Python 3.12, 3.13 and
+3.14, spelling, JSON Schema and web-asset drift checks, a dependency audit,
+and a Docker build with a smoke test of the production image. CodeQL, zizmor, Trivy and OpenSSF
 Scorecard report to the repository's code-scanning tab. All GitHub Actions
 are pinned to commit SHAs and Docker images to digests, kept current by
 Dependabot.
@@ -221,14 +246,15 @@ docker compose -f docker-compose.prod.yml up --build   # http://localhost:8000
 │   ├── render.py          # YAML/JSON → HTML (Jinja2) → PDF (WeasyPrint)
 │   ├── cli.py             # resume-build render | cover-letter | version
 │   ├── api.py             # FastAPI app: PDF endpoints + web form
-│   ├── middleware.py      # request body-size limit
+│   ├── middleware.py      # request body-size limit, security headers
 │   ├── templates/         # resume / cover letter Jinja2 templates + CSS
-│   ├── web_static/        # index.html — the web form
+│   ├── web_static/        # index.html + assets/ (built CSS, app.js, fonts, starter YAML)
 │   └── static/            # photos referenced by filename
 ├── data/                  # resume.yaml, cover_letter.yaml + *.template.yaml
-├── schema/                # resume.schema.json (generated)
-├── tests/                 # pytest suite
-├── scripts/               # schema generator, dependency audit, dev-container entrypoint
+├── schema/                # resume / cover letter JSON Schemas (generated)
+├── tests/                 # pytest suite (API, CLI, middleware, models, rendering, web assets)
+├── web/                   # Tailwind / font build for the web form (output is committed)
+├── scripts/               # schema generator, dependency audit, dev-container entrypoint and server start
 ├── docker/                # Dockerfile.dev, Dockerfile.prod
 ├── .github/               # workflows, Dependabot, rulesets docs, issue/PR templates
 ├── output/                # generated PDFs

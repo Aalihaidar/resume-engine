@@ -1,6 +1,7 @@
 {
   "$defs": {
     "Certification": {
+      "additionalProperties": false,
       "properties": {
         "include": {
           "default": true,
@@ -8,14 +9,17 @@
           "type": "boolean"
         },
         "name": {
+          "maxLength": 200,
           "title": "Name",
           "type": "string"
         },
         "issuer": {
+          "maxLength": 200,
           "title": "Issuer",
           "type": "string"
         },
         "date": {
+          "maxLength": 200,
           "title": "Date",
           "type": "string"
         }
@@ -29,12 +33,15 @@
       "type": "object"
     },
     "Contact": {
+      "additionalProperties": false,
       "properties": {
         "location": {
+          "maxLength": 200,
           "title": "Location",
           "type": "string"
         },
         "phone": {
+          "maxLength": 200,
           "title": "Phone",
           "type": "string"
         },
@@ -44,6 +51,7 @@
           "type": "string"
         },
         "linkedin_display": {
+          "maxLength": 200,
           "title": "Linkedin Display",
           "type": "string"
         },
@@ -57,6 +65,7 @@
         "github_display": {
           "anyOf": [
             {
+              "maxLength": 200,
               "type": "string"
             },
             {
@@ -93,6 +102,7 @@
       "type": "object"
     },
     "EducationEntry": {
+      "additionalProperties": false,
       "properties": {
         "include": {
           "default": true,
@@ -100,30 +110,36 @@
           "type": "boolean"
         },
         "degree": {
+          "maxLength": 200,
           "title": "Degree",
           "type": "string"
         },
         "institution": {
+          "maxLength": 200,
           "title": "Institution",
           "type": "string"
         },
         "location": {
+          "maxLength": 200,
           "title": "Location",
           "type": "string"
         },
         "start": {
+          "maxLength": 200,
           "title": "Start",
           "type": "string"
         },
         "end": {
+          "maxLength": 200,
           "title": "End",
           "type": "string"
         },
         "details": {
-          "default": [],
           "items": {
+            "maxLength": 2000,
             "type": "string"
           },
+          "maxItems": 30,
           "title": "Details",
           "type": "array"
         }
@@ -139,6 +155,7 @@
       "type": "object"
     },
     "ExperienceEntry": {
+      "additionalProperties": false,
       "properties": {
         "include": {
           "default": true,
@@ -146,29 +163,36 @@
           "type": "boolean"
         },
         "title": {
+          "maxLength": 200,
           "title": "Title",
           "type": "string"
         },
         "company": {
+          "maxLength": 200,
           "title": "Company",
           "type": "string"
         },
         "location": {
+          "maxLength": 200,
           "title": "Location",
           "type": "string"
         },
         "start": {
+          "maxLength": 200,
           "title": "Start",
           "type": "string"
         },
         "end": {
+          "maxLength": 200,
           "title": "End",
           "type": "string"
         },
         "bullets": {
           "items": {
+            "maxLength": 2000,
             "type": "string"
           },
+          "maxItems": 30,
           "title": "Bullets",
           "type": "array"
         }
@@ -185,6 +209,7 @@
       "type": "object"
     },
     "Language": {
+      "additionalProperties": false,
       "properties": {
         "include": {
           "default": true,
@@ -192,10 +217,12 @@
           "type": "boolean"
         },
         "name": {
+          "maxLength": 200,
           "title": "Name",
           "type": "string"
         },
         "level": {
+          "maxLength": 200,
           "title": "Level",
           "type": "string"
         }
@@ -208,6 +235,7 @@
       "type": "object"
     },
     "ProjectEntry": {
+      "additionalProperties": false,
       "description": "One personal/academic/freelance project.\n\nDistinct from `ExperienceEntry` because projects are typically unpaid,\ntied to an organization only loosely (e.g. \"Associated with X\nUniversity\"), and benefit from an explicit `technologies` list and\nclickable `links` (repo, live demo, published model, etc.) that a job\ndoesn't need.",
       "properties": {
         "include": {
@@ -216,12 +244,14 @@
           "type": "boolean"
         },
         "name": {
+          "maxLength": 200,
           "title": "Name",
           "type": "string"
         },
         "organization": {
           "anyOf": [
             {
+              "maxLength": 200,
               "type": "string"
             },
             {
@@ -232,34 +262,38 @@
           "title": "Organization"
         },
         "start": {
+          "maxLength": 200,
           "title": "Start",
           "type": "string"
         },
         "end": {
+          "maxLength": 200,
           "title": "End",
           "type": "string"
         },
         "bullets": {
-          "default": [],
           "items": {
+            "maxLength": 2000,
             "type": "string"
           },
+          "maxItems": 30,
           "title": "Bullets",
           "type": "array"
         },
         "technologies": {
-          "default": [],
           "items": {
+            "maxLength": 200,
             "type": "string"
           },
+          "maxItems": 50,
           "title": "Technologies",
           "type": "array"
         },
         "links": {
-          "default": [],
           "items": {
             "$ref": "#/$defs/ProjectLink"
           },
+          "maxItems": 30,
           "title": "Links",
           "type": "array"
         }
@@ -273,9 +307,11 @@
       "type": "object"
     },
     "ProjectLink": {
+      "additionalProperties": false,
       "description": "A single external link attached to a project (repo, live demo, model card, etc.).",
       "properties": {
         "label": {
+          "maxLength": 200,
           "title": "Label",
           "type": "string"
         },
@@ -295,6 +331,7 @@
       "type": "object"
     },
     "SectionToggles": {
+      "additionalProperties": false,
       "description": "Master on/off switch for each top-level section of the resume.",
       "properties": {
         "summary": {
@@ -342,6 +379,7 @@
       "type": "object"
     },
     "SkillGroup": {
+      "additionalProperties": false,
       "properties": {
         "include": {
           "default": true,
@@ -349,13 +387,16 @@
           "type": "boolean"
         },
         "category": {
+          "maxLength": 200,
           "title": "Category",
           "type": "string"
         },
         "items": {
           "items": {
+            "maxLength": 200,
             "type": "string"
           },
+          "maxItems": 50,
           "title": "Items",
           "type": "array"
         }
@@ -368,12 +409,15 @@
       "type": "object"
     }
   },
+  "additionalProperties": false,
   "properties": {
     "name": {
+      "maxLength": 200,
       "title": "Name",
       "type": "string"
     },
     "headline": {
+      "maxLength": 2000,
       "title": "Headline",
       "type": "string"
     },
@@ -393,67 +437,58 @@
       "title": "Photo"
     },
     "sections": {
-      "$ref": "#/$defs/SectionToggles",
-      "default": {
-        "summary": true,
-        "experience": true,
-        "projects": true,
-        "education": true,
-        "skills": true,
-        "certifications": true,
-        "languages": true,
-        "photo": true
-      }
+      "$ref": "#/$defs/SectionToggles"
     },
     "summary": {
+      "maxLength": 5000,
       "title": "Summary",
       "type": "string"
     },
     "experience": {
-      "default": [],
       "items": {
         "$ref": "#/$defs/ExperienceEntry"
       },
+      "maxItems": 50,
       "title": "Experience",
       "type": "array"
     },
     "projects": {
-      "default": [],
       "items": {
         "$ref": "#/$defs/ProjectEntry"
       },
+      "maxItems": 50,
       "title": "Projects",
       "type": "array"
     },
     "education": {
-      "default": [],
       "items": {
         "$ref": "#/$defs/EducationEntry"
       },
+      "maxItems": 50,
       "title": "Education",
       "type": "array"
     },
     "skills": {
-      "default": [],
       "items": {
         "$ref": "#/$defs/SkillGroup"
       },
+      "maxItems": 50,
       "title": "Skills",
       "type": "array"
     },
     "certifications": {
-      "default": [],
       "items": {
         "$ref": "#/$defs/Certification"
       },
+      "maxItems": 50,
       "title": "Certifications",
       "type": "array"
     },
     "languages": {
-      "default": [],
       "items": {
         "$ref": "#/$defs/Language"
       },
+      "maxItems": 50,
       "title": "Languages",
       "type": "array"
     }

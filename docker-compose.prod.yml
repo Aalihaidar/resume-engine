@@ -14,3 +14,10 @@ services:
       - "8000:8000"
     environment:
       - PORT=8000
+    restart: unless-stopped
+    # The service renders documents from untrusted JSON: give it no extra
+    # privileges. (It already runs as a non-root user.)
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
