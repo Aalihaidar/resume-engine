@@ -6,9 +6,12 @@ name: Scorecard
 #
 # publish_results: true puts strict limits on this file: no top-level env or
 # write permissions, and only allow-listed actions in the job. Keep it as is.
+#
+# Scorecard only publishes from the repository's default branch (`develop`);
+# the schedule also runs there, since GitHub runs schedules on the default branch.
 on:
   push:
-    branches: [main]
+    branches: [develop]
   branch_protection_rule:
   schedule:
     - cron: "41 4 * * 1" # Mondays 04:41 UTC
