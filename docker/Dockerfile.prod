@@ -14,7 +14,7 @@
 
 # uv comes in as its own stage so Dependabot's docker ecosystem, which reads
 # FROM lines (not images named inside COPY --from=), keeps it up to date.
-FROM ghcr.io/astral-sh/uv:0.11.7 AS uv
+FROM ghcr.io/astral-sh/uv:0.12.21 AS uv
 
 # ---------- Stage 1: builder ----------
 FROM python:3.14-slim-bookworm AS builder
