@@ -4,7 +4,7 @@ version = "1.0.0"
 description = "Data-driven, ATS-safe CV/resume builder (YAML -> HTML -> PDF), agent-editable."
 readme = "README.md"
 requires-python = ">=3.12"
-license = { text = "MIT" }
+license = "MIT"
 authors = [{ name = "Ali Haidar" }]
 
 dependencies = [
