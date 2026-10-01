@@ -11,11 +11,18 @@ repos:
       - id: mixed-line-ending
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.16.2
+    rev: v0.16.9
     hooks:
       - id: ruff
         args: [--fix]
       - id: ruff-format
+
+  # Spelling, using cspell.json + .cspell/*.txt. `make spell` runs this hook
+  # on every file; CI runs the same config via streetsidesoftware/cspell-action.
+  - repo: https://github.com/streetsidesoftware/cspell-cli
+    rev: v10.3.0
+    hooks:
+      - id: cspell
 
   - repo: local
     hooks:

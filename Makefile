@@ -1,4 +1,4 @@
-.PHONY: render render-html cover-letter cover-letter-html lint format typecheck test schema serve-api repomix ci clean
+.PHONY: render render-html cover-letter cover-letter-html lint format typecheck test spell schema serve-api repomix ci clean
 
 render:
 	uv run resume-build render --data data/resume.yaml --out output/resume.pdf
@@ -26,6 +26,9 @@ typecheck:
 test:
 	uv run pytest --cov=resume_builder --cov-report=term-missing
 
+spell:
+	uv run pre-commit run cspell --all-files
+
 schema:
 	uv run python scripts/generate_schema.py
 
@@ -35,7 +38,7 @@ serve-api:
 repomix:
 	npx --yes repomix@latest
 
-ci: lint typecheck test
+ci: lint typecheck test spell
 
 clean:
 	rm -rf output/*.pdf output/*.html .pytest_cache .ruff_cache .mypy_cache .coverage

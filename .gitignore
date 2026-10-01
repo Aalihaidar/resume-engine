@@ -31,3 +31,7 @@ output/preview*.png
 *.swp
 
 resume-engine.xml
+
+# Local AI assistant config (kept out of the repo)
+CLAUDE.md
+.claude/

@@ -1,0 +1,23 @@
+# Proper nouns and domain terms used in data/*.yaml (resume and cover letter).
+# Only applied to files under data/ (see the override in cspell.json), so a
+# name added here can't hide a typo in code or docs. One word per line,
+# kept sorted (case-insensitive). Comments start with #.
+
+# Organizations, institutions, products
+Airtable
+HIAST
+IROS
+ITMO
+Sber
+SOLIDWORKS
+Syriatel
+UNDP
+UNDP's
+
+# Contact details
+alihaidar
+
+# Domain vocabulary
+mechatronic
+mechatronics
+workstreams
