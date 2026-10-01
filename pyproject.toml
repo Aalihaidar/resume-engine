@@ -8,24 +8,24 @@ license = { text = "MIT" }
 authors = [{ name = "Ali Haidar" }]
 
 dependencies = [
-    "weasyprint>=69.0",
+    "weasyprint>=70.0",
     "jinja2>=3.1.6",
     "pyyaml>=6.0.3",
-    "pydantic[email]>=2.13.4",
-    "typer>=0.15.1",
+    "pydantic[email]>=2.13.5",
+    "typer>=0.27.2",
     "fastapi>=0.115.0",
-    "uvicorn[standard]>=0.32.0",
+    "uvicorn[standard]>=0.54.0",
 ]
 
 [dependency-groups]
 dev = [
-    "ruff>=0.16.4",
+    "ruff>=0.16.9",
     "mypy>=2.3.1",
     "pytest>=9.1.1",
     "pytest-cov>=7.1.0",
     "pip-audit>=2.10.1",
     "pre-commit>=4.6.2",
-    "types-pyyaml>=6.0.12.20260815",
+    "types-pyyaml>=6.0.12.20260906",
 ]
 
 [project.scripts]

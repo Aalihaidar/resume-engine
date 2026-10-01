@@ -7,10 +7,15 @@
   "features": {
     "ghcr.io/devcontainers/features/sshd:1": {},
     "ghcr.io/devcontainers/features/github-cli:1": {},
-    "ghcr.io/devcontainers/features/node:1": {
+    "ghcr.io/devcontainers/features/node:2": {
       "version": "lts"
     }
   },
+
+  // Persist the extension's login/settings across container rebuilds.
+  "mounts": [
+    "source=resume-engine-claude,target=/root/.claude,type=volume"
+  ],
 
   "forwardPorts": [8000],
   "portsAttributes": {
@@ -23,7 +28,10 @@
   "customizations": {
     "vscode": {
       "extensions": [
+        "Anthropic.claude-code",
         "ms-python.python",
+        "ms-python.vscode-pylance",
+        "ms-python.mypy-type-checker",
         "charliermarsh.ruff",
         "redhat.vscode-yaml",
         "ms-azuretools.vscode-docker",
@@ -32,7 +40,9 @@
         "DorianMassoulier.repomix-runner",
         "0xTanzim.filetree-pro",
         "tamasfe.even-better-toml",
-        "tomoki1207.pdf"
+        "tomoki1207.pdf",
+        "samuelcolvin.jinjahtml",
+        "github.vscode-github-actions"
       ],
       "settings": {
         "python.defaultInterpreterPath": "/workspace/.venv/bin/python",

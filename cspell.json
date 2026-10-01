@@ -1,0 +1,59 @@
+{
+  "$schema": "https://raw.githubusercontent.com/streetsidesoftware/cspell/main/cspell.schema.json",
+  "version": "0.2",
+  "language": "en",
+  "files": ["**"],
+  "enableGlobDot": true,
+  "useGitignore": true,
+  "ignorePaths": [
+    ".git/",
+    "uv.lock",
+    ".devcontainer/devcontainer-lock.json",
+    "schema/*.schema.json",
+    "output/",
+    "**/*.{pdf,jpg,jpeg,png,webp,ico}"
+  ],
+  "dictionaryDefinitions": [
+    {
+      "name": "project-words",
+      "path": "./.cspell/project-words.txt",
+      "addWords": true,
+      "description": "Tooling, packages and identifiers used across the codebase."
+    },
+    {
+      "name": "resume-words",
+      "path": "./.cspell/resume-words.txt",
+      "addWords": true,
+      "description": "Proper nouns and domain terms from the resume and cover letter content."
+    }
+  ],
+  "dictionaries": ["project-words", "python", "softwareTerms", "docker", "bash", "html", "css", "fullstack"],
+  "patterns": [
+    {
+      "name": "action-ref",
+      "pattern": "/uses:\\s*\\S+/g",
+      "description": "owner/repo@sha in workflows; maintained by Dependabot, not prose."
+    },
+    {
+      "name": "label-color",
+      "pattern": "/color:\\s*\"[0-9a-fA-F]{6}\"/g",
+      "description": "Hex colors in .github/labels.yml."
+    },
+    {
+      "name": "vscode-extension-id",
+      "pattern": "/\"[\\w-]+\\.[\\w-]+\"/g",
+      "description": "publisher.extension identifiers."
+    }
+  ],
+  "ignoreRegExpList": ["action-ref", "label-color"],
+  "overrides": [
+    {
+      "filename": ["data/**", ".cspell/resume-words.txt"],
+      "dictionaries": ["resume-words"]
+    },
+    {
+      "filename": ["**/.vscode/extensions.json", "**/.devcontainer/devcontainer.json"],
+      "ignoreRegExpList": ["vscode-extension-id"]
+    }
+  ]
+}

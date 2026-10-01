@@ -1,5 +1,10 @@
 # resume-engine
 
+[![CI](https://github.com/Aalihaidar/resume-engine/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Aalihaidar/resume-engine/actions/workflows/ci.yml)
+[![Security](https://github.com/Aalihaidar/resume-engine/actions/workflows/security.yml/badge.svg?branch=main)](https://github.com/Aalihaidar/resume-engine/actions/workflows/security.yml)
+[![codecov](https://codecov.io/gh/Aalihaidar/resume-engine/branch/main/graph/badge.svg)](https://codecov.io/gh/Aalihaidar/resume-engine)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/Aalihaidar/resume-engine/badge)](https://scorecard.dev/viewer/?uri=github.com/Aalihaidar/resume-engine)
+
 Data-driven, ATS-safe CV and cover letter builder. Content lives in
 `data/resume.yaml` and `data/cover_letter.yaml`; layout lives in
 `src/resume_builder/templates/`. The rendering pipeline (YAML/JSON →
@@ -61,10 +66,12 @@ uv run resume-build cover-letter --data data/cover_letter.yaml --out output/cove
 | `make lint` | `ruff check` + `ruff format --check` |
 | `make format` | `ruff format` + `ruff check --fix` |
 | `make typecheck` | `mypy --strict src` |
+| `make spell` | cspell over every tracked file (`cspell.json`) |
+| `make audit` | `pip-audit` of `uv.lock`: runtime packages fail, dev tooling warns |
 | `make test` | `pytest` with coverage |
 | `make schema` | Regenerate `schema/resume.schema.json` from `models.py` |
 | `make serve-api` | Run the FastAPI app locally on `:8000` with auto-reload |
-| `make ci` | `lint` + `typecheck` + `test` — same checks CI runs |
+| `make ci` | `lint` + `typecheck` + `test` + `spell` — same checks CI runs |
 | `make clean` | Remove build output and tool caches |
 
 ### API
@@ -185,11 +192,17 @@ validating either YAML file outside a full render. Regenerate with
 ## Testing & linting
 
 Covered by the Makefile shortcuts above (`make test`, `make lint`,
-`make typecheck`, `make ci`). `.pre-commit-config.yaml` wires the same
+`make typecheck`, `make spell`, `make ci`). `.pre-commit-config.yaml` wires the same
 checks into a pre-commit hook (`pre-commit install` once per clone).
 
-`.github/workflows/ci.yml` runs lint, typecheck, test, `pip-audit`, and a
-Trivy config scan of `docker/Dockerfile.prod` on every push/PR.
+`.github/workflows/ci.yml` runs lint, spelling, typecheck, tests on Python 3.12 and
+3.14, a JSON Schema drift check, `pip-audit`, and a Docker build + smoke
+test of the production image on every PR and on pushes to `main` /
+`develop`. `security.yml` adds CodeQL, a workflow audit (zizmor) and a
+Trivy image scan, reported to the repository's code-scanning tab. Render
+deploys `main` only once those checks pass. Branching, required checks and
+dependency automation are described in
+[`.github/CONTRIBUTING.md`](.github/CONTRIBUTING.md).
 
 ## Project layout
 
@@ -198,8 +211,14 @@ Trivy config scan of `docker/Dockerfile.prod` on every push/PR.
 ├── .devcontainer/devcontainer.json   # VS Code Dev Container config
 ├── .vscode/tasks.json                # Makefile targets as VS Code tasks
 ├── .github/
-│   ├── workflows/ci.yml              # lint, typecheck, test, security, dockerfile scan
-│   └── dependabot.yml
+│   ├── workflows/ci.yml              # lint, typecheck, test, schema, audit, docker smoke test
+│   ├── workflows/security.yml        # CodeQL, zizmor, Trivy image scan → code scanning
+│   ├── workflows/scorecard.yml       # OpenSSF Scorecard
+│   ├── workflows/labels.yml          # syncs labels.yml to the repo's labels
+│   ├── dependabot.yml                # uv, docker, actions, devcontainers, pre-commit
+│   ├── CONTRIBUTING.md               # branching, rulesets, CI/CD, dependency policy
+│   ├── SECURITY.md                   # private vulnerability reporting
+│   └── CODEOWNERS, labels.yml, ISSUE_TEMPLATE/, pull_request_template.md
 ├── src/resume_builder/
 │   ├── models.py                     # Pydantic schema for resume.yaml + cover_letter.yaml
 │   ├── render.py                     # YAML/JSON -> HTML (Jinja2) -> PDF (WeasyPrint)
@@ -215,6 +234,7 @@ Trivy config scan of `docker/Dockerfile.prod` on every push/PR.
 │   └── cover_letter.template.yaml
 ├── schema/resume.schema.json         # JSON Schema generated from models.py
 ├── scripts/
+│   ├── audit.sh                      # dependency audit (CI + make audit)
 │   ├── generate_schema.py
 │   ├── entrypoint.dev.sh
 │   └── welcome.sh
@@ -224,6 +244,7 @@ Trivy config scan of `docker/Dockerfile.prod` on every push/PR.
 ├── tests/test_render.py
 ├── output/                           # generated resume.pdf / resume.html / cover_letter.pdf / cover_letter.html
 ├── Makefile
+├── cspell.json                       # spell-check config (+ .cspell/ word lists)
 ├── render.yaml                       # Render Blueprint for the deployment
 ├── docker-compose.yml                # dev container service
 └── docker-compose.prod.yml           # run the production image locally
