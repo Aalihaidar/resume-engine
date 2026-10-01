@@ -158,7 +158,7 @@ jobs:
   security:
     name: Dependency audit
     runs-on: ubuntu-24.04
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -169,22 +169,15 @@ jobs:
           cache-suffix: security
           download-from-astral-mirror: false
       - run: uv sync --group dev
-      # Audits uv.lock (exported with hashes), not the installed venv, so the
-      # result is exactly what the lock pins and the local project itself
-      # isn't reported as "not found on PyPI".
+      # scripts/audit.sh audits uv.lock and retries PyPI network errors; see
+      # its header. Same script as `make audit`.
       - name: Audit runtime dependencies (what ships in the image)
-        run: |
-          uv export --no-dev --no-emit-project --format requirements.txt -q -o runtime.txt
-          uv run pip-audit --strict --disable-pip -r runtime.txt
+        run: bash scripts/audit.sh runtime
       # Dev tooling (pre-commit, pip-audit's own HTTP stack, …) never reaches
       # production. A CVE there is fixed by a Dependabot security PR; failing
       # CI on it would block every unrelated PR, Dependabot's fix included.
       - name: Audit dev dependencies (report only)
-        run: |
-          uv export --only-dev --no-emit-project --format requirements.txt -q -o dev.txt
-          if ! uv run pip-audit --disable-pip -r dev.txt; then
-            echo "::warning title=Dev dependency vulnerability::A dev-only package has a known vulnerability (details in the log above). It does not ship in the image; merge the Dependabot security update or run 'uv lock --upgrade-package <name>'."
-          fi
+        run: bash scripts/audit.sh dev
 
   docker:
     name: Docker build & smoke test

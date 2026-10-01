@@ -67,6 +67,7 @@ uv run resume-build cover-letter --data data/cover_letter.yaml --out output/cove
 | `make format` | `ruff format` + `ruff check --fix` |
 | `make typecheck` | `mypy --strict src` |
 | `make spell` | cspell over every tracked file (`cspell.json`) |
+| `make audit` | `pip-audit` of `uv.lock`: runtime packages fail, dev tooling warns |
 | `make test` | `pytest` with coverage |
 | `make schema` | Regenerate `schema/resume.schema.json` from `models.py` |
 | `make serve-api` | Run the FastAPI app locally on `:8000` with auto-reload |
@@ -233,6 +234,7 @@ dependency automation are described in
 │   └── cover_letter.template.yaml
 ├── schema/resume.schema.json         # JSON Schema generated from models.py
 ├── scripts/
+│   ├── audit.sh                      # dependency audit (CI + make audit)
 │   ├── generate_schema.py
 │   ├── entrypoint.dev.sh
 │   └── welcome.sh

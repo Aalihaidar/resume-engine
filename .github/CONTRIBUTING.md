@@ -130,7 +130,7 @@ Runs on PRs, pushes to `main` / `develop`, and manual dispatch.
 | `Type check` | `mypy --strict` over `src` |
 | `Test (3.12 / 3.14)` | pytest + coverage on the `requires-python` floor and the production version; Codecov upload from 3.14 |
 | `JSON Schema up to date` | Regenerates `schema/resume.schema.json` and fails if it differs from the committed file |
-| `Dependency audit` | `pip-audit` on `uv.lock`: runtime packages (what ships in the image) **block**; dev-only tooling is reported as a warning, since Dependabot security PRs fix those and failing on them would block unrelated PRs |
+| `Dependency audit` | [`scripts/audit.sh`](../scripts/audit.sh) (also `make audit`): `pip-audit` on `uv.lock`; runtime packages (what ships in the image) **block**, dev-only tooling is reported as a warning since Dependabot security PRs fix those. PyPI network errors are retried with backoff; a real finding fails at once |
 | `Docker build & smoke test` | Trivy config scan of both Dockerfiles (accepted exceptions in [`.trivyignore.yaml`](../.trivyignore.yaml)), builds `Dockerfile.prod`, boots it, and checks `/healthz`, `/` and a real PDF render from `data/resume.template.yaml` |
 | `ci-passed` | Aggregate gate — the single required check (skipped jobs count as passing) |
 

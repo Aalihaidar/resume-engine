@@ -1,4 +1,4 @@
-.PHONY: render render-html cover-letter cover-letter-html lint format typecheck test spell schema serve-api repomix ci clean
+.PHONY: render render-html cover-letter cover-letter-html lint format typecheck test spell audit schema serve-api repomix ci clean
 
 render:
 	uv run resume-build render --data data/resume.yaml --out output/resume.pdf
@@ -28,6 +28,10 @@ test:
 
 spell:
 	uv run pre-commit run cspell --all-files
+
+audit:
+	bash scripts/audit.sh runtime
+	bash scripts/audit.sh dev
 
 schema:
 	uv run python scripts/generate_schema.py
