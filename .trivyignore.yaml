@@ -1,0 +1,11 @@
+# Trivy ignores, scoped by path so an exception for one Dockerfile can never
+# hide the same finding in another. Trivy matches paths relative to the scan
+# target, hence the ** prefix. Each entry says why it is accepted.
+misconfigurations:
+  - id: DS-0002
+    paths:
+      - "**/Dockerfile.dev"
+    statement: >-
+      Dev container only: runs as root on purpose (see the file header) and is
+      never published or deployed. docker/Dockerfile.prod runs as a non-root
+      user and is still checked for this rule.

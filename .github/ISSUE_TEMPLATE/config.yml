@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/Aalihaidar/resume-engine/security/advisories/new
+    about: Report security issues privately, not as a public issue.
+  - name: Usage & data format
+    url: https://github.com/Aalihaidar/resume-engine/blob/main/README.md
+    about: How to edit content, toggle sections, and run the CLI / API.

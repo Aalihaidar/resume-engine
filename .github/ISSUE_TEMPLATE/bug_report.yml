@@ -1,0 +1,54 @@
+name: Bug report
+description: Something is broken or renders incorrectly.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the report. For security issues use the private advisory form instead.
+        Please don't paste real personal details — reduce your YAML/JSON to the smallest example that shows the problem.
+  - type: dropdown
+    id: interface
+    attributes:
+      label: Where does it happen?
+      multiple: true
+      options:
+        - CLI (resume-build)
+        - JSON API
+        - Web form
+        - Rendered PDF / HTML layout
+        - Docker / dev container
+        - CI / Dependabot
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What did you do, what did you expect, and what actually happened?
+      placeholder: |
+        Steps:
+        1. ...
+        Expected: ...
+        Actual: ...
+    validations:
+      required: true
+  - type: textarea
+    id: input
+    attributes:
+      label: Minimal input
+      description: The smallest YAML / JSON payload that reproduces it (redacted).
+      render: yaml
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs / error output
+      description: Command output, API response body, or a traceback.
+      render: text
+  - type: textarea
+    id: env
+    attributes:
+      label: Environment
+      description: OS, Python version, `uv --version`, and whether you used the dev container, Docker or the live site.
+    validations:
+      required: true

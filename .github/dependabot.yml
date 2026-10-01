@@ -1,20 +1,146 @@
+# https://docs.github.com/code-security/dependabot/working-with-dependabot/dependabot-options-reference
+#
+# Every ecosystem opens PRs against `develop` (never `main`). Dependabot reads
+# THIS file from the repository's default branch, so a change here takes
+# effect once it reaches that branch.
+#
+# Every pinned version in the repo is covered by one ecosystem below:
+#   uv              pyproject.toml + uv.lock
+#   docker          docker/Dockerfile.* (the python base image and the uv image)
+#   github-actions  .github/workflows/* (SHA pins + version comments)
+#   devcontainers   .devcontainer/devcontainer.json (+ devcontainer-lock.json)
+#   pre-commit      .pre-commit-config.yaml (hook revs)
+#
+# Cooldown: a version update is proposed only once the release is 7 days old,
+# so a compromised or broken release is usually caught (and yanked) upstream
+# before it reaches a PR. Security updates are never delayed by it.
+#
+# Minor + patch bumps are grouped into one PR per ecosystem; majors arrive as
+# individual PRs so each breaking change is reviewed on its own.
 version: 2
+
 updates:
+  # ---------------------------------------------------------------------------
+  # Python — uv (pyproject.toml + uv.lock), runtime and dev groups
+  # ---------------------------------------------------------------------------
   - package-ecosystem: "uv"
     directory: "/"
     target-branch: "develop"
     schedule:
       interval: "weekly"
+      day: "monday"
+      time: "04:00"
+      timezone: "Etc/UTC"
+    cooldown:
+      default-days: 7
     open-pull-requests-limit: 10
+    # Only bump the pyproject floor when the current constraint can't satisfy
+    # the new version; otherwise just refresh uv.lock.
+    versioning-strategy: "increase-if-necessary"
+    # Direct AND transitive dependencies: pip-audit in CI fails on a vulnerable
+    # transitive package too, so Dependabot should be able to bump those.
+    allow:
+      - dependency-type: "all"
+    labels: ["dependencies", "python"]
+    commit-message:
+      prefix: "chore(deps)"
+      prefix-development: "chore(deps-dev)"
+    groups:
+      python-minor-patch:
+        applies-to: version-updates
+        patterns: ["*"]
+        update-types: ["minor", "patch"]
+      python-security:
+        applies-to: security-updates
+        patterns: ["*"]
 
+  # ---------------------------------------------------------------------------
+  # Docker — FROM lines in docker/Dockerfile.dev and docker/Dockerfile.prod
+  # ---------------------------------------------------------------------------
   - package-ecosystem: "docker"
     directory: "/docker"
     target-branch: "develop"
     schedule:
       interval: "weekly"
+      day: "monday"
+      time: "04:00"
+      timezone: "Etc/UTC"
+    cooldown:
+      default-days: 7
+    open-pull-requests-limit: 5
+    labels: ["dependencies", "docker"]
+    commit-message:
+      prefix: "chore(deps)"
+    groups:
+      docker-minor-patch:
+        applies-to: version-updates
+        patterns: ["*"]
+        update-types: ["minor", "patch"]
+      docker-security:
+        applies-to: security-updates
+        patterns: ["*"]
 
+  # ---------------------------------------------------------------------------
+  # GitHub Actions — SHA pins in .github/workflows/*; bumps SHA + version comment
+  # ---------------------------------------------------------------------------
   - package-ecosystem: "github-actions"
     directory: "/"
     target-branch: "develop"
     schedule:
       interval: "weekly"
+      day: "monday"
+      time: "04:00"
+      timezone: "Etc/UTC"
+    cooldown:
+      default-days: 7
+    open-pull-requests-limit: 5
+    labels: ["dependencies", "ci"]
+    commit-message:
+      prefix: "chore(ci)"
+    groups:
+      github-actions:
+        patterns: ["*"]
+
+  # ---------------------------------------------------------------------------
+  # Dev container — .devcontainer/devcontainer.json feature versions
+  # ---------------------------------------------------------------------------
+  - package-ecosystem: "devcontainers"
+    directory: "/"
+    target-branch: "develop"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "04:00"
+      timezone: "Etc/UTC"
+    cooldown:
+      default-days: 7
+    open-pull-requests-limit: 5
+    labels: ["dependencies", "devcontainer"]
+    commit-message:
+      prefix: "chore(deps-dev)"
+    groups:
+      devcontainers:
+        patterns: ["*"]
+
+  # ---------------------------------------------------------------------------
+  # pre-commit — hook revs in .pre-commit-config.yaml. The ruff hook's rev is
+  # meant to match the ruff version in uv.lock: its bump arrives here and
+  # ruff's own in the uv group PR, the same Monday — merge the two together.
+  # ---------------------------------------------------------------------------
+  - package-ecosystem: "pre-commit"
+    directory: "/"
+    target-branch: "develop"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "04:00"
+      timezone: "Etc/UTC"
+    cooldown:
+      default-days: 7
+    open-pull-requests-limit: 5
+    labels: ["dependencies", "pre-commit"]
+    commit-message:
+      prefix: "chore(deps-dev)"
+    groups:
+      pre-commit-hooks:
+        patterns: ["*"]

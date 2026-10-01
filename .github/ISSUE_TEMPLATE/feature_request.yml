@@ -1,0 +1,38 @@
+name: Feature request
+description: Propose a change or a new capability.
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem / motivation
+      description: What need does this address? Link related issues.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed change
+      description: What should happen? Note any impact on the data format (models / JSON Schema), the API, or the template layout.
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      multiple: true
+      options:
+        - Data model / validation
+        - Templates / PDF layout
+        - CLI
+        - JSON API
+        - Web form
+        - Docker / deployment
+        - CI / tooling
+        - Docs
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered

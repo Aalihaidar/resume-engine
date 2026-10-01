@@ -1,0 +1,40 @@
+# Words cspell should accept anywhere in the repo: tools, packages, env vars,
+# identifiers. One word per line, kept sorted (case-insensitive). Comments
+# start with #. Resume / cover-letter vocabulary goes in resume-words.txt.
+
+# Owner / repository
+Aalihaidar
+Haidar
+janedoe
+
+# Tooling and CI
+htmlcov
+repomix
+sarif
+testpaths
+trivyignores
+zizmor
+
+# Docker / system packages (WeasyPrint runtime deps)
+dejavu
+Dockerfiles
+libcairo
+libgdk
+libharfbuzz
+libpango
+libpangocairo
+nologin
+Pango
+pixbuf
+PYTHONDONTWRITEBYTECODE
+PYTHONUNBUFFERED
+USERPROFILE
+
+# Application
+Downscales
+headshot
+healthz
+jsyaml
+onrender
+subline
+Tailorable

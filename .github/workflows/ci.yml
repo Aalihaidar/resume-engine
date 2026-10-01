@@ -2,62 +2,120 @@ name: CI
 
 on:
   push:
-    branches: ["**"]
-    tags: ["v*"]
+    # Feature branches get CI via the pull_request trigger below; restricting
+    # push to the long-lived branches avoids duplicate runs per commit.
+    branches: [main, develop]
   pull_request:
     types: [opened, synchronize, reopened]
+  workflow_dispatch:
+
+# Least privilege by default; no job here writes to the repo.
+permissions:
+  contents: read
 
 concurrency:
   group: ci-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
+  # Cancel superseded PR runs, but let every push to main/develop finish so
+  # each commit on a protected branch keeps its own CI record (Render's
+  # checksPass deploy trigger waits on it).
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  FORCE_COLOR: "1"
+  UV_FROZEN: "1"
 
 jobs:
   verify-pr-source:
     if: github.event_name == 'pull_request' && github.event.pull_request.base.ref == 'main'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
     steps:
-      - name: Ensure PRs into main only come from develop
+      - name: Ensure PRs into main only come from this repo's develop
+        # Event values reach the script through env, never spliced in with ${{ }}:
+        # whoever opens a PR chooses the branch name, and it can contain shell syntax.
+        env:
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
+          HEAD_REPO: ${{ github.event.pull_request.head.repo.full_name }}
+          THIS_REPO: ${{ github.repository }}
         run: |
-          HEAD_REF="${{ github.event.pull_request.head.ref }}"
-          if [ "$HEAD_REF" != "develop" ]; then
-            echo "❌ PRs into 'main' are only allowed from 'develop' (got '$HEAD_REF')."
+          # A fork can also have a branch called develop, so check the repo too.
+          if [ "$HEAD_REF" != "develop" ] || [ "$HEAD_REPO" != "$THIS_REPO" ]; then
+            echo "::error::PRs into 'main' are only allowed from '$THIS_REPO:develop' (got '$HEAD_REPO:$HEAD_REF')."
             exit 1
           fi
           echo "✅ PR source verified: develop -> main"
 
   lint:
-    runs-on: ubuntu-latest
+    name: Lint & format
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
         with:
           enable-cache: true
           cache-suffix: lint
           download-from-astral-mirror: false
-      - run: uv sync --group dev --frozen
-      - run: uv run ruff check .
+      - run: uv sync --group dev
+      - run: uv run ruff check --output-format=github .
       - run: uv run ruff format --check .
 
-  typecheck:
-    runs-on: ubuntu-latest
+  spelling:
+    name: Spelling
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: streetsidesoftware/cspell-action@6f3c77c1406bc930f944ba97e9801a22e42caf58 # v9.1.0
+        with:
+          # The whole repo every run (it takes seconds), with the files and
+          # ignores from cspell.json, so CI, `make spell` and the editor agree.
+          incremental_files_only: false
+          use_cspell_files: true
+          check_dot_files: true
+          inline: error
+          suggestions: true
+          summary: true
+
+  typecheck:
+    name: Type check
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
         with:
           enable-cache: true
           cache-suffix: typecheck
           download-from-astral-mirror: false
-      - run: uv sync --group dev --frozen
+      - run: uv sync --group dev
       - run: uv run mypy src
 
   test:
-    runs-on: ubuntu-latest
+    name: Test (Python ${{ matrix.python-version }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        # The floor from pyproject's requires-python, and the version the
+        # production image ships (docker/Dockerfile.prod).
+        python-version: ["3.12", "3.14"]
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
         with:
+          python-version: ${{ matrix.python-version }}
           enable-cache: true
-          cache-suffix: test
+          cache-suffix: test-${{ matrix.python-version }}
           download-from-astral-mirror: false
       # WeasyPrint needs Pango/Cairo at runtime, same as the Docker image.
       - name: Install WeasyPrint system dependencies
@@ -65,62 +123,150 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y --no-install-recommends \
             libpango-1.0-0 libpangocairo-1.0-0 libcairo2 libgdk-pixbuf-2.0-0 \
-            libffi-dev shared-mime-info fonts-dejavu-core fonts-liberation
-      - run: uv sync --group dev --frozen
-      - run: uv run pytest --cov=resume_builder --cov-report=xml
-      - uses: codecov/codecov-action@v7
+            libharfbuzz-subset0 libffi-dev shared-mime-info fonts-dejavu-core fonts-liberation
+      - run: uv sync --group dev
+      - run: uv run pytest --cov=resume_builder --cov-report=xml --cov-report=term-missing
+      - uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
+        if: matrix.python-version == '3.14'
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
+          files: coverage.xml
           fail_ci_if_error: false
 
-  security:
-    runs-on: ubuntu-latest
+  schema:
+    name: JSON Schema up to date
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          enable-cache: true
+          cache-suffix: schema
+          download-from-astral-mirror: false
+      - run: uv sync
+      - run: uv run python scripts/generate_schema.py
+      - name: Fail if models.py changed without `make schema`
+        run: |
+          if ! git diff --exit-code -- schema/; then
+            echo "::error file=schema/resume.schema.json::Schema is stale. Run 'make schema' and commit the result."
+            exit 1
+          fi
+
+  security:
+    name: Dependency audit
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
         with:
           enable-cache: true
           cache-suffix: security
           download-from-astral-mirror: false
-      - run: uv sync --group dev --frozen
-      - run: uv run pip-audit
+      - run: uv sync --group dev
+      # Audits uv.lock (exported with hashes), not the installed venv, so the
+      # result is exactly what the lock pins and the local project itself
+      # isn't reported as "not found on PyPI".
+      - name: Audit runtime dependencies (what ships in the image)
+        run: |
+          uv export --no-dev --no-emit-project --format requirements.txt -q -o runtime.txt
+          uv run pip-audit --strict --disable-pip -r runtime.txt
+      # Dev tooling (pre-commit, pip-audit's own HTTP stack, …) never reaches
+      # production. A CVE there is fixed by a Dependabot security PR; failing
+      # CI on it would block every unrelated PR, Dependabot's fix included.
+      - name: Audit dev dependencies (report only)
+        run: |
+          uv export --only-dev --no-emit-project --format requirements.txt -q -o dev.txt
+          if ! uv run pip-audit --disable-pip -r dev.txt; then
+            echo "::warning title=Dev dependency vulnerability::A dev-only package has a known vulnerability (details in the log above). It does not ship in the image; merge the Dependabot security update or run 'uv lock --upgrade-package <name>'."
+          fi
 
-  dockerfile-check:
-    runs-on: ubuntu-latest
+  docker:
+    name: Docker build & smoke test
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # Both Dockerfiles are blocking. Accepted exceptions (the dev image runs
+      # as root on purpose) live in .trivyignore.yaml, scoped to one file each.
       - name: Trivy config scan — Dockerfile.prod
-        uses: aquasecurity/trivy-action@v0.36.0
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
           scan-type: config
           scan-ref: docker/Dockerfile.prod
           severity: CRITICAL,HIGH
+          trivyignores: .trivyignore.yaml
           exit-code: "1"
 
-      - name: Trivy config scan — Dockerfile.dev (report only)
-        uses: aquasecurity/trivy-action@v0.36.0
+      - name: Trivy config scan — Dockerfile.dev
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
           scan-type: config
           scan-ref: docker/Dockerfile.dev
           severity: CRITICAL,HIGH
-          exit-code: "0"
+          trivyignores: .trivyignore.yaml
+          exit-code: "1"
+
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+
+      # Render builds this same Dockerfile on deploy; building it here catches a
+      # broken image before it reaches main instead of as a failed deploy.
+      - name: Build production image
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: .
+          file: docker/Dockerfile.prod
+          tags: resume-engine:ci
+          load: true
+          push: false
+          cache-from: type=gha,scope=prod
+          # A failed cache write must not fail a build whose image is complete.
+          cache-to: type=gha,scope=prod,mode=max,ignore-error=true
+
+      # Unit tests run against the runner's system libraries; this proves the
+      # slim runtime image itself has everything WeasyPrint needs to render.
+      - name: Smoke test the container
+        run: |
+          docker run -d --name app -p 8000:8000 resume-engine:ci
+          trap 'docker logs app; docker rm -f app >/dev/null' EXIT
+
+          for _ in $(seq 1 30); do
+            curl -fsS http://localhost:8000/healthz && break
+            sleep 1
+          done
+          curl -fsS http://localhost:8000/healthz > /dev/null
+          curl -fsS http://localhost:8000/ > /dev/null
+
+          yq -o=json data/resume.template.yaml > payload.json
+          curl -fsS -H "Content-Type: application/json" --data-binary @payload.json \
+            -o resume.pdf http://localhost:8000/api/resume/pdf
+          head -c 5 resume.pdf | grep -q '%PDF-'
+          echo "✅ Image serves /healthz, / and renders a PDF ($(stat -c %s resume.pdf) bytes)"
 
   ci-passed:
+    name: ci-passed
     if: always()
-    needs: [verify-pr-source, lint, typecheck, test, security, dockerfile-check]
-    runs-on: ubuntu-latest
+    needs: [verify-pr-source, lint, spelling, typecheck, test, schema, security, docker]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
     steps:
+      # The single required status check for branch rulesets. verify-pr-source
+      # is skipped for PRs not targeting main — skipped counts as passing.
       - name: Check all required jobs succeeded
+        env:
+          RESULTS: ${{ join(needs.*.result, ' ') }}
         run: |
-          for result in \
-            "${{ needs.verify-pr-source.result }}" \
-            "${{ needs.lint.result }}" \
-            "${{ needs.typecheck.result }}" \
-            "${{ needs.test.result }}" \
-            "${{ needs.security.result }}" \
-            "${{ needs.dockerfile-check.result }}"; do
+          for result in $RESULTS; do
             if [ "$result" != "success" ] && [ "$result" != "skipped" ]; then
-              echo "❌ A required job failed: $result"
+              echo "::error::A required job did not succeed: $result"
               exit 1
             fi
           done
