@@ -22,7 +22,8 @@ concurrency:
 
 env:
   FORCE_COLOR: "1"
-  UV_FROZEN: "1"
+  # Like frozen, but also fails when uv.lock is out of date with pyproject.toml.
+  UV_LOCKED: "1"
 
 jobs:
   verify-pr-source:
@@ -104,9 +105,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # The floor from pyproject's requires-python, and the version the
-        # production image ships (docker/Dockerfile.prod).
-        python-version: ["3.12", "3.14"]
+        # The floor from pyproject's requires-python, the version the
+        # production image ships (docker/Dockerfile.prod), and the one between.
+        python-version: ["3.12", "3.13", "3.14"]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -150,8 +151,32 @@ jobs:
       - run: uv run python scripts/generate_schema.py
       - name: Fail if models.py changed without `make schema`
         run: |
-          if ! git diff --exit-code -- schema/; then
+          # `status` (unlike `diff`) also catches a schema file that was never added.
+          if [ -n "$(git status --porcelain -- schema/)" ]; then
+            git --no-pager diff -- schema/
             echo "::error file=schema/resume.schema.json::Schema is stale. Run 'make schema' and commit the result."
+            exit 1
+          fi
+
+  web-assets:
+    name: Web assets up to date
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # The runner's preinstalled Node is enough; web/.npmrc blocks install scripts.
+      - name: Rebuild the web form assets
+        working-directory: web
+        run: |
+          npm ci
+          npm run build
+      - name: Fail if the committed assets differ from a fresh build
+        run: |
+          if [ -n "$(git status --porcelain -- src/resume_builder/web_static/assets)" ]; then
+            git status --short -- src/resume_builder/web_static/assets
+            echo "::error::Committed web assets are stale. Run 'make web-assets' and commit the result."
             exit 1
           fi
 
@@ -238,16 +263,28 @@ jobs:
           curl -fsS http://localhost:8000/healthz > /dev/null
           curl -fsS http://localhost:8000/ > /dev/null
 
-          yq -o=json data/resume.template.yaml > payload.json
+          # The template names a server-side photo file; over HTTP a photo must be inline.
+          yq -o=json '.photo = null' data/resume.template.yaml > payload.json
           curl -fsS -H "Content-Type: application/json" --data-binary @payload.json \
             -o resume.pdf http://localhost:8000/api/resume/pdf
           head -c 5 resume.pdf | grep -q '%PDF-'
-          echo "✅ Image serves /healthz, / and renders a PDF ($(stat -c %s resume.pdf) bytes)"
+
+          # The web form's own assets, and the policy that only allows those.
+          curl -fsS http://localhost:8000/assets/app.css > /dev/null
+          curl -fsS -D - -o /dev/null http://localhost:8000/ | grep -qi '^content-security-policy:'
+
+          # A bad payload must be a clean 422, never a 500.
+          yq -o=json '.photo = "data:image/png;base64,@@@@"' data/resume.template.yaml > bad.json
+          status=$(curl -s -o /dev/null -w '%{http_code}' -H "Content-Type: application/json" \
+            --data-binary @bad.json http://localhost:8000/api/resume/pdf)
+          [ "$status" = "422" ] || { echo "::error::expected 422 for an invalid photo, got $status"; exit 1; }
+
+          echo "✅ Image serves /healthz, / and its assets, renders a PDF ($(stat -c %s resume.pdf) bytes) and rejects bad input with 422"
 
   ci-passed:
     name: ci-passed
     if: always()
-    needs: [verify-pr-source, lint, spelling, typecheck, test, schema, security, docker]
+    needs: [verify-pr-source, lint, spelling, typecheck, test, schema, web-assets, security, docker]
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:

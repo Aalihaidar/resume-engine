@@ -67,3 +67,6 @@
 - name: "pre-commit"
   color: "fab040"
   description: "pre-commit hook versions in .pre-commit-config.yaml"
+- name: "web"
+  color: "0e8a16"
+  description: "Web form build tooling in web/"

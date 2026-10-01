@@ -32,6 +32,9 @@ Commit messages follow [Conventional Commits](https://www.conventionalcommits.or
 `feat(web): …`, `fix(api): …`, `ci: …`, `chore(deps): …`, imperative, subject
 ≤ 72 characters, body explains *why*.
 
+Changing the web form's styling (`web/`, or the classes in `index.html` / `app.js`) needs
+`make web-assets` (Node 20+) to regenerate the committed CSS; no other workflow needs Node.
+
 Install the hooks once per clone with `uv run pre-commit install`. Besides
 ruff, cspell and whitespace fixers, a local hook re-renders `output/resume.pdf` when
 `data/resume.yaml` or a template changes — if it modifies files the commit
@@ -140,10 +143,11 @@ Runs on PRs, pushes to `main` / `develop`, and manual dispatch.
 | `Lint & format` | `ruff check` (inline PR annotations) + `ruff format --check` |
 | `Spelling` | cspell over the whole repo with `cspell.json`; unknown words are annotated inline with suggestions |
 | `Type check` | `mypy --strict` over `src` |
-| `Test (3.12 / 3.14)` | pytest + coverage on the `requires-python` floor and the production version; Codecov upload from 3.14 |
-| `JSON Schema up to date` | Regenerates `schema/resume.schema.json` and fails if it differs from the committed file |
+| `Test (3.12 / 3.13 / 3.14)` | pytest + coverage (the run fails below the `fail_under` threshold in `pyproject.toml`) on the `requires-python` floor, the version between and the production version; Codecov upload from 3.14 |
+| `JSON Schema up to date` | Regenerates `schema/*.schema.json` and fails if any differs from the committed file |
+| `Web assets up to date` | Rebuilds the web form's CSS, fonts and vendored js-yaml from `web/` and fails if they differ from the committed files in `src/resume_builder/web_static/assets/` |
 | `Dependency audit` | [`scripts/audit.sh`](../scripts/audit.sh) (also `make audit`): `pip-audit` on `uv.lock`; runtime packages (what ships in the image) **block**, dev-only tooling is reported as a warning since Dependabot security PRs fix those. PyPI network errors are retried with backoff; a real finding fails at once |
-| `Docker build & smoke test` | Trivy config scan of both Dockerfiles (accepted exceptions in [`.trivyignore.yaml`](../.trivyignore.yaml)), builds `Dockerfile.prod`, boots it, and checks `/healthz`, `/` and a real PDF render from `data/resume.template.yaml` |
+| `Docker build & smoke test` | Trivy config scan of both Dockerfiles (accepted exceptions in [`.trivyignore.yaml`](../.trivyignore.yaml)), builds `Dockerfile.prod`, boots it, and checks `/healthz`, `/`, the page's assets and its Content-Security-Policy header, a real PDF render from `data/resume.template.yaml`, and that an invalid photo is a clean `422` |
 | `ci-passed` | Aggregate gate — the single required check (skipped jobs count as passing) |
 
 ### [`security.yml`](workflows/security.yml) — code scanning

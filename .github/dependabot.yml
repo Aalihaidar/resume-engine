@@ -6,6 +6,7 @@
 #
 # Every pinned version in the repo is covered by one ecosystem below:
 #   uv              pyproject.toml + uv.lock
+#   npm             web/package.json (build tooling for the web form's committed assets)
 #   docker          docker/Dockerfile.* (the python base image and the uv image)
 #   github-actions  .github/workflows/* (SHA pins + version comments)
 #   devcontainers   .devcontainer/devcontainer.json (+ devcontainer-lock.json)
@@ -143,4 +144,28 @@ updates:
       prefix: "chore(deps-dev)"
     groups:
       pre-commit-hooks:
+        patterns: ["*"]
+
+  # ---------------------------------------------------------------------------
+  # npm — web/ build tooling (Tailwind, fonts, js-yaml). Never reaches production
+  # directly: the built files are committed. CI's "Web assets up to date" job
+  # fails on a bump until `make web-assets` has been run and its output pushed
+  # to the Dependabot branch, which keeps a changed vendored file reviewable.
+  # ---------------------------------------------------------------------------
+  - package-ecosystem: "npm"
+    directory: "/web"
+    target-branch: "develop"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "04:00"
+      timezone: "Etc/UTC"
+    cooldown:
+      default-days: 7
+    open-pull-requests-limit: 5
+    labels: ["dependencies", "web"]
+    commit-message:
+      prefix: "chore(deps-dev)"
+    groups:
+      web-assets:
         patterns: ["*"]
