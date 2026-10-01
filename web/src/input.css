@@ -1,0 +1,128 @@
+@import "tailwindcss";
+@config "../tailwind.config.js";
+@plugin "@tailwindcss/forms";
+@source "../../src/resume_builder/web_static/index.html";
+@source "../../src/resume_builder/web_static/assets/app.js";
+
+/* Self-hosted variable fonts (latin subset), copied from node_modules by build.mjs. */
+@font-face {
+  font-family: "Geist";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url("fonts/geist-latin-wght-normal.woff2") format("woff2-variations");
+}
+
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 800;
+  src: url("fonts/jetbrains-mono-latin-wght-normal.woff2")
+    format("woff2-variations");
+}
+
+@layer base {
+  /* Tailwind 4's preflight no longer gives buttons a pointer cursor. */
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+}
+
+body {
+  font-family: "Geist", sans-serif;
+}
+
+.code-font {
+  font-family: "JetBrains Mono", monospace;
+}
+
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #2d3449;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #10b981;
+}
+
+.glass-panel {
+  background: rgba(23, 31, 51, 0.8);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(218, 226, 253, 0.1);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+}
+
+/* -- interactive states driven by JS class / attribute toggles -- */
+.tab {
+  padding: 6px 16px;
+  border-radius: 0.125rem;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 500;
+  color: #bbcabf;
+  background: transparent;
+  border: none;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
+}
+.tab:hover {
+  background: rgba(218, 226, 253, 0.05);
+  color: #dae2fd;
+}
+.tab[aria-pressed="true"] {
+  background: #10b981;
+  color: #00422b;
+}
+.tab:focus-visible,
+.focus-ring:focus-visible {
+  outline: 2px solid #4edea3;
+  outline-offset: 2px;
+}
+
+#status {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 12px;
+  letter-spacing: 0.05em;
+  padding: 4px 10px;
+  border-radius: 0.125rem;
+  color: #bbcabf;
+  background: rgba(187, 202, 191, 0.06);
+  border: 1px solid rgba(187, 202, 191, 0.12);
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+#status.ok {
+  color: #4edea3;
+  background: rgba(78, 222, 163, 0.1);
+  border-color: rgba(78, 222, 163, 0.25);
+}
+#status.error {
+  color: #ffb4ab;
+  background: rgba(255, 180, 171, 0.1);
+  border-color: rgba(255, 180, 171, 0.25);
+}
+#status:empty {
+  display: none;
+}
+
+#yamlInput {
+  caret-color: #4edea3;
+}
+#yamlInput::placeholder {
+  color: #3c4a42;
+}
+
+#lineNumbers {
+  white-space: pre;
+}

@@ -1,0 +1,207 @@
+{
+  "$defs": {
+    "Contact": {
+      "additionalProperties": false,
+      "properties": {
+        "location": {
+          "maxLength": 200,
+          "title": "Location",
+          "type": "string"
+        },
+        "phone": {
+          "maxLength": 200,
+          "title": "Phone",
+          "type": "string"
+        },
+        "email": {
+          "format": "email",
+          "title": "Email",
+          "type": "string"
+        },
+        "linkedin_display": {
+          "maxLength": 200,
+          "title": "Linkedin Display",
+          "type": "string"
+        },
+        "linkedin_url": {
+          "format": "uri",
+          "maxLength": 2083,
+          "minLength": 1,
+          "title": "Linkedin Url",
+          "type": "string"
+        },
+        "github_display": {
+          "anyOf": [
+            {
+              "maxLength": 200,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Github Display"
+        },
+        "github_url": {
+          "anyOf": [
+            {
+              "format": "uri",
+              "maxLength": 2083,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Github Url"
+        }
+      },
+      "required": [
+        "location",
+        "phone",
+        "email",
+        "linkedin_display",
+        "linkedin_url"
+      ],
+      "title": "Contact",
+      "type": "object"
+    },
+    "CoverLetterRecipient": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "anyOf": [
+            {
+              "maxLength": 200,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Name"
+        },
+        "title": {
+          "anyOf": [
+            {
+              "maxLength": 200,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Title"
+        },
+        "company": {
+          "maxLength": 200,
+          "title": "Company",
+          "type": "string"
+        },
+        "company_address": {
+          "anyOf": [
+            {
+              "maxLength": 2000,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Company Address"
+        }
+      },
+      "required": [
+        "company"
+      ],
+      "title": "CoverLetterRecipient",
+      "type": "object"
+    },
+    "CoverLetterSectionToggles": {
+      "additionalProperties": false,
+      "description": "Master on/off switch for each part of the cover letter.",
+      "properties": {
+        "date": {
+          "default": true,
+          "title": "Date",
+          "type": "boolean"
+        },
+        "recipient": {
+          "default": true,
+          "title": "Recipient",
+          "type": "boolean"
+        },
+        "body": {
+          "default": true,
+          "title": "Body",
+          "type": "boolean"
+        }
+      },
+      "title": "CoverLetterSectionToggles",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "applicant_name": {
+      "maxLength": 200,
+      "title": "Applicant Name",
+      "type": "string"
+    },
+    "applicant_contact": {
+      "$ref": "#/$defs/Contact"
+    },
+    "date": {
+      "maxLength": 200,
+      "title": "Date",
+      "type": "string"
+    },
+    "recipient": {
+      "$ref": "#/$defs/CoverLetterRecipient"
+    },
+    "role_title": {
+      "maxLength": 200,
+      "title": "Role Title",
+      "type": "string"
+    },
+    "salutation": {
+      "default": "Dear Hiring Manager,",
+      "maxLength": 200,
+      "title": "Salutation",
+      "type": "string"
+    },
+    "sections": {
+      "$ref": "#/$defs/CoverLetterSectionToggles"
+    },
+    "body_paragraphs": {
+      "items": {
+        "maxLength": 5000,
+        "type": "string"
+      },
+      "maxItems": 30,
+      "title": "Body Paragraphs",
+      "type": "array"
+    },
+    "closing": {
+      "default": "Sincerely,",
+      "maxLength": 200,
+      "title": "Closing",
+      "type": "string"
+    }
+  },
+  "required": [
+    "applicant_name",
+    "applicant_contact",
+    "date",
+    "recipient",
+    "role_title"
+  ],
+  "title": "CoverLetter",
+  "type": "object"
+}

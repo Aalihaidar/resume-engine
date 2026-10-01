@@ -1,13 +1,25 @@
 """Render resume.yaml -> resume.pdf and cover_letter.yaml -> cover_letter.pdf
-via Jinja2 + WeasyPrint."""
+via Jinja2 + WeasyPrint.
+
+Every interface (CLI, HTTP API, web form) goes through the functions here, so
+layout and safety rules live in exactly one place. In particular, WeasyPrint
+is only ever given `_LocalResourceFetcher`: the templates need a stylesheet and
+an optional headshot, nothing else, so a document may not make the renderer
+reach out to the network or read arbitrary files.
+"""
 
 from __future__ import annotations
 
+from functools import cache
 from pathlib import Path
+from typing import Any
+from urllib.parse import urlparse
+from urllib.request import url2pathname
 
 import yaml
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from weasyprint import HTML
+from weasyprint.urls import URLFetcher
 
 from resume_builder.models import CoverLetter, Resume
 
@@ -16,10 +28,37 @@ TEMPLATES_DIR = PACKAGE_DIR / "templates"
 STATIC_DIR = PACKAGE_DIR / "static"
 
 
+class _LocalResourceFetcher(URLFetcher):  # type: ignore[misc]  # WeasyPrint is untyped
+    """Serve only `data:` URIs and files inside the templates / static dirs."""
+
+    _ALLOWED_ROOTS = (TEMPLATES_DIR.resolve(), STATIC_DIR.resolve())
+
+    def __init__(self) -> None:
+        super().__init__(allowed_protocols={"data", "file"})
+
+    def fetch(self, url: str, headers: dict[str, str] | None = None) -> Any:
+        if url.lower().startswith("file:"):
+            path = Path(url2pathname(urlparse(url).path)).resolve()
+            if not any(path.is_relative_to(root) for root in self._ALLOWED_ROOTS):
+                raise ValueError(f"Refusing to read outside the template directories: {url}")
+        return super().fetch(url, headers)
+
+
+@cache
+def _environment() -> Environment:
+    return Environment(
+        loader=FileSystemLoader(str(TEMPLATES_DIR)),
+        autoescape=select_autoescape(["html", "j2"]),
+    )
+
+
+def _read_yaml(data_path: Path) -> object:
+    return yaml.safe_load(data_path.read_text(encoding="utf-8"))
+
+
 def load_resume(data_path: Path) -> Resume:
     """Load and validate resume.yaml into a typed Resume object."""
-    raw = yaml.safe_load(data_path.read_text(encoding="utf-8"))
-    return Resume.model_validate(raw)
+    return Resume.model_validate(_read_yaml(data_path))
 
 
 def _resolve_photo_path(photo: str) -> str | None:
@@ -60,11 +99,7 @@ def _resolve_photo_path(photo: str) -> str | None:
 
 def render_html(resume: Resume, template_name: str = "resume.html.j2") -> str:
     """Render the resume data into an HTML string using the Jinja2 template."""
-    env = Environment(
-        loader=FileSystemLoader(str(TEMPLATES_DIR)),
-        autoescape=select_autoescape(["html", "j2"]),
-    )
-    template = env.get_template(template_name)
+    template = _environment().get_template(template_name)
 
     photo_path = None
     if resume.show_photo and resume.photo is not None:
@@ -73,10 +108,20 @@ def render_html(resume: Resume, template_name: str = "resume.html.j2") -> str:
     return template.render(resume=resume, photo_path=photo_path)
 
 
-def render_pdf(html_content: str, output_path: Path) -> None:
+def render_pdf_bytes(html_content: str) -> bytes:
     """Convert rendered HTML to a print-ready, ATS-safe single-column PDF."""
+    pdf: bytes = HTML(
+        string=html_content,
+        base_url=str(TEMPLATES_DIR),
+        url_fetcher=_LocalResourceFetcher(),
+    ).write_pdf()
+    return pdf
+
+
+def render_pdf(html_content: str, output_path: Path) -> None:
+    """Write the PDF for `html_content` to `output_path`, creating parent dirs."""
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    HTML(string=html_content, base_url=str(TEMPLATES_DIR)).write_pdf(str(output_path))
+    output_path.write_bytes(render_pdf_bytes(html_content))
 
 
 def build(
@@ -97,20 +142,14 @@ def build(
 
 def load_cover_letter(data_path: Path) -> CoverLetter:
     """Load and validate cover_letter.yaml into a typed CoverLetter object."""
-    raw = yaml.safe_load(data_path.read_text(encoding="utf-8"))
-    return CoverLetter.model_validate(raw)
+    return CoverLetter.model_validate(_read_yaml(data_path))
 
 
 def render_cover_letter_html(
     letter: CoverLetter, template_name: str = "cover_letter.html.j2"
 ) -> str:
     """Render the cover letter data into an HTML string using the Jinja2 template."""
-    env = Environment(
-        loader=FileSystemLoader(str(TEMPLATES_DIR)),
-        autoescape=select_autoescape(["html", "j2"]),
-    )
-    template = env.get_template(template_name)
-    return template.render(letter=letter)
+    return _environment().get_template(template_name).render(letter=letter)
 
 
 def build_cover_letter(

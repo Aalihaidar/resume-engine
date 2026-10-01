@@ -1,8 +1,16 @@
-"""Typed schema for resume.yaml.
+"""Typed schema for resume.yaml and cover_letter.yaml.
 
 Keeping this as a Pydantic model means malformed data (missing fields, wrong
 types) fails loudly at build time instead of silently breaking the PDF layout
 — important once an AI agent starts editing the YAML unattended.
+
+Strictness
+----------
+Every model rejects unknown keys (`extra="forbid"`). Without that, a typo such
+as `experiance:` or `bulets:` validates fine and the content is silently
+dropped from the PDF. Strings and lists also carry generous length limits: they
+never trip on real content, but they bound how much work a single request to
+the public, no-auth API (api.py) can make the renderer do.
 
 Visibility model
 -----------------
@@ -23,7 +31,8 @@ Photo validation
 -----------------
 `Resume.photo` accepts two forms (see render.py for how each is resolved):
   - a `data:image/{png,jpeg,webp};base64,...` URI — validated here for MIME
-    type, size, and that the payload is actually well-formed base64, since
+    type, size, that the payload is well-formed base64, and that the decoded
+    bytes really start with the signature of the declared image type, since
     this is a no-auth public endpoint (api.py) and nothing else stops a
     caller from POSTing an oversized or malformed value.
   - a plain filename referencing an image inside STATIC_DIR (the original
@@ -31,26 +40,57 @@ Photo validation
     can never be used to reference a file outside STATIC_DIR. render.py
     re-derives the basename and re-checks containment independently, so this
     stays safe even if a Resume is ever constructed without going through
-    this validator.
+    this validator. The HTTP API additionally refuses this form altogether.
 """
 
 from __future__ import annotations
 
 import base64
 import re
+from typing import Annotated
 
-from pydantic import BaseModel, EmailStr, HttpUrl, field_validator, model_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    EmailStr,
+    Field,
+    HttpUrl,
+    StringConstraints,
+    field_validator,
+    model_validator,
+)
 
 _PLACEHOLDER_RE = re.compile(r"\[[A-Z][A-Z0-9 _-]*\]")
 
 # --- Photo constraints -------------------------------------------------
 # Applied in Resume._validate_photo below.
-_DATA_URI_RE = re.compile(r"^data:image/(png|jpeg|jpg|webp);base64,")
+_DATA_URI_RE = re.compile(r"^data:image/(png|jpeg|webp);base64,")
 MAX_PHOTO_DECODED_BYTES = 3 * 1024 * 1024  # 3MB decoded image
 MAX_PHOTO_FILENAME_LEN = 255
 
+# --- Size limits -------------------------------------------------------
+# Far above anything a real resume needs; they exist to bound render work.
+ShortText = Annotated[str, StringConstraints(max_length=200)]
+LongText = Annotated[str, StringConstraints(max_length=2_000)]
+Paragraph = Annotated[str, StringConstraints(max_length=5_000)]
+MAX_ENTRIES = 50
+MAX_BULLETS = 30
 
-class SectionToggles(BaseModel):
+
+def _has_image_signature(kind: str, data: bytes) -> bool:
+    """True when `data` starts with the magic bytes of the declared image type."""
+    if kind == "png":
+        return data.startswith(b"\x89PNG\r\n\x1a\n")
+    if kind == "jpeg":
+        return data.startswith(b"\xff\xd8\xff")
+    return data[:4] == b"RIFF" and data[8:12] == b"WEBP"  # webp
+
+
+class _StrictModel(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+
+class SectionToggles(_StrictModel):
     """Master on/off switch for each top-level section of the resume."""
 
     summary: bool = True
@@ -63,34 +103,34 @@ class SectionToggles(BaseModel):
     photo: bool = True
 
 
-class Contact(BaseModel):
-    location: str
-    phone: str
+class Contact(_StrictModel):
+    location: ShortText
+    phone: ShortText
     email: EmailStr
-    linkedin_display: str
+    linkedin_display: ShortText
     linkedin_url: HttpUrl
-    github_display: str | None = None
+    github_display: ShortText | None = None
     github_url: HttpUrl | None = None
 
 
-class ExperienceEntry(BaseModel):
+class ExperienceEntry(_StrictModel):
     include: bool = True
-    title: str
-    company: str
-    location: str
-    start: str
-    end: str
-    bullets: list[str]
+    title: ShortText
+    company: ShortText
+    location: ShortText
+    start: ShortText
+    end: ShortText
+    bullets: list[LongText] = Field(max_length=MAX_BULLETS)
 
 
-class ProjectLink(BaseModel):
+class ProjectLink(_StrictModel):
     """A single external link attached to a project (repo, live demo, model card, etc.)."""
 
-    label: str
+    label: ShortText
     url: HttpUrl
 
 
-class ProjectEntry(BaseModel):
+class ProjectEntry(_StrictModel):
     """One personal/academic/freelance project.
 
     Distinct from `ExperienceEntry` because projects are typically unpaid,
@@ -101,57 +141,57 @@ class ProjectEntry(BaseModel):
     """
 
     include: bool = True
-    name: str
-    organization: str | None = None
-    start: str
-    end: str
-    bullets: list[str] = []
-    technologies: list[str] = []
-    links: list[ProjectLink] = []
+    name: ShortText
+    organization: ShortText | None = None
+    start: ShortText
+    end: ShortText
+    bullets: list[LongText] = Field(default_factory=list, max_length=MAX_BULLETS)
+    technologies: list[ShortText] = Field(default_factory=list, max_length=MAX_ENTRIES)
+    links: list[ProjectLink] = Field(default_factory=list, max_length=MAX_BULLETS)
 
 
-class EducationEntry(BaseModel):
+class EducationEntry(_StrictModel):
     include: bool = True
-    degree: str
-    institution: str
-    location: str
-    start: str
-    end: str
-    details: list[str] = []
+    degree: ShortText
+    institution: ShortText
+    location: ShortText
+    start: ShortText
+    end: ShortText
+    details: list[LongText] = Field(default_factory=list, max_length=MAX_BULLETS)
 
 
-class SkillGroup(BaseModel):
+class SkillGroup(_StrictModel):
     include: bool = True
-    category: str
-    items: list[str]
+    category: ShortText
+    items: list[ShortText] = Field(max_length=MAX_ENTRIES)
 
 
-class Certification(BaseModel):
+class Certification(_StrictModel):
     include: bool = True
-    name: str
-    issuer: str
-    date: str
+    name: ShortText
+    issuer: ShortText
+    date: ShortText
 
 
-class Language(BaseModel):
+class Language(_StrictModel):
     include: bool = True
-    name: str
-    level: str
+    name: ShortText
+    level: ShortText
 
 
-class Resume(BaseModel):
-    name: str
-    headline: str
+class Resume(_StrictModel):
+    name: ShortText
+    headline: LongText
     contact: Contact
     photo: str | None = None
-    sections: SectionToggles = SectionToggles()
-    summary: str
-    experience: list[ExperienceEntry] = []
-    projects: list[ProjectEntry] = []
-    education: list[EducationEntry] = []
-    skills: list[SkillGroup] = []
-    certifications: list[Certification] = []
-    languages: list[Language] = []
+    sections: SectionToggles = Field(default_factory=SectionToggles)
+    summary: Paragraph
+    experience: list[ExperienceEntry] = Field(default_factory=list, max_length=MAX_ENTRIES)
+    projects: list[ProjectEntry] = Field(default_factory=list, max_length=MAX_ENTRIES)
+    education: list[EducationEntry] = Field(default_factory=list, max_length=MAX_ENTRIES)
+    skills: list[SkillGroup] = Field(default_factory=list, max_length=MAX_ENTRIES)
+    certifications: list[Certification] = Field(default_factory=list, max_length=MAX_ENTRIES)
+    languages: list[Language] = Field(default_factory=list, max_length=MAX_ENTRIES)
 
     @field_validator("photo")
     @classmethod
@@ -185,9 +225,13 @@ class Resume(BaseModel):
             # truncated/corrupt data URI here, with a clear error, instead of
             # failing deep inside WeasyPrint mid-render.
             try:
-                base64.b64decode(b64_data, validate=True)
-            except Exception as exc:
+                decoded = base64.b64decode(b64_data, validate=True)
+            except ValueError as exc:
                 raise ValueError("photo data URI is not valid base64") from exc
+
+            # The declared MIME type is caller-controlled; the bytes decide.
+            if not _has_image_signature(match.group(1), decoded):
+                raise ValueError(f"photo bytes are not a valid {match.group(1)} image")
 
             return v
 
@@ -255,7 +299,7 @@ class Resume(BaseModel):
         return [lang for lang in self.languages if lang.include]
 
 
-class CoverLetterSectionToggles(BaseModel):
+class CoverLetterSectionToggles(_StrictModel):
     """Master on/off switch for each part of the cover letter."""
 
     date: bool = True
@@ -263,23 +307,23 @@ class CoverLetterSectionToggles(BaseModel):
     body: bool = True
 
 
-class CoverLetterRecipient(BaseModel):
-    name: str | None = None
-    title: str | None = None
-    company: str
-    company_address: str | None = None
+class CoverLetterRecipient(_StrictModel):
+    name: ShortText | None = None
+    title: ShortText | None = None
+    company: ShortText
+    company_address: LongText | None = None
 
 
-class CoverLetter(BaseModel):
-    applicant_name: str
+class CoverLetter(_StrictModel):
+    applicant_name: ShortText
     applicant_contact: Contact
-    date: str
+    date: ShortText
     recipient: CoverLetterRecipient
-    role_title: str
-    salutation: str = "Dear Hiring Manager,"
-    sections: CoverLetterSectionToggles = CoverLetterSectionToggles()
-    body_paragraphs: list[str] = []
-    closing: str = "Sincerely,"
+    role_title: ShortText
+    salutation: ShortText = "Dear Hiring Manager,"
+    sections: CoverLetterSectionToggles = Field(default_factory=CoverLetterSectionToggles)
+    body_paragraphs: list[Paragraph] = Field(default_factory=list, max_length=MAX_BULLETS)
+    closing: ShortText = "Sincerely,"
 
     @model_validator(mode="after")
     def _no_leftover_placeholders(self) -> CoverLetter:
@@ -289,10 +333,14 @@ class CoverLetter(BaseModel):
         placeholder renders straight into the PDF silently.
         """
         candidates = {
+            "applicant_name": self.applicant_name,
             "role_title": self.role_title,
+            "salutation": self.salutation,
+            "closing": self.closing,
             "recipient.company": self.recipient.company,
             "recipient.name": self.recipient.name,
             "recipient.title": self.recipient.title,
+            "recipient.company_address": self.recipient.company_address,
             "date": self.date,
             **{f"body_paragraphs[{i}]": p for i, p in enumerate(self.body_paragraphs)},
         }

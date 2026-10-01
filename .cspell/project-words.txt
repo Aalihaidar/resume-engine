@@ -38,3 +38,17 @@ jsyaml
 onrender
 subline
 Tailorable
+trixie
+pyupgrade
+addopts
+secho
+IHDR
+IDAT
+IEND
+IIBBBBB
+wght
+delenv
+nohup
+# Deliberate misspellings: examples of the typos the models now reject.
+experiance
+bulets

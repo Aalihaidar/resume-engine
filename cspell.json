@@ -10,6 +10,10 @@
     "uv.lock",
     ".devcontainer/devcontainer-lock.json",
     "schema/*.schema.json",
+    "web/package-lock.json",
+    "web/node_modules/",
+    "src/resume_builder/web_static/assets/app.css",
+    "src/resume_builder/web_static/assets/js-yaml.min.js",
     "output/",
     "**/*.{pdf,jpg,jpeg,png,webp,ico}"
   ],
