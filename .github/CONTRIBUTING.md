@@ -59,16 +59,25 @@ Keep both lists sorted. Words that only appear in machine-maintained strings
 
 ### Rulesets — Settings → Rules → Rulesets
 
+**Default branch** (Settings → General): **`develop`**, so new PRs target it by
+default, Dependabot reads its config from it, and scheduled workflows run on it.
+
 **`protect-main`** (target: `main`)
 
 | Setting | Value |
 | --- | --- |
-| Enforcement | **Active**, empty bypass list |
+| Enforcement | **Active**, **empty bypass list** — with an admin bypass, the owner can still push to `main` directly |
+| Restrict creations / Restrict updates | ❌ / ❌ — with an empty bypass list these would block PR merges too; "Require a pull request" is what stops direct pushes |
 | Restrict deletions / Block force pushes | ✅ / ✅ |
-| Require a pull request before merging | ✅ — 0 approvals while solo; Code Owners review once there's a second maintainer |
+| Require a pull request before merging | ✅ — 0 approvals while solo (you can't approve your own PR); Code Owners review once there's a second maintainer |
 | Require conversation resolution | ✅ |
-| Require status checks to pass | ✅ — **`ci-passed`** and **`verify-pr-source`**; require branches up to date ✅ |
-| Allowed merge methods | **Merge** (keeps `develop` history intact) |
+| Require status checks to pass | ✅ — **`ci-passed`** and **`verify-pr-source`**; require branches up to date ❌ (see below) |
+| Allowed merge methods | **Merge** only (keeps `develop` history intact) |
+
+Release PRs are merge commits, so `main` always has one commit `develop`
+doesn't. With "require branches up to date" on, every release PR would first
+need `main` merged back into `develop`; leaving it off avoids that, and the
+merge still fails if there's a real conflict.
 
 **`protect-develop`** (target: `develop`)
 
@@ -77,8 +86,11 @@ Keep both lists sorted. Words that only appear in machine-maintained strings
 | Enforcement | **Active**, empty bypass list |
 | Restrict deletions / Block force pushes | ✅ / ✅ |
 | Require a pull request before merging | ✅ (0 approvals while solo) |
-| Require status checks to pass | ✅ — **`ci-passed`** |
-| Allowed merge methods | **Squash** |
+| Require status checks to pass | ✅ — **`ci-passed`**; require branches up to date ✅ |
+| Allowed merge methods | **Squash** (one commit per feature / Dependabot PR) |
+
+"Automatically delete head branches" never deletes `develop` after a release
+PR, because it is the default branch; "Restrict deletions" is the second guard.
 
 "Only `develop` may PR into `main`" can't be expressed as a ruleset — GitHub
 has no source-branch rule. The **`verify-pr-source`** job in
@@ -149,7 +161,8 @@ introduces them.
 
 ### [`scorecard.yml`](workflows/scorecard.yml) — OpenSSF Scorecard
 
-Grades the repo's supply-chain practices on pushes to `main` and weekly, and
+Grades the repo's supply-chain practices on pushes to `develop` (the default
+branch — Scorecard only publishes from it) and weekly, and
 publishes the score behind the README badge. `publish_results: true`
 restricts what that file may contain — see its header before editing.
 
