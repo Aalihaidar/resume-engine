@@ -24,6 +24,7 @@
     "schema/**",
     "scripts/**",
     "tests/**",
+    "web/**",
     "README.md",
     "pyproject.toml",
     "docker-compose.yml",

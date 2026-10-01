@@ -13,6 +13,9 @@ htmlcov/
 # uv
 # (uv.lock is intentionally NOT ignored - it's committed for reproducibility)
 
+# Node tooling for the web form assets (web/); the built files are committed
+web/node_modules/
+
 # Env / secrets
 .env
 !.env.example

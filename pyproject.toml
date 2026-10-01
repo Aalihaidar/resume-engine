@@ -4,8 +4,20 @@ version = "1.0.0"
 description = "Data-driven, ATS-safe CV/resume builder (YAML -> HTML -> PDF), agent-editable."
 readme = "README.md"
 requires-python = ">=3.12"
-license = { text = "MIT" }
+license = "MIT"
+license-files = ["LICENSE"]
 authors = [{ name = "Ali Haidar" }]
+keywords = ["resume", "cv", "cover-letter", "ats", "pdf", "weasyprint", "fastapi"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Framework :: FastAPI",
+    "Intended Audience :: End Users/Desktop",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Office/Business",
+]
 
 dependencies = [
     "weasyprint>=70.0",
@@ -26,10 +38,15 @@ dev = [
     "pip-audit>=2.10.1",
     "pre-commit>=4.6.2",
     "types-pyyaml>=6.0.12.20260906",
+    "httpx2>=2.13.1",
 ]
 
 [project.scripts]
 resume-build = "resume_builder.cli:app"
+
+[project.urls]
+Homepage = "https://github.com/Aalihaidar/resume-engine"
+Issues = "https://github.com/Aalihaidar/resume-engine/issues"
 
 [build-system]
 requires = ["hatchling"]
@@ -47,11 +64,15 @@ target-version = "py312"
 src = ["src", "tests"]
 
 [tool.ruff.lint]
-select = ["E", "F", "I", "UP", "B", "SIM", "C4"]
+# E/F/I/UP/B/SIM/C4: pycodestyle, pyflakes, isort, pyupgrade, bugbear, simplify,
+# comprehensions. RUF: ruff-specific. PT: pytest style. PTH: pathlib over os.path.
+# S: bandit-style security checks, relevant for a public no-auth endpoint.
+select = ["E", "F", "I", "UP", "B", "SIM", "C4", "RUF", "PT", "PTH", "S"]
 ignore = ["E501"]
 
 [tool.ruff.lint.per-file-ignores]
 "src/resume_builder/cli.py" = ["B008"]
+"tests/**" = ["S101"]
 
 [tool.ruff.format]
 quote-style = "double"
@@ -61,11 +82,24 @@ python_version = "3.12"
 mypy_path = "src"
 packages = ["resume_builder"]
 strict = true
+
+# WeasyPrint ships no type information; scope the leniency to it instead of
+# silencing missing imports for every dependency.
+[[tool.mypy.overrides]]
+module = ["weasyprint", "weasyprint.*"]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]
 testpaths = ["tests"]
+addopts = "-ra --strict-markers --strict-config"
+filterwarnings = ["error"]
 
 [tool.coverage.run]
 source = ["src/resume_builder"]
+branch = true
+
+[tool.coverage.report]
+fail_under = 90
+show_missing = true
+skip_covered = true

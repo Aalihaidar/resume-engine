@@ -20,8 +20,9 @@
   "forwardPorts": [8000],
   "portsAttributes": {
     "8000": {
-      "label": "Resume Engine API",
-      "onAutoForward": "notify"
+      "label": "Resume Engine (web form + API)",
+      // Opens the site in VS Code's built-in Simple Browser as soon as it is up.
+      "onAutoForward": "openPreview"
     }
   },
 
@@ -60,5 +61,8 @@
   },
 
   "postCreateCommand": "uv sync --group dev && git config core.fileMode false",
+  // Every time the container starts: run the web app in the background.
+  // `|| true` keeps a failed start from blocking the container (see the log it prints).
+  "postStartCommand": "bash scripts/start-dev-server.sh || true",
   "remoteUser": "root"
 }

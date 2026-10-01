@@ -1,4 +1,4 @@
-.PHONY: render render-html cover-letter cover-letter-html lint format typecheck test spell audit schema serve-api repomix ci clean
+.PHONY: render render-html cover-letter cover-letter-html lint format typecheck test spell audit schema web-assets serve-api repomix ci clean
 
 render:
 	uv run resume-build render --data data/resume.yaml --out output/resume.pdf
@@ -36,8 +36,13 @@ audit:
 schema:
 	uv run python scripts/generate_schema.py
 
+# Rebuilds the committed CSS / fonts / js-yaml under src/resume_builder/web_static/assets/.
+# Needs Node 20+; only required after changing web/ or index.html / app.js classes.
+web-assets:
+	cd web && npm ci && npm run build
+
 serve-api:
-	uv run uvicorn resume_builder.api:app --host 0.0.0.0 --port 8000 --reload
+	uv run uvicorn resume_builder.api:app --host 0.0.0.0 --port 8000 --reload --reload-dir src
 
 repomix:
 	npx --yes repomix@latest
