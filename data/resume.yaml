@@ -11,9 +11,9 @@ sections:
   photo: true
 
 contact:
-  location: "Saint Petersburg, Russia"
+  location: "Saint Petersburg, Russia · Open to relocation / remote"
   phone: "+7 (931) 585-08-58"
-  email: "Aalihaidar.1995@gmail.com"
+  email: "aalihaidar.1995@gmail.com"
   linkedin_display: "linkedin.com/in/alihaidar1995"
   linkedin_url: "https://www.linkedin.com/in/alihaidar1995/"
   github_display: "github.com/Aalihaidar"
@@ -35,7 +35,7 @@ summary: >
 # -----------------------------------------------------------------------
 experience:
   - include: true
-    title: "AI/ML & CAD Engineer — Industrial Automation"
+    title: "AI/ML & CAD Engineer"
     company: "IROS-System"
     location: "Saint Petersburg, Russia"
     start: "Jul 2023"
@@ -120,13 +120,17 @@ skills:
       - "Artificial Neural Networks"
       - "Image Processing"
       - "Reinforcement Learning"
+      - "PyTorch"
       - "TensorFlow"
+      - "OpenCV"
       - "Python (pandas, scikit-learn)"
 
   - category: "Generative AI & LLMs (applied)"
     items:
       - "Retrieval-Augmented Generation (RAG)"
-      - "AI Agents / LangGraph"
+      - "AI Agents"
+      - "LangChain"
+      - "LangGraph"
       - "Large Language Models (LLMs)"
       - "Generative AI"
 
@@ -155,6 +159,9 @@ skills:
     items:
       - "FastAPI"
       - "Weaviate"
+      - "Arize Phoenix"
+      - "SQL"
+      - "Linux"
       - "Docker"
       - "Git"
       - "Programmable Logic Controller (PLC)"
@@ -183,11 +190,11 @@ certifications:
   - include: true
     name: "LangChain for LLM Application Development"
     issuer: "DeepLearning.AI"
-    date: "[NEED DATE]"
+    date: "Jul 2026"
   - include: true
     name: "LangChain Chat with Your Data"
     issuer: "DeepLearning.AI"
-    date: "[NEED DATE]"
+    date: "Jul 2026"
   - include: true
     name: "Knowledge Graphs for RAG"
     issuer: "DeepLearning.AI"
