@@ -1,4 +1,4 @@
-.PHONY: render render-html cover-letter cover-letter-html lint format typecheck test spell audit schema web-assets serve-api repomix ci clean
+.PHONY: render render-html cover-letter cover-letter-html lint format typecheck test spell audit schema web-assets hooks serve-api repomix ci clean
 
 render:
 	uv run resume-build render --data data/resume.yaml --out output/resume.pdf
@@ -40,6 +40,10 @@ schema:
 # Needs Node 20+; only required after changing web/ or index.html / app.js classes.
 web-assets:
 	cd web && npm ci && npm run build
+
+# Turns on the git hooks in this clone (the dev container does this on every start).
+hooks:
+	uv run pre-commit install --install-hooks
 
 serve-api:
 	uv run uvicorn resume_builder.api:app --host 0.0.0.0 --port 8000 --reload --reload-dir src
