@@ -71,6 +71,15 @@ Your SSH agent and `~/.gitconfig` are forwarded, so `git` works as on the
 host. `.vscode/tasks.json` exposes the Makefile targets as tasks
 (`Ctrl+Shift+B` renders the resume).
 
+**The git hooks switch on by themselves.** On every container start
+[`scripts/setup-git-hooks.sh`](scripts/setup-git-hooks.sh) installs the
+pre-commit hooks if they are missing, and a small `git` wrapper re-checks that
+before each `git commit` (terminal and Source Control alike), putting the hook
+back if it was deleted. It never blocks or changes a commit. If you commit from
+a terminal *outside* the container, install pre-commit there too
+(`uv tool install pre-commit`), because the hook is shared through the mounted
+folder and fails when `pre-commit` is not available.
+
 **The web app starts by itself** every time the container starts
 ([`scripts/start-dev-server.sh`](scripts/start-dev-server.sh)) and opens in
 VS Code's built-in Simple Browser on port 8000, with auto-reload on edits under
@@ -102,7 +111,7 @@ macOS: `brew install pango`. On Windows, use the dev container.
 
 ```bash
 uv sync --group dev
-uv run pre-commit install    # optional: run the checks on every commit
+make hooks                   # run the checks (ruff, cspell, ...) on every commit
 make render
 ```
 
