@@ -61,8 +61,9 @@
   },
 
   "postCreateCommand": "uv sync --group dev && git config core.fileMode false",
-  // Every time the container starts: run the web app in the background.
-  // `|| true` keeps a failed start from blocking the container (see the log it prints).
-  "postStartCommand": "bash scripts/start-dev-server.sh || true",
+  // Every time the container starts: turn on the git hooks (and the commit-time check that
+  // puts them back if they ever go missing), then run the web app in the background.
+  // Both scripts always let the container finish starting; see their output for problems.
+  "postStartCommand": "bash scripts/setup-git-hooks.sh; bash scripts/start-dev-server.sh || true",
   "remoteUser": "root"
 }

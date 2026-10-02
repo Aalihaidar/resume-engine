@@ -35,7 +35,8 @@ Commit messages follow [Conventional Commits](https://www.conventionalcommits.or
 Changing the web form's styling (`web/`, or the classes in `index.html` / `app.js`) needs
 `make web-assets` (Node 20+) to regenerate the committed CSS; no other workflow needs Node.
 
-Install the hooks once per clone with `uv run pre-commit install`. Besides
+Install the hooks once per clone with `make hooks` (the dev container does it on every start, and
+re-checks before each `git commit`). Besides
 ruff, cspell and whitespace fixers, a local hook re-renders `output/resume.pdf` when
 `data/resume.yaml` or a template changes — if it modifies files the commit
 stops once; re-stage and commit again.
