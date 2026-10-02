@@ -126,6 +126,33 @@ def test_user_text_is_html_escaped(resume_payload: dict[str, Any]) -> None:
     assert str(escape("<script>alert(1)</script>")) in html
 
 
+def test_linkedin_is_optional_in_the_resume_header(resume_payload: dict[str, Any]) -> None:
+    contact = resume_payload["contact"]
+    linkedin = str(escape(contact["linkedin_display"]))
+    assert linkedin in render_html(Resume.model_validate(resume_payload))
+
+    del contact["linkedin_display"], contact["linkedin_url"]
+    html = render_html(Resume.model_validate(resume_payload))
+    assert linkedin not in html
+    assert str(escape(contact["github_display"])) in html
+
+    contact.pop("github_display", None)
+    contact.pop("github_url", None)
+    assert 'class="contact-line contact-links"' not in render_html(
+        Resume.model_validate(resume_payload)
+    )
+
+
+def test_linkedin_is_optional_in_the_cover_letter_header(
+    cover_letter_payload: dict[str, Any],
+) -> None:
+    contact = cover_letter_payload["applicant_contact"]
+    linkedin = str(escape(contact["linkedin_display"]))
+    del contact["linkedin_display"], contact["linkedin_url"]
+    html = render_cover_letter_html(CoverLetter.model_validate(cover_letter_payload))
+    assert linkedin not in html
+
+
 def test_render_cover_letter_html_contains_key_fields(cover_letter_payload: dict[str, Any]) -> None:
     letter = CoverLetter.model_validate(cover_letter_payload)
     html = render_cover_letter_html(letter)
