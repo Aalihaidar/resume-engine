@@ -19,12 +19,16 @@
         &nbsp;·&nbsp; {{ resume.contact.phone }}
         &nbsp;·&nbsp; {{ resume.contact.email }}
       </p>
+      {% if resume.contact.linkedin_display or resume.contact.github_display %}
       <p class="contact-line contact-links">
+        {% if resume.contact.linkedin_display %}
         <a href="{{ resume.contact.linkedin_url }}">{{ resume.contact.linkedin_display }}</a>
+        {% endif %}
         {% if resume.contact.github_display %}
-        &nbsp;·&nbsp; <a href="{{ resume.contact.github_url }}">{{ resume.contact.github_display }}</a>
+        {% if resume.contact.linkedin_display %}&nbsp;·&nbsp; {% endif %}<a href="{{ resume.contact.github_url }}">{{ resume.contact.github_display }}</a>
         {% endif %}
       </p>
+      {% endif %}
     </div>
   </header>
 

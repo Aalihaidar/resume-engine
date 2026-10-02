@@ -107,8 +107,8 @@ class Contact(_StrictModel):
     location: ShortText
     phone: ShortText
     email: EmailStr
-    linkedin_display: ShortText
-    linkedin_url: HttpUrl
+    linkedin_display: ShortText | None = None
+    linkedin_url: HttpUrl | None = None
     github_display: ShortText | None = None
     github_url: HttpUrl | None = None
 

@@ -14,12 +14,16 @@
       &nbsp;·&nbsp; {{ letter.applicant_contact.phone }}
       &nbsp;·&nbsp; {{ letter.applicant_contact.email }}
     </p>
+    {% if letter.applicant_contact.linkedin_display or letter.applicant_contact.github_display %}
     <p class="cl-contact">
+      {% if letter.applicant_contact.linkedin_display %}
       <a href="{{ letter.applicant_contact.linkedin_url }}">{{ letter.applicant_contact.linkedin_display }}</a>
+      {% endif %}
       {% if letter.applicant_contact.github_display %}
-      &nbsp;·&nbsp; <a href="{{ letter.applicant_contact.github_url }}">{{ letter.applicant_contact.github_display }}</a>
+      {% if letter.applicant_contact.linkedin_display %}&nbsp;·&nbsp; {% endif %}<a href="{{ letter.applicant_contact.github_url }}">{{ letter.applicant_contact.github_display }}</a>
       {% endif %}
     </p>
+    {% endif %}
   </header>
 
   {% if letter.show_date %}

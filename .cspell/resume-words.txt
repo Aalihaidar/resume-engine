@@ -4,13 +4,16 @@
 # kept sorted (case-insensitive). Comments start with #.
 
 # Organizations, institutions, products
+Adiwah
 Airtable
+Danshop
 HIAST
 IROS
 ITMO
 Sber
 SOLIDWORKS
 Syriatel
+Tzakartk
 UNDP
 UNDP's
 
@@ -18,6 +21,9 @@ UNDP's
 alihaidar
 
 # Domain vocabulary
+Firestore
 mechatronic
 mechatronics
+MVVM
+telematics
 workstreams
