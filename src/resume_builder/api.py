@@ -12,7 +12,9 @@ Endpoints:
   GET  /healthz                -> {"status": "ok"}
   GET  /                        -> serves web_static/index.html (manual YAML-fill UI;
                                     converts to JSON client-side before posting)
-  GET  /assets/*               -> the UI's own CSS, script and fonts (self-hosted)
+  GET  /assets/*               -> the UI's own CSS, script and fonts (self-hosted);
+                                    served with `no-cache` so a deploy is never masked by
+                                    a stale stylesheet or script (ETag keeps it cheap)
 
 Any app or AI agent can call the two POST endpoints directly with a JSON
 body matching schema/resume.schema.json — no auth, no YAML step.
@@ -44,6 +46,7 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import FileResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
+from starlette.types import Scope
 
 from resume_builder import __version__
 from resume_builder.middleware import (
@@ -181,13 +184,27 @@ def cover_letter_pdf(letter: CoverLetter) -> Response:
     return _pdf_response(render_cover_letter_html(letter), "cover_letter.pdf")
 
 
+class RevalidatedStaticFiles(StaticFiles):
+    """StaticFiles that makes browsers revalidate on every load.
+
+    The asset URLs are not fingerprinted, and without a Cache-Control header a browser may
+    keep using an old app.css or app.js against a newer index.html (the page then renders
+    unstyled or half-broken until a hard reload). `no-cache` still allows a 304 via the ETag.
+    """
+
+    async def get_response(self, path: str, scope: Scope) -> Response:
+        response = await super().get_response(path, scope)
+        response.headers["Cache-Control"] = "no-cache"
+        return response
+
+
 @app.api_route("/", methods=["GET", "HEAD"], include_in_schema=False)
 def index() -> FileResponse:
     return FileResponse(
         WEB_STATIC_DIR / "index.html",
         media_type="text/html",
-        headers={"Content-Security-Policy": CONTENT_SECURITY_POLICY},
+        headers={"Content-Security-Policy": CONTENT_SECURITY_POLICY, "Cache-Control": "no-cache"},
     )
 
 
-app.mount("/assets", StaticFiles(directory=WEB_STATIC_DIR / "assets"), name="assets")
+app.mount("/assets", RevalidatedStaticFiles(directory=WEB_STATIC_DIR / "assets"), name="assets")

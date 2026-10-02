@@ -279,7 +279,8 @@ async function renderPreview() {
     if (currentBlobUrl) URL.revokeObjectURL(currentBlobUrl);
     currentBlobUrl = URL.createObjectURL(blob);
     if (canEmbedPdf) {
-      pdfFrame.src = currentBlobUrl;
+      // FitH makes the viewer fit the page width instead of showing it at 100% in a narrow pane.
+      pdfFrame.src = currentBlobUrl + '#view=FitH';
       pdfFrame.hidden = false;
     } else {
       pdfOpenLink.href = currentBlobUrl;
