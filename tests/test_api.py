@@ -76,6 +76,18 @@ def test_ui_assets_are_served(client: TestClient, path: str) -> None:
     assert response.content
 
 
+@pytest.mark.parametrize("path", ["/", "/assets/app.css", "/assets/app.js"])
+def test_ui_is_revalidated_so_a_deploy_is_never_masked_by_a_stale_copy(
+    client: TestClient, path: str
+) -> None:
+    first = client.get(path)
+    assert first.headers["cache-control"] == "no-cache"
+    if path != "/":
+        again = client.get(path, headers={"If-None-Match": first.headers["etag"]})
+        assert again.status_code == 304
+        assert again.headers["cache-control"] == "no-cache"
+
+
 def test_framing_is_refused_unless_development_embedding_is_enabled() -> None:
     assert "frame-ancestors 'none'" in api.content_security_policy()
     assert "frame-ancestors *" in api.content_security_policy(allow_embedding=True)
