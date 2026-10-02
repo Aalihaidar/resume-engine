@@ -11,7 +11,13 @@ const photoInput = document.getElementById('photoInput');
 const removePhotoBtn = document.getElementById('removePhotoBtn');
 const pdfFrame = document.getElementById('pdfFrame');
 const pdfPlaceholder = document.getElementById('pdfPlaceholder');
+const pdfFallback = document.getElementById('pdfFallback');
+const pdfOpenLink = document.getElementById('pdfOpenLink');
 const pdfOverlay = document.getElementById('pdfOverlay');
+
+// Most phone browsers cannot render a PDF inside an <iframe> (they show a blocked-file icon),
+// so there the preview becomes a link that opens the PDF in the browser's own viewer.
+const canEmbedPdf = navigator.pdfViewerEnabled !== false;
 
 let kind = 'resume';
 let currentBlobUrl = null;
@@ -183,6 +189,8 @@ function resetPreview() {
   }
   pdfFrame.hidden = true;
   pdfFrame.removeAttribute('src');
+  pdfFallback.hidden = true;
+  pdfOpenLink.removeAttribute('href');
   pdfPlaceholder.hidden = false;
   downloadBtn.disabled = true;
   setStatus('');
@@ -270,8 +278,13 @@ async function renderPreview() {
 
     if (currentBlobUrl) URL.revokeObjectURL(currentBlobUrl);
     currentBlobUrl = URL.createObjectURL(blob);
-    pdfFrame.src = currentBlobUrl;
-    pdfFrame.hidden = false;
+    if (canEmbedPdf) {
+      pdfFrame.src = currentBlobUrl;
+      pdfFrame.hidden = false;
+    } else {
+      pdfOpenLink.href = currentBlobUrl;
+      pdfFallback.hidden = false;
+    }
     pdfPlaceholder.hidden = true;
     downloadBtn.disabled = false;
     setStatus('Up to date', 'ok');
