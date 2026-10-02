@@ -51,16 +51,32 @@
           "type": "string"
         },
         "linkedin_display": {
-          "maxLength": 200,
-          "title": "Linkedin Display",
-          "type": "string"
+          "anyOf": [
+            {
+              "maxLength": 200,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Linkedin Display"
         },
         "linkedin_url": {
-          "format": "uri",
-          "maxLength": 2083,
-          "minLength": 1,
-          "title": "Linkedin Url",
-          "type": "string"
+          "anyOf": [
+            {
+              "format": "uri",
+              "maxLength": 2083,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Linkedin Url"
         },
         "github_display": {
           "anyOf": [
@@ -94,9 +110,7 @@
       "required": [
         "location",
         "phone",
-        "email",
-        "linkedin_display",
-        "linkedin_url"
+        "email"
       ],
       "title": "Contact",
       "type": "object"

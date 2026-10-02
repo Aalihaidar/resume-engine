@@ -1,0 +1,244 @@
+name: "Ali Haidar"
+headline: "AI/ML & Full-Stack Engineer | Machine Learning · Python/Django · Flutter"
+
+sections:
+  summary: true
+  experience: true
+  projects: true
+  education: true
+  skills: true
+  certifications: true
+  languages: true
+  photo: true
+
+contact:
+  location: "Saint Petersburg, Russia · Open to relocation / remote"
+  phone: "+7 (931) 585-08-58"
+  email: "alihaidar.199527@gmail.com"
+  github_display: "github.com/alihaidar0"
+  github_url: "https://github.com/alihaidar0"
+
+photo: headshot.jpg
+
+summary: >
+  AI/ML & Full-Stack Engineer with 6+ years of commercial software experience and an MSc (Honors)
+  in Robotics and Artificial Intelligence from ITMO University. Ships production ML and LLM
+  systems end to end: a RAG-based AI agent (LangGraph, Weaviate, FastAPI) with Arize Phoenix
+  observability, and a recommendation system for a supermarket chain, validated through A/B
+  testing. Combines deep learning (Python, PyTorch) with solid engineering practice (Django,
+  PostgreSQL, Docker, Linux, Clean Architecture) and a record of Flutter and React products
+  published to the App Store and Google Play.
+
+# -----------------------------------------------------------------------
+# EXPERIENCE
+# -----------------------------------------------------------------------
+experience:
+  - include: true
+    title: "Machine Learning & Full-Stack Engineer"
+    company: "Independent IT Consultant (Freelance)"
+    location: ""
+    start: "Dec 2022"
+    end: "Present"
+    bullets:
+      - "Designed and built the backend of an agentic RAG chatbot for a restaurant chain (bilingual RU/EN menu and FAQ): a LangGraph agent with hybrid vector and keyword search over Weaviate Cloud, served through FastAPI, with answers grounded in the client's knowledge base. Pre-release."
+      - "Implemented logging, monitoring and observability with Arize Phoenix to trace and debug the agent."
+      - "Delivered an AI agent-based chatbot engagement for a gym client."
+      - "Launched a live prototype on a sample English-language menu, with a web chat page and a Telegram bot sharing one agent. Live: wagami-rag-en-staging.onrender.com · @wagami_restaurant_bot"
+      - "Built a recommendation system for a supermarket chain from scratch on transactional and user data, combining deep learning and classical ML (Python, PyTorch, Transformers)."
+      - "Owned the full ML lifecycle: data collection, EDA, prototyping, inference, monitoring and support."
+      - "Planned, ran and evaluated A/B tests to validate new algorithms and improve conversion metrics; built dashboards and visualizations that surfaced customer behavior patterns and business insights."
+      - "Developed backend logic and REST APIs (Python/Django, PostgreSQL) to serve ML models in production as microservices."
+      - "\"My Car\" automotive IoT telematics: contributed to a system that ingests and processes streaming in-vehicle sensor data, and built the Flutter app that visualizes it in real time (Streams/WebSockets, Firebase, push notifications)."
+      - "Built Flutter and React interfaces for internal tools and client projects; containerized and deployed applications with Docker on Linux, following Clean Architecture."
+
+  - include: true
+    title: "Full-Stack Engineer (Flutter, Django, React)"
+    company: "VRoad"
+    location: ""
+    start: "Oct 2021"
+    end: "Nov 2022"
+    bullets:
+      - "Delivered commercial products end to end: Flutter apps (iOS/Android, published to the App Store and Google Play) with a Python/Django backend and a React web front end, across e-commerce, AdTech and MedTech."
+      - "E-commerce: Tzakartk, an international shopping and gift-delivery app for Syria (MVC), and Danshop, an online shopping app (Provider)."
+      - "Go Public (AdTech): TV, radio and social media advertising platform on a scalable Bloc architecture."
+      - "Adiwah (MedTech): medication and doctor-appointment tracker with smart reminders (MVVM, GetX)."
+      - "Backend: designed relational schemas and RESTful JSON APIs in Django (PostgreSQL, MySQL), documented in Swagger, with WebSockets for real-time updates."
+      - "Data and cloud: SQLite locally; Firebase (Firestore, Realtime Database, Cloud Storage, Cloud Messaging); async flows with Future/Stream; user-event analytics collection."
+
+  - include: true
+    title: "Full-Stack Instructor & Developer (Flutter, Django)"
+    company: "Teaching Flutter"
+    location: ""
+    start: "Jan 2021"
+    end: "Jun 2021"
+    bullets:
+      - "Taught a Flutter course (state management, architecture, REST APIs) to computer science students."
+      - "Built \"Clinics\" end to end: a Flutter patient app with a Django REST backend for medication schedules, clinic appointments, similar-medication suggestions and drug-interaction warnings."
+
+  - include: true
+    title: "Full-Stack Developer (Flutter, Django, React)"
+    company: "Easy Soft"
+    location: ""
+    start: "Dec 2019"
+    end: "Nov 2021"
+    bullets:
+      - "Developed and maintained Paprika, a FoodTech platform for restaurant table booking, food ordering and delivery: a Flutter mobile app, a Python/Django backend and a React web interface."
+      - "Mobile: Flutter client with Firebase authentication, push notifications and real-time databases, plus a real-time courier-tracking module with live geolocation streams."
+      - "Backend: REST APIs documented in Swagger, PostgreSQL storage and WebSockets/Streams for live order and courier updates; Git, Docker and Linux for delivery."
+
+# -----------------------------------------------------------------------
+# PROJECTS
+# -----------------------------------------------------------------------
+projects: []
+
+# -----------------------------------------------------------------------
+# EDUCATION
+# -----------------------------------------------------------------------
+education:
+  - include: true
+    degree: "MSc (Honors), Robotics and Artificial Intelligence"
+    institution: "ITMO University"
+    location: "Saint Petersburg, Russia"
+    start: "Oct 2023"
+    end: "Jul 2025"
+    details:
+      - 'Thesis: "Real-Time Visual Object Tracking Methods with Deep Learning Techniques."'
+      - "Coursework: Machine Learning in Robotics, Applied AI in Science and Business, Big Data Storage."
+
+  - include: false
+    degree: "BEng, Mechatronics Engineering"
+    institution: "Higher Institute for Applied Sciences and Technology (HIAST)"
+    location: "Damascus, Syria"
+    start: "Oct 2013"
+    end: "Oct 2018"
+    details: []
+
+# -----------------------------------------------------------------------
+# SKILLS
+# -----------------------------------------------------------------------
+skills:
+  - category: "Machine Learning & Data Science"
+    items:
+      - "Python"
+      - "PyTorch"
+      - "TensorFlow"
+      - "Transformers"
+      - "scikit-learn"
+      - "pandas"
+      - "Machine Learning"
+      - "Deep Learning"
+      - "Artificial Neural Networks"
+      - "Reinforcement Learning"
+      - "NLP"
+      - "Recommendation Systems"
+      - "Computer Vision"
+      - "Image Processing"
+      - "OpenCV"
+      - "EDA"
+      - "Data Visualization"
+      - "A/B Testing"
+
+  - category: "Generative AI & LLMs (applied)"
+    items:
+      - "Retrieval-Augmented Generation (RAG)"
+      - "AI Agents"
+      - "LangChain"
+      - "LangGraph"
+      - "Large Language Models (LLMs)"
+      - "Generative AI"
+      - "Weaviate"
+      - "Arize Phoenix"
+
+  - category: "Backend & Web"
+    items:
+      - "FastAPI"
+      - "Django"
+      - "REST API"
+      - "GraphQL"
+      - "WebSockets"
+      - "Swagger"
+      - "React"
+
+  - category: "Mobile"
+    items:
+      - "Flutter"
+      - "Dart"
+      - "Bloc"
+      - "GetX"
+      - "Provider"
+      - "Android"
+      - "Kotlin"
+
+  - category: "Databases & Cloud"
+    items:
+      - "PostgreSQL"
+      - "MySQL"
+      - "SQLite"
+      - "SQL"
+      - "Firebase (Firestore, Realtime Database, Auth, Cloud Messaging)"
+
+  - category: "Engineering Practices & Tools"
+    items:
+      - "Clean Architecture"
+      - "MVVM"
+      - "MVC"
+      - "OOP"
+      - "Docker"
+      - "Linux"
+      - "Bash"
+      - "Git"
+
+# -----------------------------------------------------------------------
+# CERTIFICATIONS
+# -----------------------------------------------------------------------
+certifications:
+  - include: true
+    name: "Generative AI with Large Language Models"
+    issuer: "DeepLearning.AI"
+    date: "Jul 2026"
+  - include: true
+    name: "Retrieval Augmented Generation (RAG)"
+    issuer: "DeepLearning.AI"
+    date: "Jul 2026"
+  - include: true
+    name: "AI Agents in LangGraph"
+    issuer: "DeepLearning.AI"
+    date: "Jun 2026"
+  - include: true
+    name: "Functions, Tools and Agents with LangChain"
+    issuer: "DeepLearning.AI"
+    date: "Jun 2026"
+  - include: true
+    name: "LangChain for LLM Application Development"
+    issuer: "DeepLearning.AI"
+    date: "Jul 2026"
+  - include: true
+    name: "LangChain Chat with Your Data"
+    issuer: "DeepLearning.AI"
+    date: "Jul 2026"
+  - include: true
+    name: "Knowledge Graphs for RAG"
+    issuer: "DeepLearning.AI"
+    date: "Jun 2026"
+  - include: true
+    name: "Robotics and Artificial Intelligence (Sber × ITMO)"
+    issuer: "Sberbank-Technology"
+    date: "Jul 2025"
+  - include: true
+    name: "Docker Certified Associate Exam Prep Specialization"
+    issuer: "LearnKartS"
+    date: "Jul 2026"
+
+# -----------------------------------------------------------------------
+# LANGUAGES
+# -----------------------------------------------------------------------
+languages:
+  - include: true
+    name: "Arabic"
+    level: "Native"
+  - include: true
+    name: "English"
+    level: "B2"
+  - include: true
+    name: "Russian"
+    level: "B1"
