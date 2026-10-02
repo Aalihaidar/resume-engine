@@ -7,6 +7,7 @@ fonts, so anything inline or third-party would silently break in production.
 from __future__ import annotations
 
 import re
+import struct
 from html.parser import HTMLParser
 from pathlib import Path
 
@@ -94,6 +95,21 @@ def test_index_loads_its_own_script_and_styles() -> None:
 @pytest.mark.parametrize("reference", LOCAL_REFERENCES)
 def test_assets_referenced_by_index_exist(reference: str) -> None:
     assert (WEB_STATIC / reference.removeprefix("/")).is_file()
+
+
+def test_index_has_a_tab_icon_and_a_link_preview_image() -> None:
+    assert "/assets/favicon.svg" in LOCAL_REFERENCES
+    previews = [
+        value
+        for tag, name, value in PAGE.attributes
+        if tag == "meta" and name == "content" and value.endswith("/assets/social-preview.png")
+    ]
+    # Link previews need an absolute URL, so this one is checked by name and the file by header.
+    assert len(previews) == 1
+    assert previews[0].startswith("https://")
+    header = (ASSETS / "social-preview.png").read_bytes()[:24]
+    assert header[:8] == b"\x89PNG\r\n\x1a\n"
+    assert struct.unpack(">II", header[16:24]) == (1200, 630)
 
 
 def test_every_font_face_url_exists() -> None:
