@@ -34,6 +34,52 @@ body {
   font-family: "Geist", sans-serif;
 }
 
+/* Page shell. Below md the page scrolls and each panel gets a fixed height; from md up the
+   shell fills the screen and the panels split it. dvh (which tracks the mobile browser bar)
+   sits in @supports because the minifier would otherwise drop the vh fallback. */
+.app-shell {
+  min-height: 100vh;
+}
+.pane {
+  width: 100%;
+  flex-shrink: 0;
+}
+.pane-editor {
+  height: 70vh;
+}
+.pane-preview {
+  height: 80vh;
+}
+@supports (height: 1dvh) {
+  .app-shell {
+    min-height: 100dvh;
+  }
+  .pane-editor {
+    height: 70dvh;
+  }
+  .pane-preview {
+    height: 80dvh;
+  }
+}
+@media (min-width: 48rem) {
+  .app-shell {
+    height: 100vh;
+    overflow: hidden;
+  }
+  .pane {
+    width: 50%;
+    height: 100%;
+    flex-shrink: 1;
+  }
+}
+@media (min-width: 48rem) {
+  @supports (height: 1dvh) {
+    .app-shell {
+      height: 100dvh;
+    }
+  }
+}
+
 .code-font {
   font-family: "JetBrains Mono", monospace;
 }

@@ -26,7 +26,7 @@
 <script src="/assets/js-yaml.min.js" defer></script>
 <script src="/assets/app.js" defer></script>
 </head>
-<body class="bg-background text-on-surface min-h-dvh flex flex-col md:h-dvh md:overflow-hidden">
+<body class="bg-background text-on-surface app-shell flex flex-col">
 <!-- TopNavBar: one row from md up; on narrow screens the tabs wrap onto a second row -->
 <nav class="bg-surface-container/80 backdrop-blur-xl border-b border-white/10 flex flex-wrap items-center gap-x-4 gap-y-2 px-gutter py-2 md:py-unit md:h-16 md:flex-nowrap w-full flex-shrink-0" aria-label="Main">
   <div class="order-1 text-body-lg font-display-lg font-bold tracking-tighter text-on-surface whitespace-nowrap">
@@ -46,7 +46,7 @@
 <main class="flex-1 flex flex-col md:flex-row md:overflow-hidden relative p-gutter gap-gutter bg-surface">
 
   <!-- Engine / Code Editor (Left) -->
-  <section class="w-full md:w-1/2 h-[70dvh] md:h-full flex-shrink-0 md:flex-shrink flex flex-col glass-panel rounded-xl overflow-hidden relative" aria-label="YAML editor">
+  <section class="w-full md:w-1/2 pane pane-editor flex flex-col glass-panel rounded-xl overflow-hidden relative" aria-label="YAML editor">
     <div class="flex justify-between items-center px-4 py-2 h-11 border-b border-white/5 bg-surface-container-low flex-shrink-0">
       <div class="flex items-center gap-3">
         <label for="yamlInput" class="text-label-xs font-label-xs text-on-surface-variant uppercase tracking-wider">YAML</label>
@@ -64,12 +64,12 @@
     </div>
     <div class="flex-1 flex overflow-hidden bg-surface-container-lowest relative">
       <div id="lineNumbers" aria-hidden="true" class="w-12 flex-shrink-0 py-4 px-2 text-right bg-surface-container-lowest border-r border-white/5 text-on-surface-variant/40 code-font text-code-sm select-none overflow-hidden">1</div>
-      <textarea id="yamlInput" wrap="off" spellcheck="false" autocomplete="off" autocapitalize="off" class="flex-1 h-full resize-none bg-transparent text-tertiary code-font text-code-sm p-4 outline-none overflow-auto whitespace-pre"></textarea>
+      <textarea id="yamlInput" wrap="off" spellcheck="false" autocomplete="off" autocapitalize="off" class="flex-1 h-full min-h-0 resize-none bg-transparent text-tertiary code-font text-code-sm p-4 outline-none overflow-auto whitespace-pre"></textarea>
     </div>
   </section>
 
   <!-- Output / Preview (Right) -->
-  <section class="w-full md:w-1/2 h-[80dvh] md:h-full flex-shrink-0 md:flex-shrink flex flex-col glass-panel rounded-xl overflow-hidden relative" aria-label="PDF preview">
+  <section class="w-full md:w-1/2 pane pane-preview flex flex-col glass-panel rounded-xl overflow-hidden relative" aria-label="PDF preview">
     <div class="flex justify-between items-center px-4 py-2 h-11 border-b border-white/5 bg-surface-container-low flex-shrink-0">
       <span class="text-label-xs font-label-xs text-on-surface-variant uppercase tracking-wider">Preview</span>
     </div>
@@ -77,7 +77,7 @@
       <div id="pdfPlaceholder" class="absolute inset-0 flex items-center justify-center text-center text-gray-600 text-body-md font-body-md p-10">
         Start typing — the preview renders automatically.
       </div>
-      <iframe id="pdfFrame" title="PDF preview" hidden class="w-full h-full border-0"></iframe>
+      <iframe id="pdfFrame" title="PDF preview" hidden class="absolute inset-0 w-full h-full border-0"></iframe>
       <!-- Shown instead of the iframe in browsers that cannot display a PDF inline (most phones). -->
       <div id="pdfFallback" hidden class="absolute inset-0 flex flex-col items-center justify-center gap-4 text-center text-gray-700 text-body-md font-body-md p-10">
         <p>This browser can't show the PDF inside the page.</p>
