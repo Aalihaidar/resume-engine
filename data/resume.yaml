@@ -24,11 +24,11 @@ photo: headshot.jpg
 summary: >
   AI/ML & Robotics Engineer with an MSc (Honors) in Robotics and Artificial Intelligence from ITMO University,
   specializing in applied generative AI, production ML systems, and deep learning-based computer vision.
-  Built an agentic RAG chatbot backend for bilingual restaurant and gym clients, with logging
-  and observability via Arize Phoenix. At IROS-System, developed a cost-prediction regression model and a cosine-similarity-based
-  part-matching system from BOM and assembly data, alongside CAD automation and FEA validation for industrial automation.
-  Graduate research focused on real-time visual object tracking using deep learning techniques, complemented by a mechatronics
-  and robotics background spanning motion control, kinematics, and mechatronic system design.
+  Built an agentic RAG chatbot backend for restaurant and gym clients, with observability via Arize Phoenix.
+  At IROS-System, developed a cost-prediction regression model and a cosine-similarity part-matching system
+  from BOM and assembly data, alongside CAD automation and FEA validation. Graduate research on real-time
+  visual object tracking with deep learning, on top of a mechatronics and robotics background in motion
+  control, kinematics, and mechatronic system design.
 
 # -----------------------------------------------------------------------
 # EXPERIENCE
@@ -41,7 +41,7 @@ experience:
     start: "Jul 2023"
     end: "Present"
     bullets:
-      - "Built a cost-prediction regression model and a cosine-similarity-based part-matching system (Python, pandas, scikit-learn) from BOM and assembly data, enabling earlier cost estimates and reducing part duplication."
+      - "Built a cost-prediction regression model and a cosine-similarity-based part-matching system (Python, pandas, scikit-learn) from BOM and assembly data, enabling earlier cost estimates and less duplication."
       - "Designed 3D part models, assemblies, and technical drawings, and built rule-based automation scripts (iLogic, Inventor API) to auto-generate design variants and drawings, cutting modeling time and reducing manual errors."
       - "Performed stress calculations and FEA validation across all design outputs, maintaining 100% compliance with regulatory standards."
 
@@ -52,9 +52,10 @@ experience:
     start: "Aug 2025"
     end: "Present"
     bullets:
-      - "Designed and shipped an AI agent for a restaurant chain's RAG chatbot backend (bilingual RU/EN menu + FAQ), using FastAPI, LangGraph, and Weaviate Cloud for retrieval."
-      - "Implemented logging, monitoring, and observability with Arize Phoenix to track and debug agent behavior in production."
+      - "Designed and built the backend of an agentic RAG chatbot for a restaurant chain (bilingual RU/EN menu and FAQ): a LangGraph agent with hybrid vector and keyword search over Weaviate Cloud, served through FastAPI, with answers grounded in the client's knowledge base. Pre-release."
+      - "Implemented logging, monitoring and observability with Arize Phoenix to trace and debug the agent."
       - "Delivered an AI agent-based chatbot engagement for a gym client."
+      - "Launched a live prototype on a sample English-language menu, with a web chat page and a Telegram bot sharing one agent. Live: wagami-rag-en-staging.onrender.com · @wagami_restaurant_bot"
 
   - include: true
     title: "Research Assistant & Robotics Engineer"
@@ -65,7 +66,7 @@ experience:
     bullets:
       - "Supervised 4th- and 5th-year capstone projects in robotics and mechatronics, including a Knee CPM machine, a propulsive bionic foot, and a laser engraving machine."
       - "Taught Industrial Drawing and CAD to 100+ students; led advanced modules in Robotics, Industrial Automation, and CAM."
-      - "Delivered practical training in Ansys simulation and PLC coding, preparing students for industrial manufacturing roles."
+      - "Delivered practical Ansys simulation and PLC coding training, preparing students for industrial roles."
 
   - include: true
     title: "Mechatronics Engineer, Automated Systems (Part-time)"
@@ -76,7 +77,7 @@ experience:
     bullets:
       - "Designed and implemented a custom 500×500×500mm Cartesian 3D printer, managing the full lifecycle from mechanical design to firmware integration."
       - "Developed a high-precision volumetric filling machine, a cup feeder machine, and an end-line picker machine for high-viscosity, food-grade production lines."
-      - "Managed development of a Building Management System (BMS), improving facility automation and energy efficiency."
+      - "Managed development of a Building Management System (BMS) for automation and energy efficiency."
 
 # -----------------------------------------------------------------------
 # PROJECTS
@@ -95,7 +96,7 @@ education:
     end: "Jul 2025"
     details:
       - 'Thesis: "Real-Time Visual Object Tracking Methods with Deep Learning Techniques."'
-      - "Coursework: Machine Learning in Robotics, Introduction to ML Tools and Applied AI in Science and Business, Data Preprocessing and Big Data Storage Technologies, Cyber-Physical Systems and Technologies, Robot Programming, Robot Modeling and Motion Control, Trajectory Planning and Control, Simulation of Robotic Systems, Design of Mechatronic Systems."
+      - "Coursework: Machine Learning in Robotics, Applied AI in Science and Business, Big Data Storage Technologies, Robot Modeling and Motion Control, Trajectory Planning."
       - "Research focus: implementing deep learning algorithms for visual perception in dynamic environments."
 
   - include: true

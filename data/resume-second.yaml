@@ -40,11 +40,12 @@ experience:
     start: "Dec 2022"
     end: "Present"
     bullets:
-      - "Designed and shipped an AI agent for a restaurant chain's RAG chatbot backend (bilingual RU/EN menu + FAQ), using FastAPI, LangGraph, and Weaviate Cloud for retrieval."
-      - "Implemented logging, monitoring, and observability with Arize Phoenix to track and debug agent behavior in production."
+      - "Designed and built the backend of an agentic RAG chatbot for a restaurant chain (bilingual RU/EN menu and FAQ): a LangGraph agent with hybrid vector and keyword search over Weaviate Cloud, served through FastAPI, with answers grounded in the client's knowledge base. Pre-release."
+      - "Implemented logging, monitoring and observability with Arize Phoenix to trace and debug the agent."
       - "Delivered an AI agent-based chatbot engagement for a gym client."
+      - "Launched a live prototype on a sample English-language menu, with a web chat page and a Telegram bot sharing one agent. Live: wagami-rag-en-staging.onrender.com · @wagami_restaurant_bot"
       - "Built a recommendation system for a supermarket chain from scratch on transactional and user data, combining deep learning and classical ML (Python, PyTorch, Transformers)."
-      - "Owned the full ML lifecycle: data collection, EDA, prototyping, production inference, monitoring and support."
+      - "Owned the full ML lifecycle: data collection, EDA, prototyping, inference, monitoring and support."
       - "Planned, ran and evaluated A/B tests to validate new algorithms and improve conversion metrics; built dashboards and visualizations that surfaced customer behavior patterns and business insights."
       - "Developed backend logic and REST APIs (Python/Django, PostgreSQL) to serve ML models in production as microservices."
       - "\"My Car\" automotive IoT telematics: contributed to a system that ingests and processes streaming in-vehicle sensor data, and built the Flutter app that visualizes it in real time (Streams/WebSockets, Firebase, push notifications)."
@@ -59,8 +60,8 @@ experience:
     bullets:
       - "Delivered commercial products end to end: Flutter apps (iOS/Android, published to the App Store and Google Play) with a Python/Django backend and a React web front end, across e-commerce, AdTech and MedTech."
       - "E-commerce: Tzakartk, an international shopping and gift-delivery app for Syria (MVC), and Danshop, an online shopping app (Provider)."
-      - "Go Public (AdTech): platform for placing and managing TV, radio and social media advertising, built on a scalable Bloc architecture."
-      - "Adiwah (MedTech): medication-intake and doctor-appointment tracker with smart reminders, built with MVVM and GetX."
+      - "Go Public (AdTech): TV, radio and social media advertising platform on a scalable Bloc architecture."
+      - "Adiwah (MedTech): medication and doctor-appointment tracker with smart reminders (MVVM, GetX)."
       - "Backend: designed relational schemas and RESTful JSON APIs in Django (PostgreSQL, MySQL), documented in Swagger, with WebSockets for real-time updates."
       - "Data and cloud: SQLite locally; Firebase (Firestore, Realtime Database, Cloud Storage, Cloud Messaging); async flows with Future/Stream; user-event analytics collection."
 
