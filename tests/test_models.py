@@ -79,6 +79,42 @@ def test_too_many_bullets_are_rejected(resume_payload: dict[str, Any]) -> None:
         Resume.model_validate(resume_payload)
 
 
+# --- contact --------------------------------------------------------------
+
+
+def test_single_phone_and_email_are_normalized_to_lists(resume_payload: dict[str, Any]) -> None:
+    contact = Resume.model_validate(resume_payload).contact
+    assert contact.phones == [resume_payload["contact"]["phone"]]
+    assert contact.emails == [resume_payload["contact"]["email"]]
+
+
+def test_two_phones_and_two_emails_are_accepted(resume_payload: dict[str, Any]) -> None:
+    phones = ["+49 151 23456789", "+1 415 555 0100"]
+    emails = ["jane.doe@example.com", "jane@example.org"]
+    resume_payload["contact"].update(phone=phones, email=emails)
+    contact = Resume.model_validate(resume_payload).contact
+    assert contact.phones == phones
+    assert contact.emails == emails
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [
+        ("phone", []),
+        ("phone", ["1", "2", "3"]),
+        ("phone", ["+1 415 555 0100", "+1 415 555 0100"]),
+        ("email", ["jane@example.org", "Jane@Example.org"]),
+        ("email", ["jane@example.org", "not-an-email"]),
+    ],
+)
+def test_bad_phone_or_email_list_is_rejected(
+    resume_payload: dict[str, Any], field: str, value: list[str]
+) -> None:
+    resume_payload["contact"][field] = value
+    with pytest.raises(ValidationError, match=field):
+        Resume.model_validate(resume_payload)
+
+
 # --- photo ----------------------------------------------------------------
 
 

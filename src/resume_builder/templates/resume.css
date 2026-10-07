@@ -69,6 +69,11 @@ body {
   margin-top: 1px;
 }
 
+/* A line break inside a phone number reads as two numbers. */
+.contact-item {
+  white-space: nowrap;
+}
+
 /* ---------- Sections ---------- */
 .section {
   margin-bottom: 10px;

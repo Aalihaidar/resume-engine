@@ -11,19 +11,21 @@
     <h1>{{ letter.applicant_name }}</h1>
     <p class="cl-contact">
       {{ letter.applicant_contact.location }}
-      &nbsp;·&nbsp; {{ letter.applicant_contact.phone }}
-      &nbsp;·&nbsp; {{ letter.applicant_contact.email }}
+      {% for phone in letter.applicant_contact.phones %}
+      &nbsp;·&nbsp; <span class="contact-item">{{ phone }}</span>
+      {% endfor %}
     </p>
-    {% if letter.applicant_contact.linkedin_display or letter.applicant_contact.github_display %}
     <p class="cl-contact">
+      {% for email in letter.applicant_contact.emails %}
+      {% if not loop.first %}&nbsp;·&nbsp; {% endif %}<span class="contact-item">{{ email }}</span>
+      {% endfor %}
       {% if letter.applicant_contact.linkedin_display %}
-      <a href="{{ letter.applicant_contact.linkedin_url }}">{{ letter.applicant_contact.linkedin_display }}</a>
+      &nbsp;·&nbsp; <a href="{{ letter.applicant_contact.linkedin_url }}">{{ letter.applicant_contact.linkedin_display }}</a>
       {% endif %}
       {% if letter.applicant_contact.github_display %}
-      {% if letter.applicant_contact.linkedin_display %}&nbsp;·&nbsp; {% endif %}<a href="{{ letter.applicant_contact.github_url }}">{{ letter.applicant_contact.github_display }}</a>
+      &nbsp;·&nbsp; <a href="{{ letter.applicant_contact.github_url }}">{{ letter.applicant_contact.github_display }}</a>
       {% endif %}
     </p>
-    {% endif %}
   </header>
 
   {% if letter.show_date %}

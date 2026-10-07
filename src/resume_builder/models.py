@@ -75,6 +75,12 @@ LongText = Annotated[str, StringConstraints(max_length=2_000)]
 Paragraph = Annotated[str, StringConstraints(max_length=5_000)]
 MAX_ENTRIES = 50
 MAX_BULLETS = 30
+MAX_CONTACT_VALUES = 2  # e.g. a local and an international number
+
+# `phone` / `email` take a single value or a short list, so a one-number
+# resume keeps the plain `phone: "..."` form.
+PhoneList = Annotated[list[ShortText], Field(min_length=1, max_length=MAX_CONTACT_VALUES)]
+EmailList = Annotated[list[EmailStr], Field(min_length=1, max_length=MAX_CONTACT_VALUES)]
 
 
 def _has_image_signature(kind: str, data: bytes) -> bool:
@@ -105,12 +111,27 @@ class SectionToggles(_StrictModel):
 
 class Contact(_StrictModel):
     location: ShortText
-    phone: ShortText
-    email: EmailStr
+    phone: ShortText | PhoneList
+    email: EmailStr | EmailList
     linkedin_display: ShortText | None = None
     linkedin_url: HttpUrl | None = None
     github_display: ShortText | None = None
     github_url: HttpUrl | None = None
+
+    @field_validator("phone", "email")
+    @classmethod
+    def _no_repeated_values(cls, v: str | list[str]) -> str | list[str]:
+        if isinstance(v, list) and len({item.casefold() for item in v}) != len(v):
+            raise ValueError("the same value is listed twice")
+        return v
+
+    @property
+    def phones(self) -> list[str]:
+        return [self.phone] if isinstance(self.phone, str) else self.phone
+
+    @property
+    def emails(self) -> list[str]:
+        return [self.email] if isinstance(self.email, str) else self.email
 
 
 class ExperienceEntry(_StrictModel):
