@@ -16,19 +16,21 @@
       <p class="headline">{{ resume.headline }}</p>
       <p class="contact-line">
         {{ resume.contact.location }}
-        &nbsp;·&nbsp; {{ resume.contact.phone }}
-        &nbsp;·&nbsp; {{ resume.contact.email }}
+        {% for phone in resume.contact.phones %}
+        &nbsp;·&nbsp; <span class="contact-item">{{ phone }}</span>
+        {% endfor %}
       </p>
-      {% if resume.contact.linkedin_display or resume.contact.github_display %}
       <p class="contact-line contact-links">
+        {% for email in resume.contact.emails %}
+        {% if not loop.first %}&nbsp;·&nbsp; {% endif %}<span class="contact-item">{{ email }}</span>
+        {% endfor %}
         {% if resume.contact.linkedin_display %}
-        <a href="{{ resume.contact.linkedin_url }}">{{ resume.contact.linkedin_display }}</a>
+        &nbsp;·&nbsp; <a href="{{ resume.contact.linkedin_url }}">{{ resume.contact.linkedin_display }}</a>
         {% endif %}
         {% if resume.contact.github_display %}
-        {% if resume.contact.linkedin_display %}&nbsp;·&nbsp; {% endif %}<a href="{{ resume.contact.github_url }}">{{ resume.contact.github_display }}</a>
+        &nbsp;·&nbsp; <a href="{{ resume.contact.github_url }}">{{ resume.contact.github_display }}</a>
         {% endif %}
       </p>
-      {% endif %}
     </div>
   </header>
 

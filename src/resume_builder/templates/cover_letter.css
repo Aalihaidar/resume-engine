@@ -32,6 +32,11 @@ body {
     text-decoration: none;
 }
 
+/* A line break inside a phone number reads as two numbers. */
+.contact-item {
+    white-space: nowrap;
+}
+
 .cl-date {
     margin: 20px 0 16px 0;
 }

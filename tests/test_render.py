@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 from typing import Any
 
@@ -136,11 +137,13 @@ def test_linkedin_is_optional_in_the_resume_header(resume_payload: dict[str, Any
     assert linkedin not in html
     assert str(escape(contact["github_display"])) in html
 
-    contact.pop("github_display", None)
-    contact.pop("github_url", None)
-    assert 'class="contact-line contact-links"' not in render_html(
-        Resume.model_validate(resume_payload)
-    )
+    github = str(escape(contact.pop("github_display")))
+    del contact["github_url"]
+    html = render_html(Resume.model_validate(resume_payload))
+    assert f">{github}</a>" not in html
+    # The email still opens the second line, with no separator left dangling.
+    email = re.escape(f'<span class="contact-item">{escape(contact["email"])}</span>')
+    assert re.search(rf'contact-links">\s*{email}\s*</p>', html)
 
 
 def test_linkedin_is_optional_in_the_cover_letter_header(
@@ -151,6 +154,26 @@ def test_linkedin_is_optional_in_the_cover_letter_header(
     del contact["linkedin_display"], contact["linkedin_url"]
     html = render_cover_letter_html(CoverLetter.model_validate(cover_letter_payload))
     assert linkedin not in html
+
+
+def test_every_phone_and_email_is_rendered(
+    resume_payload: dict[str, Any], cover_letter_payload: dict[str, Any]
+) -> None:
+    phones = ["+49 151 23456789", "+1 415 555 0100"]
+    emails = ["jane.doe@example.com", "jane@example.org"]
+    resume_payload["contact"].update(phone=phones, email=emails)
+    cover_letter_payload["applicant_contact"].update(phone=phones, email=emails)
+
+    for html in (
+        render_html(Resume.model_validate(resume_payload)),
+        render_cover_letter_html(CoverLetter.model_validate(cover_letter_payload)),
+    ):
+        for value in phones + emails:
+            assert f'<span class="contact-item">{escape(value)}</span>' in html
+        # Phones share the location's line; emails open the next one.
+        lines = html.split("</p>")
+        assert any(phones[1] in line and emails[0] not in line for line in lines)
+        assert any(emails[1] in line and phones[0] not in line for line in lines)
 
 
 def test_render_cover_letter_html_contains_key_fields(cover_letter_payload: dict[str, Any]) -> None:

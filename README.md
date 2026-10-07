@@ -182,6 +182,11 @@ request after a while can take 30–60 s.
 - **Cover letter:** rewritten per application (`role_title`, `recipient`,
   `body_paragraphs`). `sections.date` / `sections.recipient` can be turned off
   when that information isn't known.
+- **Phone / email:** `contact.phone` and `contact.email` (`applicant_contact`
+  in the cover letter) take a single value or a list of up to two, e.g.
+  `phone: ["+49 151 23456789", "+1 415 555 0100"]`. The header puts the
+  phone numbers after the location, and the emails at the start of the line
+  with LinkedIn and GitHub.
 - **Photo:** either a filename inside `src/resume_builder/static/` (CLI only),
   or a `data:image/{png,jpeg,webp};base64,…` URI of at most 3 MB decoded (the
   only form the API and web form accept — the deployed container has no
