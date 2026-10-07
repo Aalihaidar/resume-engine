@@ -9,14 +9,40 @@
           "type": "string"
         },
         "phone": {
-          "maxLength": 200,
-          "title": "Phone",
-          "type": "string"
+          "anyOf": [
+            {
+              "maxLength": 200,
+              "type": "string"
+            },
+            {
+              "items": {
+                "maxLength": 200,
+                "type": "string"
+              },
+              "maxItems": 2,
+              "minItems": 1,
+              "type": "array"
+            }
+          ],
+          "title": "Phone"
         },
         "email": {
-          "format": "email",
-          "title": "Email",
-          "type": "string"
+          "anyOf": [
+            {
+              "format": "email",
+              "type": "string"
+            },
+            {
+              "items": {
+                "format": "email",
+                "type": "string"
+              },
+              "maxItems": 2,
+              "minItems": 1,
+              "type": "array"
+            }
+          ],
+          "title": "Email"
         },
         "linkedin_display": {
           "anyOf": [
