@@ -71,17 +71,28 @@ Paste into *Allow or block specified actions and reusable workflows* (one
 line, comma-separated), then **Save**:
 
 ```text
-aquasecurity/trivy-action@*, astral-sh/setup-uv@*, codecov/codecov-action@*, crazy-max/ghaction-github-labeler@*, docker/build-push-action@*, docker/setup-buildx-action@*, ossf/scorecard-action@*, streetsidesoftware/cspell-action@*, zizmorcore/zizmor-action@*
+aquasecurity/setup-trivy@*, aquasecurity/trivy-action@*, astral-sh/setup-uv@*, codecov/codecov-action@*, crazy-max/ghaction-github-labeler@*, docker/build-push-action@*, docker/setup-buildx-action@*, ossf/scorecard-action@*, streetsidesoftware/cspell-action@*, zizmorcore/zizmor-action@*
 ```
 
 **This list must stay in step with the workflows.** An action that isn't on
 it fails with "action is not allowed". When a PR adds a new `uses:` line, add
 the action here first; Dependabot only bumps versions, so it doesn't need
-list changes. To regenerate the list from the repository:
+list changes.
+
+The list must also cover actions that other actions call. `trivy-action` is a
+composite action that calls `aquasecurity/setup-trivy`, which never appears in
+a workflow file, so it has to be listed on its own. Nested actions created by
+GitHub (`actions/cache`, `actions/github-script`, `github/codeql-action`) are
+already covered by *Allow actions created by GitHub*. The workflow files show
+the direct ones:
 
 ```bash
 grep -rhoE "uses: [^ @]+" .github/workflows | sort -u
 ```
+
+For the nested ones, read the `action.yml` of each third-party action at the
+SHA the workflows pin, and look for `uses:` lines. When a run fails with "The
+action … is not allowed", the error names the exact action to add.
 
 ### Check, workflow run, status, artifact and log retention
 

@@ -241,8 +241,7 @@ jobs:
       # Dependabot's weekly npm PR is how it gets fixed.
       - name: Audit all web build dependencies (report only)
         working-directory: web
-        continue-on-error: true
-        run: npm audit
+        run: npm audit || echo "::warning::npm audit reports advisories in build tooling that does not ship; see the log above"
 
   docker:
     name: Docker build & smoke test
