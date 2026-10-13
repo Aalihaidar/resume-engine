@@ -61,64 +61,17 @@ Keep both lists sorted. Words that only appear in machine-maintained strings
 
 ## 2. GitHub settings (one-time setup)
 
-### Rulesets — Settings → Rules → Rulesets
+Some of the rules above live in GitHub's settings, not in the repository.
+[`SETTINGS.md`](SETTINGS.md) lists every one of them: General, Actions
+permissions, Environments, Advanced Security, secrets and the two rulesets
+(importable from [`rulesets/`](rulesets/)). In short:
 
-**Default branch** (Settings → General): **`develop`**, so new PRs target it by
-default, Dependabot reads its config from it, and scheduled workflows run on it.
-
-**`protect-main`** (target: `main`)
-
-| Setting | Value |
-| --- | --- |
-| Enforcement | **Active**, **empty bypass list** — with an admin bypass, the owner can still push to `main` directly |
-| Restrict creations / Restrict updates | ❌ / ❌ — with an empty bypass list these would block PR merges too; "Require a pull request" is what stops direct pushes |
-| Restrict deletions / Block force pushes | ✅ / ✅ |
-| Require a pull request before merging | ✅ — 0 approvals while solo (you can't approve your own PR); Code Owners review once there's a second maintainer |
-| Require conversation resolution | ✅ |
-| Require status checks to pass | ✅ — **`ci-passed`** and **`verify-pr-source`**; require branches up to date ❌ (see below) |
-| Allowed merge methods | **Merge** only (keeps `develop` history intact) |
-
-Release PRs are merge commits, so `main` always has one commit `develop`
-doesn't. With "require branches up to date" on, every release PR would first
-need `main` merged back into `develop`; leaving it off avoids that, and the
-merge still fails if there's a real conflict.
-
-**`protect-develop`** (target: `develop`)
-
-| Setting | Value |
-| --- | --- |
-| Enforcement | **Active**, empty bypass list |
-| Restrict deletions / Block force pushes | ✅ / ✅ |
-| Require a pull request before merging | ✅ (0 approvals while solo) |
-| Require status checks to pass | ✅ — **`ci-passed`**; require branches up to date ✅ |
-| Allowed merge methods | **Squash** (one commit per feature / Dependabot PR) |
-
-"Automatically delete head branches" never deletes `develop` after a release
-PR, because it is the default branch; "Restrict deletions" is the second guard.
-
-"Only `develop` may PR into `main`" can't be expressed as a ruleset — GitHub
-has no source-branch rule. The **`verify-pr-source`** job in
-[`workflows/ci.yml`](workflows/ci.yml) fails any PR into `main` whose head
-isn't this repository's `develop`; making it a required check is what makes
-that binding.
-
-### Security — Settings → Advanced Security
-
-- Enable **Dependabot alerts**, **Dependabot security updates**, **Private
-  vulnerability reporting** and **Code scanning**.
-- Code scanning uses the advanced setup in
-  [`workflows/security.yml`](workflows/security.yml). If CodeQL **default
-  setup** is on, switch it off — GitHub rejects uploads from an advanced
-  workflow while default setup is enabled.
-
-### Secrets — Settings → Secrets and variables → Actions
-
-| Secret | Used by | Notes |
-| --- | --- | --- |
-| `CODECOV_TOKEN` | `ci.yml` → `test` | Optional; upload failures don't fail CI |
-
-`GITHUB_TOKEN` is automatic. Nothing else is needed: Render builds the image
-itself from [`render.yaml`](../render.yaml).
+- `develop` is the default branch. Neither `develop` nor `main` accepts a
+  direct push: both require a pull request and a green **`ci-passed`**.
+- `main` additionally requires **`verify-pr-source`**, which is how "only
+  `develop` may open PRs into `main`" is enforced.
+- **Merge commits** are the only merge method, for feature PRs and release
+  PRs alike. Auto-merge is on, and head branches are deleted after merging.
 
 ---
 
@@ -141,13 +94,14 @@ Runs on PRs, pushes to `main` / `develop`, and manual dispatch.
 | Job | What |
 | --- | --- |
 | `verify-pr-source` | Blocks PRs into `main` that don't come from `develop` |
-| `Lint & format` | `ruff check` (inline PR annotations) + `ruff format --check` |
+| `Lint & format` | `ruff check` (inline PR annotations) + `ruff format --check` + a byte-compile of `src`, `tests` and `scripts` |
 | `Spelling` | cspell over the whole repo with `cspell.json`; unknown words are annotated inline with suggestions |
 | `Type check` | `mypy --strict` over `src` |
 | `Test (3.12 / 3.13 / 3.14)` | pytest + coverage (the run fails below the `fail_under` threshold in `pyproject.toml`) on the `requires-python` floor, the version between and the production version; Codecov upload from 3.14 |
 | `JSON Schema up to date` | Regenerates `schema/*.schema.json` and fails if any differs from the committed file |
 | `Web assets up to date` | Rebuilds the web form's CSS, fonts and vendored js-yaml from `web/` and fails if they differ from the committed files in `src/resume_builder/web_static/assets/` |
 | `Dependency audit` | [`scripts/audit.sh`](../scripts/audit.sh) (also `make audit`): `pip-audit` on `uv.lock`; runtime packages (what ships in the image) **block**, dev-only tooling is reported as a warning since Dependabot security PRs fix those. PyPI network errors are retried with backoff; a real finding fails at once |
+| `npm audit (web/)` | `npm audit` on `web/package-lock.json`. A HIGH or CRITICAL advisory in a package that ships in the committed assets (js-yaml, the fonts) **blocks**; build-tooling advisories (today: `braces`, via Tailwind CLI's file watcher, with no patched release) are only reported, like dev-only Python packages |
 | `Docker build & smoke test` | Trivy config scan of both Dockerfiles (accepted exceptions in [`.trivyignore.yaml`](../.trivyignore.yaml)), builds `Dockerfile.prod`, boots it, and checks `/healthz`, `/`, the page's assets and its Content-Security-Policy header, a real PDF render from `data/resume.template.yaml`, and that an invalid photo is a clean `422` |
 | `ci-passed` | Aggregate gate — the single required check (skipped jobs count as passing) |
 
@@ -230,6 +184,8 @@ Five ecosystems, weekly (Monday 04:00 UTC), all opening PRs against
 | `SECURITY.md` | Private vulnerability reporting and scope |
 | `dependabot.yml` | Dependency update automation |
 | `labels.yml` | Repository labels as code |
+| `SETTINGS.md` | The GitHub settings to apply by hand, step by step |
+| `rulesets/` | `protect-main.json` and `protect-develop.json`, importable in Settings → Rules |
 | `pull_request_template.md` | PR checklist |
 | `ISSUE_TEMPLATE/` | Issue forms; blank issues disabled |
 | `workflows/` | `ci.yml`, `security.yml`, `scorecard.yml`, `labels.yml` |

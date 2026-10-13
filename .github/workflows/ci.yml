@@ -62,6 +62,8 @@ jobs:
       - run: uv sync --group dev
       - run: uv run ruff check --output-format=github .
       - run: uv run ruff format --check .
+      # Fails on a syntax error in any file, including ones no test imports.
+      - run: uv run python -m compileall -q src tests scripts
 
   spelling:
     name: Spelling
@@ -204,6 +206,44 @@ jobs:
       - name: Audit dev dependencies (report only)
         run: bash scripts/audit.sh dev
 
+  npm-audit:
+    name: npm audit (web/)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # Audits web/package-lock.json as committed; nothing is installed. Every
+      # package there is a build tool, and only js-yaml and the fonts end up in
+      # the committed assets the image serves. A HIGH or CRITICAL advisory on
+      # those blocks; a plain `--audit-level=high` would also fail on Tailwind
+      # CLI's file watcher (braces), which never leaves the build machine.
+      - name: Audit the packages that ship in the web assets
+        working-directory: web
+        run: |
+          npm audit --json > "$RUNNER_TEMP/npm-audit.json" || true
+          shipped=$(node -e '
+            const report = JSON.parse(require("fs").readFileSync(process.argv[1], "utf8"));
+            const shipped = (name) => name === "js-yaml" || name.startsWith("@fontsource-variable/");
+            const bad = Object.entries(report.vulnerabilities ?? {})
+              .filter(([name, v]) => shipped(name) && ["high", "critical"].includes(v.severity))
+              .map(([name]) => name);
+            console.log(bad.join(" "));
+          ' "$RUNNER_TEMP/npm-audit.json")
+          if [ -n "$shipped" ]; then
+            echo "::error::HIGH/CRITICAL advisory in a package that ships in the web assets: $shipped"
+            npm audit
+            exit 1
+          fi
+          echo "✅ No HIGH/CRITICAL advisories in js-yaml or the fonts"
+      # Everything else (build tooling) is reported so it shows in the log;
+      # Dependabot's weekly npm PR is how it gets fixed.
+      - name: Audit all web build dependencies (report only)
+        working-directory: web
+        continue-on-error: true
+        run: npm audit
+
   docker:
     name: Docker build & smoke test
     runs-on: ubuntu-24.04
@@ -284,7 +324,17 @@ jobs:
   ci-passed:
     name: ci-passed
     if: always()
-    needs: [verify-pr-source, lint, spelling, typecheck, test, schema, web-assets, security, docker]
+    needs:
+      - verify-pr-source
+      - lint
+      - spelling
+      - typecheck
+      - test
+      - schema
+      - web-assets
+      - security
+      - npm-audit
+      - docker
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
