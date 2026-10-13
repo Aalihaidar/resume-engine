@@ -1,0 +1,3 @@
+{
+  "GHSA-vfj7-8cjw-p6xm": "braces (via @tailwindcss/cli > @parcel/watcher > micromatch), stack exhaustion on deeply nested brace patterns. No patched release exists (3.0.3 is the latest). Only Tailwind CLI's file watcher uses it, on the build machine, on this repository's own file patterns; it is not in the image. Remove this entry when npm audit stops reporting it."
+}
