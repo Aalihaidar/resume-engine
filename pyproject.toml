@@ -25,14 +25,14 @@ dependencies = [
     "pyyaml>=6.0.3",
     "pydantic[email]>=2.13.5",
     "typer>=0.27.2",
-    "fastapi>=0.142.1",
+    "fastapi>=0.142.2",
     "uvicorn[standard]>=0.54.0",
 ]
 
 [dependency-groups]
 dev = [
-    "ruff>=0.16.9",
-    "mypy>=2.3.1",
+    "ruff>=0.16.10",
+    "mypy>=2.4.0",
     "pytest>=9.1.1",
     "pytest-cov>=7.1.0",
     "pip-audit>=2.10.1",
