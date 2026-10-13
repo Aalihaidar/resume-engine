@@ -32,6 +32,7 @@ spell:
 audit:
 	bash scripts/audit.sh runtime
 	bash scripts/audit.sh dev
+	cd web && node audit.mjs
 
 schema:
 	uv run python scripts/generate_schema.py

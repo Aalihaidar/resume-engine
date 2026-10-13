@@ -8,12 +8,17 @@ Haidar
 janedoe
 
 # Tooling and CI
+fontsource
+ghaction
+GHSA
 htmlcov
+ossf
 repomix
 sarif
 testpaths
 trivyignores
 zizmor
+zizmorcore
 
 # Docker / system packages (WeasyPrint runtime deps)
 dejavu

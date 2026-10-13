@@ -62,6 +62,8 @@ jobs:
       - run: uv sync --group dev
       - run: uv run ruff check --output-format=github .
       - run: uv run ruff format --check .
+      # Fails on a syntax error in any file, including ones no test imports.
+      - run: uv run python -m compileall -q src tests scripts
 
   spelling:
     name: Spelling
@@ -204,6 +206,23 @@ jobs:
       - name: Audit dev dependencies (report only)
         run: bash scripts/audit.sh dev
 
+  npm-audit:
+    name: npm audit (web/)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # web/audit.mjs (also run by `make audit`) audits web/package-lock.json as
+      # committed; nothing is installed. Only js-yaml and the fonts end up in the
+      # committed assets the image serves, so a HIGH/CRITICAL advisory there fails
+      # the job. Advisories in the build toolchain are warnings unless they are
+      # accepted, with a reason, in web/audit-exceptions.json.
+      - name: Audit web build dependencies
+        working-directory: web
+        run: node audit.mjs
+
   docker:
     name: Docker build & smoke test
     runs-on: ubuntu-24.04
@@ -284,7 +303,17 @@ jobs:
   ci-passed:
     name: ci-passed
     if: always()
-    needs: [verify-pr-source, lint, spelling, typecheck, test, schema, web-assets, security, docker]
+    needs:
+      - verify-pr-source
+      - lint
+      - spelling
+      - typecheck
+      - test
+      - schema
+      - web-assets
+      - security
+      - npm-audit
+      - docker
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
