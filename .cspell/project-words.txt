@@ -10,6 +10,7 @@ janedoe
 # Tooling and CI
 fontsource
 ghaction
+GHSA
 htmlcov
 ossf
 repomix
