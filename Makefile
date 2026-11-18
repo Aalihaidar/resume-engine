@@ -1,4 +1,4 @@
-.PHONY: render render-html cover-letter cover-letter-html lint format typecheck test spell audit schema web-assets hooks serve-api repomix ci clean
+.PHONY: render render-html cover-letter cover-letter-html lint format typecheck test spell audit schema agent-pack web-assets hooks serve-api repomix ci clean
 
 render:
 	uv run resume-build render --data data/resume.yaml --out output/resume.pdf
@@ -36,6 +36,11 @@ audit:
 
 schema:
 	uv run python scripts/generate_schema.py
+
+# One file to hand to any AI chat or agent: rules, API/web-form guide, schemas, templates and
+# your current data. Contains personal details, so it lands in the gitignored output/.
+agent-pack:
+	uv run python scripts/build_agent_pack.py
 
 # Rebuilds the committed CSS / fonts / js-yaml under src/resume_builder/web_static/assets/.
 # Needs Node 20+; only required after changing web/ or index.html / app.js classes.

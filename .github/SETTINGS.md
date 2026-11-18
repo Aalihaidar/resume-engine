@@ -96,8 +96,8 @@ action … is not allowed", the error names the exact action to add.
 
 ### Check, workflow run, status, artifact and log retention
 
-**30 days** is fine (maximum 90). The only artifact is Scorecard's SARIF file,
-which the workflow keeps for 5 days anyway.
+**30 days** is fine (maximum 90). The only artifacts are Scorecard's SARIF file
+and CI's `agent-pack` file, which the workflows keep for 5 and 7 days anyway.
 
 ### Cache
 

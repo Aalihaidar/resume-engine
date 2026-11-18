@@ -168,6 +168,29 @@ HTTP a photo must be sent inline as a `data:image/…` URI: filename references
 only exist for the CLI. The free-tier instance sleeps when idle, so the first
 request after a while can take 30–60 s.
 
+### Use with an AI assistant
+
+`make agent-pack` writes `output/agent-pack.md`: one file that briefs any AI chat
+or agent. It holds the rules (truthful, toggle rather than delete, no
+placeholders), the workflow, how to get the PDFs from the API or the web form,
+the JSON Schemas, the web form's starter templates (the shape it must return)
+and your current `data/*.yaml`.
+
+1. Run `make agent-pack` (re-run it whenever your data or the models change).
+2. Give the file to the assistant: attach it to a chat, or upload it as a
+   knowledge file in a project so every new chat starts with it.
+3. Paste a job posting. The assistant tailors the resume, writes the cover
+   letter, and either calls the API or, when it has no network access, hands
+   you the YAML to paste into the [web form](#web-form).
+
+CI also runs `make agent-pack` on every pull request and push, and attaches the
+result to the run as the `agent-pack` artifact (kept 7 days).
+
+The file contains your personal details and the real `photo` is replaced by
+`null`. It is gitignored: don't commit or publish it. Use `--resume` to base it
+on another resume file, e.g. `uv run python scripts/build_agent_pack.py --resume
+data/resume-second.yaml`.
+
 ## Editing content
 
 | File | Start from | Holds |
