@@ -158,7 +158,7 @@ Scorecard). Most Scorecard findings are about repository settings, not code:
 | Fuzzing | Property-based tests with Hypothesis in [`tests/test_fuzz.py`](../tests/test_fuzz.py); the alert closes on the next Scorecard run after the change reaches `develop` |
 | SAST | CodeQL already runs on every PR ([`workflows/security.yml`](workflows/security.yml)); the score rises as PRs merged with it fall inside Scorecard's 30-commit window |
 | CI-Tests | Same window: it counts recent merged PRs that had a passing check run |
-| CII-Best-Practices | Optional: an OpenSSF Best Practices badge, registered by hand at bestpractices.dev |
+| CII-Best-Practices | Optional: an OpenSSF Best Practices badge, registered by hand on the OpenSSF site |
 
 A Trivy alert about a Debian package closes by itself once the base image or
 `apt-get upgrade` picks up the fix; re-run the **Security** workflow to
