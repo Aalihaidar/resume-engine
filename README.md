@@ -47,6 +47,10 @@ flowchart LR
   Content-Security-Policy on the web form — each enforced independently.
 - **Self-hosted web form.** No CDN scripts, styles or fonts: the page works
   offline and makes no third-party requests.
+- **Ready for AI assistants.** `make agent-pack` builds one briefing file
+  (rules, workflow, API guide, schemas, templates and your data) that any AI
+  chat can use to tailor a resume and cover letter for a job posting. See
+  [Use with an AI assistant](#use-with-an-ai-assistant).
 
 ## Quick start
 
@@ -236,6 +240,7 @@ data/resume-second.yaml`.
 | `make spell` | cspell over every tracked file |
 | `make audit` | `pip-audit` of `uv.lock` — runtime packages fail, dev tooling warns |
 | `make schema` | Regenerate `schema/resume.schema.json` and `schema/cover_letter.schema.json` |
+| `make agent-pack` | Build `output/agent-pack.md`, the briefing file for AI assistants (gitignored: it holds your data) |
 | `make web-assets` | Rebuild the web form's CSS, fonts and vendored js-yaml (Node 20+; only after changing `web/` or the page's classes) |
 | `make ci` | lint + typecheck + test + spell — the checks CI runs |
 | `make clean` | Remove build output and caches |
@@ -289,9 +294,9 @@ docker compose -f docker-compose.prod.yml up --build   # http://localhost:8000
 │   └── static/            # photos referenced by filename
 ├── data/                  # resume.yaml, cover_letter.yaml + *.template.yaml
 ├── schema/                # resume / cover letter JSON Schemas (generated)
-├── tests/                 # pytest suite (API, CLI, middleware, models, rendering, web assets)
+├── tests/                 # pytest suite (API, CLI, middleware, models, rendering, web assets, agent pack)
 ├── web/                   # Tailwind / font build for the web form (output is committed)
-├── scripts/               # schema generator, dependency audit, dev-container entrypoint and server start
+├── scripts/               # schema generator, agent pack builder + guide, dependency audit, dev-container entrypoint and server start
 ├── docker/                # Dockerfile.dev, Dockerfile.prod
 ├── .github/               # workflows, Dependabot, rulesets docs, issue/PR templates
 ├── output/                # generated PDFs
