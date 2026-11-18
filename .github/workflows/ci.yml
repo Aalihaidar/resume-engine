@@ -160,6 +160,42 @@ jobs:
             exit 1
           fi
 
+  agent-pack:
+    name: Agent pack
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+        with:
+          enable-cache: true
+          cache-suffix: agent-pack
+          download-from-astral-mirror: false
+      - run: make agent-pack
+      # The file is never printed to the log: it embeds data/*.yaml.
+      - name: Check the pack is complete
+        run: |
+          pack=output/agent-pack.md
+          for heading in '## 1. Rules' '## 4. Getting the PDFs' '## 5. Current data' \
+                         '## 6. Templates' '## 7. JSON Schemas'; do
+            grep -qF "$heading" "$pack" || { echo "::error::agent pack is missing '$heading'"; exit 1; }
+          done
+          if grep -qF '{{BASE_URL}}' "$pack"; then
+            echo "::error::agent pack still has an unfilled {{BASE_URL}} placeholder"
+            exit 1
+          fi
+          echo "✅ Agent pack built ($(wc -c < "$pack") bytes)"
+      # Same content as the committed data/*.yaml, so a public repo exposes nothing new.
+      # Short retention: it is a convenience copy for the PR, not a release.
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: agent-pack
+          path: output/agent-pack.md
+          retention-days: 7
+          if-no-files-found: error
+
   web-assets:
     name: Web assets up to date
     runs-on: ubuntu-24.04
@@ -310,6 +346,7 @@ jobs:
       - typecheck
       - test
       - schema
+      - agent-pack
       - web-assets
       - security
       - npm-audit
