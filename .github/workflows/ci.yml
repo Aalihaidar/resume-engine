@@ -107,9 +107,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # The floor from pyproject's requires-python, the version the
-        # production image ships (docker/Dockerfile.prod), and the one between.
-        python-version: ["3.12", "3.13", "3.14"]
+        # The floor from pyproject's requires-python and the version the
+        # production image ships (docker/Dockerfile.prod).
+        python-version: ["3.14", "3.15"]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -130,7 +130,7 @@ jobs:
       - run: uv sync --group dev
       - run: uv run pytest --cov=resume_builder --cov-report=xml --cov-report=term-missing
       - uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
-        if: matrix.python-version == '3.14'
+        if: matrix.python-version == '3.15'
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: coverage.xml
