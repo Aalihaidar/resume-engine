@@ -4,7 +4,7 @@
 [![Security](https://github.com/Aalihaidar/resume-engine/actions/workflows/security.yml/badge.svg?branch=main)](https://github.com/Aalihaidar/resume-engine/actions/workflows/security.yml)
 [![codecov](https://codecov.io/gh/Aalihaidar/resume-engine/branch/main/graph/badge.svg)](https://codecov.io/gh/Aalihaidar/resume-engine)
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/Aalihaidar/resume-engine/badge)](https://scorecard.dev/viewer/?uri=github.com/Aalihaidar/resume-engine)
-[![Python 3.12+](https://img.shields.io/badge/python-3.12%2B-3776AB?logo=python&logoColor=white)](pyproject.toml)
+[![Python 3.14+](https://img.shields.io/badge/python-3.14%2B-3776AB?logo=python&logoColor=white)](pyproject.toml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
 **Data-driven, ATS-safe resume and cover letter builder.** Write your content
@@ -107,7 +107,7 @@ docker compose run --rm app uv run resume-build cover-letter
 </details>
 
 <details>
-<summary><b>Native</b> (Python 3.12+ and <a href="https://docs.astral.sh/uv/">uv</a>)</summary>
+<summary><b>Native</b> (Python 3.14+ and <a href="https://docs.astral.sh/uv/">uv</a>)</summary>
 
 Install WeasyPrint's system libraries first — Debian/Ubuntu:
 `sudo apt install libpango-1.0-0 libpangocairo-1.0-0 libharfbuzz-subset0`,
@@ -250,8 +250,8 @@ Pre-commit hooks run Ruff, cspell and whitespace fixers, and re-render
 
 ### CI/CD and security
 
-Every pull request runs lint, type checks, tests on Python 3.12, 3.13 and
-3.14, spelling, JSON Schema and web-asset drift checks, a dependency audit,
+Every pull request runs lint, type checks, tests on Python 3.14 and
+3.15, spelling, JSON Schema and web-asset drift checks, a dependency audit,
 and a Docker build with a smoke test of the production image. CodeQL, zizmor, Trivy and OpenSSF
 Scorecard report to the repository's code-scanning tab. All GitHub Actions
 are pinned to commit SHAs and Docker images to digests, kept current by

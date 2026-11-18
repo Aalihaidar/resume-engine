@@ -44,12 +44,17 @@
       "description": "Hex colors in .github/labels.yml."
     },
     {
+      "name": "advisory-id",
+      "pattern": "/GHSA(-[a-z0-9]{4}){3}/g",
+      "description": "GitHub advisory IDs in web/audit-exceptions.json: random characters, not words."
+    },
+    {
       "name": "vscode-extension-id",
       "pattern": "/\"[\\w-]+\\.[\\w-]+\"/g",
       "description": "publisher.extension identifiers."
     }
   ],
-  "ignoreRegExpList": ["action-ref", "label-color"],
+  "ignoreRegExpList": ["action-ref", "label-color", "advisory-id"],
   "overrides": [
     {
       "filename": ["data/**", ".cspell/resume-words.txt"],

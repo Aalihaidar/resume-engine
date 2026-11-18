@@ -3,7 +3,7 @@ name = "resume-engine"
 version = "1.0.0"
 description = "Data-driven, ATS-safe CV/resume builder (YAML -> HTML -> PDF), agent-editable."
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.14"
 license = "MIT"
 license-files = ["LICENSE"]
 authors = [{ name = "Ali Haidar" }]
@@ -13,9 +13,8 @@ classifiers = [
     "Framework :: FastAPI",
     "Intended Audience :: End Users/Desktop",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.12",
-    "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.14",
+    "Programming Language :: Python :: 3.15",
     "Topic :: Office/Business",
 ]
 
@@ -60,7 +59,7 @@ constraint-dependencies = ["setuptools>=83.0.0"]
 
 [tool.ruff]
 line-length = 100
-target-version = "py312"
+target-version = "py314"
 src = ["src", "tests"]
 
 [tool.ruff.lint]
@@ -78,7 +77,7 @@ ignore = ["E501"]
 quote-style = "double"
 
 [tool.mypy]
-python_version = "3.12"
+python_version = "3.14"
 mypy_path = "src"
 packages = ["resume_builder"]
 strict = true
