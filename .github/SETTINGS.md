@@ -155,7 +155,10 @@ Scorecard). Most Scorecard findings are about repository settings, not code:
 | Code-Review | Needs a second reviewer; a solo maintainer can't meet it. Dismiss the alert with a reason rather than weakening the rules |
 | Vulnerabilities | Merge the weekly Dependabot PRs |
 | Maintained | Time: the repository needs 90 days of age and recent activity |
-| Fuzzing, CII-Best-Practices | Optional extras (property-based tests; an OpenSSF Best Practices badge) |
+| Fuzzing | Property-based tests with Hypothesis in [`tests/test_fuzz.py`](../tests/test_fuzz.py); the alert closes on the next Scorecard run after the change reaches `develop` |
+| SAST | CodeQL already runs on every PR ([`workflows/security.yml`](workflows/security.yml)); the score rises as PRs merged with it fall inside Scorecard's 30-commit window |
+| CI-Tests | Same window: it counts recent merged PRs that had a passing check run |
+| CII-Best-Practices | Optional: an OpenSSF Best Practices badge, registered by hand at bestpractices.dev |
 
 A Trivy alert about a Debian package closes by itself once the base image or
 `apt-get upgrade` picks up the fix; re-run the **Security** workflow to
