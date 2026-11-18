@@ -8,6 +8,7 @@ Haidar
 janedoe
 
 # Tooling and CI
+extglobs
 fontsource
 ghaction
 GHSA
