@@ -24,6 +24,8 @@ web/node_modules/
 # build-resume workflow, which commits output/resume.pdf deliberately)
 output/*.html
 output/preview*.png
+# Inputs saved by `make fuzz` when the fuzzer finds a crash
+output/fuzz/
 # Briefing file for AI assistants; embeds the owner's real resume data, so never tracked
 output/agent-pack.md
 

@@ -237,6 +237,7 @@ data/resume-second.yaml`.
 | `make lint` / `make format` | Ruff lint + format check / auto-fix |
 | `make typecheck` | `mypy --strict` |
 | `make test` | pytest with coverage (fails below the threshold in `pyproject.toml`) |
+| `make fuzz` | 60 s of coverage-guided fuzzing of the models, photo resolver and templates with Atheris (Linux x86-64: use the dev container elsewhere; `FUZZ_SECONDS=600` for longer) |
 | `make spell` | cspell over every tracked file |
 | `make audit` | `pip-audit` of `uv.lock` — runtime packages fail, dev tooling warns |
 | `make schema` | Regenerate `schema/resume.schema.json` and `schema/cover_letter.schema.json` |
@@ -251,7 +252,7 @@ Pre-commit hooks run Ruff, cspell and whitespace fixers, and re-render
 ### CI/CD and security
 
 Every pull request runs lint, type checks, tests on Python 3.14 and
-3.15, spelling, JSON Schema and web-asset drift checks, a dependency audit,
+3.15, a minute of fuzzing, spelling, JSON Schema and web-asset drift checks, a dependency audit,
 and a Docker build with a smoke test of the production image. CodeQL, zizmor, Trivy and OpenSSF
 Scorecard report to the repository's code-scanning tab. All GitHub Actions
 are pinned to commit SHAs and Docker images to digests, kept current by
@@ -295,6 +296,7 @@ docker compose -f docker-compose.prod.yml up --build   # http://localhost:8000
 ├── data/                  # resume.yaml, cover_letter.yaml + *.template.yaml
 ├── schema/                # resume / cover letter JSON Schemas (generated)
 ├── tests/                 # pytest suite (API, CLI, middleware, models, rendering, web assets, agent pack)
+├── fuzz/                  # Atheris fuzz harness for the untrusted-input code (`make fuzz`)
 ├── web/                   # Tailwind / font build for the web form (output is committed)
 ├── scripts/               # schema generator, agent pack builder + guide, dependency audit, dev-container entrypoint and server start
 ├── docker/                # Dockerfile.dev, Dockerfile.prod

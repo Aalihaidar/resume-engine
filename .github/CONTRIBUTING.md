@@ -94,10 +94,11 @@ Runs on PRs, pushes to `main` / `develop`, and manual dispatch.
 | Job | What |
 | --- | --- |
 | `verify-pr-source` | Blocks PRs into `main` that don't come from `develop` |
-| `Lint & format` | `ruff check` (inline PR annotations) + `ruff format --check` + a byte-compile of `src`, `tests` and `scripts` |
+| `Lint & format` | `ruff check` (inline PR annotations) + `ruff format --check` + a byte-compile of `src`, `tests`, `scripts` and `fuzz` |
 | `Spelling` | cspell over the whole repo with `cspell.json`; unknown words are annotated inline with suggestions |
 | `Type check` | `mypy --strict` over `src` |
 | `Test (3.14 / 3.15)` | pytest + coverage (the run fails below the `fail_under` threshold in `pyproject.toml`) on the `requires-python` floor and the production version; Codecov upload from 3.15 |
+| `Fuzz (Atheris)` | `make fuzz` for 60 s on 3.14: [`fuzz/fuzz_untrusted_input.py`](../fuzz/fuzz_untrusted_input.py) feeds libFuzzer-mutated input to the models, the photo resolver and both templates. Any exception other than `ValidationError`, a photo resolved outside `static/` or unescaped output fails the job, and the crashing input is uploaded as the `fuzz-crashes` artifact |
 | `JSON Schema up to date` | Regenerates `schema/*.schema.json` and fails if any differs from the committed file |
 | `Agent pack` | Runs `make agent-pack`, checks the file has every section and uploads it as the `agent-pack` artifact (kept 7 days) so a PR's run has a ready-to-use copy |
 | `Web assets up to date` | Rebuilds the web form's CSS, fonts and vendored js-yaml from `web/` and fails if they differ from the committed files in `src/resume_builder/web_static/assets/` |
