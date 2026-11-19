@@ -151,14 +151,14 @@ Scorecard). Most Scorecard findings are about repository settings, not code:
 
 | Scorecard finding | What clears it |
 | --- | --- |
-| Branch-Protection | The rulesets in [section 4](#4-rulesets--settings--rules--rulesets). Scorecard's token can't read every ruleset detail, so it may still under-report |
-| Code-Review | Needs a second reviewer; a solo maintainer can't meet it. Dismiss the alert with a reason rather than weakening the rules |
+| Branch-Protection | The rulesets in [section 4](#4-rulesets--settings--rules--rulesets) score 4/10. The rest needs required approvals (two for a 10), code-owner review, stale-review dismissal and last-push approval, which a solo maintainer can't give their own PRs; those would then merge only by bypassing the ruleset, and auto-merge would stop working. Dismiss the alert as *won't fix*, and revisit once there's a second maintainer |
+| Code-Review | Counts merged PRs approved by someone other than the author; a solo maintainer can't meet it. Dismiss the alert as *won't fix* |
 | Vulnerabilities | Merge the weekly Dependabot PRs |
 | Maintained | Time: the repository needs 90 days of age and recent activity |
-| Fuzzing | Property-based tests with Hypothesis in [`tests/test_fuzz.py`](../tests/test_fuzz.py); the alert closes on the next Scorecard run after the change reaches `develop` |
+| Fuzzing | The Atheris harness in [`fuzz/`](../fuzz/fuzz_untrusted_input.py), run by CI's `Fuzz (Atheris)` job. For Python, Scorecard only detects `import atheris`; the Hypothesis tests in [`tests/test_fuzz.py`](../tests/test_fuzz.py) don't count. The alert closes on the next Scorecard run after the change reaches `develop` |
 | SAST | CodeQL already runs on every PR ([`workflows/security.yml`](workflows/security.yml)); the score rises as PRs merged with it fall inside Scorecard's 30-commit window |
 | CI-Tests | Same window: it counts recent merged PRs that had a passing check run |
-| CII-Best-Practices | Optional: an OpenSSF Best Practices badge, registered by hand on the OpenSSF site |
+| CII-Best-Practices | Register the project at [bestpractices.dev](https://www.bestpractices.dev) (sign in with GitHub) and answer the questionnaire. Scorecard gives points for *in progress* and more for *passing*, but only a *gold* badge (which needs two maintainers) clears the alert, so dismiss it once the badge is earned |
 
 A Trivy alert about a Debian package closes by itself once the base image or
 `apt-get upgrade` picks up the fix; re-run the **Security** workflow to

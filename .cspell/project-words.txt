@@ -8,6 +8,8 @@ Haidar
 janedoe
 
 # Tooling and CI
+Atheris
+bestpractices
 extglobs
 fontsource
 ghaction

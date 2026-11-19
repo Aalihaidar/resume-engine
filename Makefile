@@ -1,4 +1,4 @@
-.PHONY: render render-html cover-letter cover-letter-html lint format typecheck test spell audit schema agent-pack web-assets hooks serve-api repomix ci clean
+.PHONY: render render-html cover-letter cover-letter-html lint format typecheck test fuzz spell audit schema agent-pack web-assets hooks serve-api repomix ci clean
 
 render:
 	uv run resume-build render --data data/resume.yaml --out output/resume.pdf
@@ -25,6 +25,13 @@ typecheck:
 
 test:
 	uv run pytest --cov=resume_builder --cov-report=term-missing
+
+# Coverage-guided fuzzing with Atheris (Linux x86-64 only: use the dev container elsewhere).
+# Inputs that crash it are saved to output/fuzz/.
+FUZZ_SECONDS ?= 60
+fuzz:
+	mkdir -p output/fuzz
+	uv run --group fuzz python fuzz/fuzz_untrusted_input.py -max_total_time=$(FUZZ_SECONDS) -artifact_prefix=output/fuzz/
 
 spell:
 	uv run pre-commit run cspell --all-files
@@ -60,4 +67,4 @@ repomix:
 ci: lint typecheck test spell
 
 clean:
-	rm -rf output/*.pdf output/*.html .pytest_cache .ruff_cache .mypy_cache .coverage
+	rm -rf output/*.pdf output/*.html output/fuzz .pytest_cache .ruff_cache .mypy_cache .coverage
