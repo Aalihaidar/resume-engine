@@ -14,7 +14,8 @@
 #
 # Cooldown: a version update is proposed only once the release is 7 days old,
 # so a compromised or broken release is usually caught (and yanked) upstream
-# before it reaches a PR. Security updates are never delayed by it.
+# before it reaches a PR. Security updates are never delayed by it. (The one
+# exception is the uv Docker image, see the docker entry below.)
 #
 # Minor + patch bumps are grouped into one PR per ecosystem; majors arrive as
 # individual PRs so each breaking change is reviewed on its own.
@@ -66,8 +67,15 @@ updates:
       day: "monday"
       time: "04:00"
       timezone: "Etc/UTC"
+    # The uv image lives on ghcr.io, which exposes no publication dates, so
+    # Dependabot cannot age-check it and logs "Cooldown was not applied" on every
+    # run. It is exempted explicitly instead; its bumps still arrive as a PR
+    # pinned by digest and go through CI. The python image (Docker Hub) keeps
+    # the 7-day cooldown.
     cooldown:
       default-days: 7
+      exclude:
+        - "astral-sh/uv"
     open-pull-requests-limit: 5
     labels: ["dependencies", "docker"]
     commit-message:
