@@ -170,7 +170,10 @@ Five ecosystems, weekly (Monday 04:00 UTC), all opening PRs against
 - Debian packages inside the images aren't a Dependabot ecosystem: the
   production image runs `apt-get upgrade` at build time so security fixes ship
   before the base image catches up, and the weekly Trivy image scan reports
-  anything still fixable.
+  anything still fixable. That scan rebuilds the runtime stage without the
+  build cache (`no-cache-filters: runtime`); otherwise the cached
+  `apt-get upgrade` layer would stay frozen at whatever was available when the
+  base digest last changed.
 - The production image uninstalls the base image's `pip`. Nothing installs
   packages at runtime, and pip's vendored copies of `urllib3`, `msgpack` and
   setuptools' `pkg_resources` were otherwise the only Python CVEs in the image.

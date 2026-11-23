@@ -162,7 +162,9 @@ Scorecard). Most Scorecard findings are about repository settings, not code:
 
 A Trivy alert about a Debian package closes by itself once the base image or
 `apt-get upgrade` picks up the fix; re-run the **Security** workflow to
-refresh it. If no fix exists yet, dismiss the alert as *won't fix*.
+refresh it. The scan job rebuilds the image's runtime stage without the build
+cache, so the re-run sees every fix Debian has published. If no fix exists yet,
+dismiss the alert as *won't fix*.
 
 ---
 
