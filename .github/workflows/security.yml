@@ -85,9 +85,13 @@ jobs:
           tags: resume-engine:scan
           load: true
           push: false
-          # Shares ci.yml's cache scope; the scheduled run pulls fresh base
-          # layers anyway when the tag has moved.
+          # Shares ci.yml's cache scope for the builder stage (the venv). The
+          # runtime stage is rebuilt every time: its `apt-get upgrade` layer
+          # has the same cache key until the pinned base digest changes, so a
+          # cached copy would keep reporting Debian packages whose fix has
+          # long been published.
           cache-from: type=gha,scope=prod
+          no-cache-filters: runtime
           pull: true
 
       - name: Scan image
